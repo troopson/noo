@@ -1,0 +1,17 @@
+          
+spring:
+    application: 
+        name: noo
+    datasource:
+        url: jdbc:mysql://127.0.0.1:3306/dev?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT
+        username: root
+        password: 412200 
+        maximumPoolSize: 5
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        hikari: 
+            idle-timeout: 10000
+            
+    
+server:
+     port: 8762 
+    

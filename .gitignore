@@ -1,0 +1,10 @@
+build
+bin
+.classpath
+/.gradle/
+gradle/
+.project
+.settings/
+/.project
+/.idea
+.vertx/

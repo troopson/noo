@@ -1,0 +1,76 @@
+configurations.all {
+	exclude module:'log4j-over-slf4j'
+	
+}
+
+buildscript {
+    repositories {                
+	    jcenter() 
+    }
+   
+}
+
+apply plugin: 'java'
+
+jar {
+
+  archiveName = 'toolkitspring-0.2.jar'
+  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+ 
+ exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA' 
+ 
+
+}
+
+
+task copyJars(type:Copy) {
+
+  from configurations.runtime
+  into 'build/runtime' // 目标位置
+
+}
+
+task addDependToManifest << {
+    if (!configurations.runtime.isEmpty()) {
+        jar.manifest.attributes('Class-Path': ". " + configurations.runtime.collect { it.name }.join(' '))
+    }
+}
+jar.dependsOn += addDependToManifest 
+
+jar.dependsOn += copyJars
+
+ext {
+  springBootVersion = "2.0.0.RELEASE"
+}
+
+repositories {
+
+	jcenter() 
+
+}
+
+dependencies {
+		 
+		
+	//compile   group: 'log4j', name: 'log4j', version: '1.2.17'
+	compile group: 'com.alibaba', name: 'fastjson', version: '1.2.40'
+	compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
+    compile "org.springframework.boot:spring-boot-starter-jdbc:$springBootVersion"
+    compile "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
+    
+    
+	
+    compile "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
+    compile "org.springframework.boot:spring-boot-devtools:$springBootVersion"     
+	
+    compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
+	  
+	compile group: 'mysql', name: 'mysql-connector-java', version: '6.0.6'
+	//compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.2.1'
+	compile group: 'com.zaxxer', name: 'HikariCP', version: '2.6.2'
+	 
+	compile group: 'org.yaml', name: 'snakeyaml', version: '1.18'	  
+	
+    testCompile 'junit:junit:4.12'
+     
+}
