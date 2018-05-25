@@ -14,6 +14,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
+
 /**
  * A representation of a <a href="http://json.org/">JSON</a> object in Java.
  * <p>
@@ -49,7 +51,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 * Create a new, empty instance
 	 */
 	public JsonObject() {
-		map = new LinkedHashMap<>();
+		map = new CaseInsensitiveMap<String,Object>();
 	}
 
 	/**
@@ -912,6 +914,15 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public Map<String, Object> getMap() {
 		return map;
+	}
+	
+	
+    public boolean containsAll(String...required) {
+    	for(String one: required) {
+			if(!this.map.containsKey(one))
+				return false;
+		}
+    	return true;
 	}
 
 	/**

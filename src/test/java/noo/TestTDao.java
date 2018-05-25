@@ -52,6 +52,8 @@ public class TestTDao {
 	    int i = book.deleteById(20);
 	    System.out.println("delete row "+i);
 		
+	    System.out.println(book.queryByPage("select * from book",null,0,10));
+	    
 		}catch(Exception e) {
 			e.printStackTrace();
 			throw e;

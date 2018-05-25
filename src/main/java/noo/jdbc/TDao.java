@@ -7,9 +7,12 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
+import noo.json.JsonArray;
 import noo.json.JsonObject;
+import noo.json.PageJsonArray;
 import noo.util.S;
 
 /**
@@ -17,10 +20,14 @@ import noo.util.S;
  * 2016年5月7日 
  */
 @Repository
+@Primary
 public abstract class TDao {
 
 	@Autowired
 	protected JdbcSvr jdbc;
+
+	@Autowired
+	private SQLHolder sqlholder;
 
 	private String tableName=null;
 	
@@ -32,6 +39,11 @@ public abstract class TDao {
 		}
 		return this.tableName;
 	}
+	
+	protected String sqltext(String sqlid) {
+		return sqlholder.getSQL(sqlid);
+	}
+	
 	
 	
 	public JsonObject getById(Object id){
@@ -93,7 +105,54 @@ public abstract class TDao {
 	public int[] insertAll(List rows) {
     	return this.jdbc.insertAll(this.getTableByClassName(), rows);
     }
-	    
+    
+    public JsonArray findAll() {
+    	return this.jdbc.qry("select * from "+this.getTableByClassName());
+    }
+    
+    public JsonArray findBy(String whereOrder, Object[] param) {
+    	return this.jdbc.qry("select * from "+this.getTableByClassName()+" where "+whereOrder, param);
+    }
+
+    public PageJsonArray findByPage(String whereOrder, Object[] param, int pageNo, int pageSize) {
+    	return this.jdbc.qryByPage("select * from "+this.getTableByClassName()+" where "+whereOrder, param, pageNo, pageSize);
+    }
+    
+    //=========================================================================
+    
+    public PageJsonArray queryByPage(String sql, Object[] param, int pageNo, int pageSize) {
+    	return this.jdbc.qryByPage(sql, param, pageNo, pageSize);
+    }    
+    public PageJsonArray queryByPage2(String sql, JsonObject param, int pageNo, int pageSize) {
+    	param.put(JdbcSvr.PageNo, pageNo);
+    	param.put(JdbcSvr.PageSize, pageSize);
+    	return this.jdbc.qryByPage(sql, param);
+    }
+    
+    public JsonArray query(String sql, Object...param) {
+    	return this.jdbc.qry(sql, param);
+    }    
+    public JsonArray queryByNameParam(String sql, JsonObject param) {
+    	return this.jdbc.qry(sql, param);
+    }
+    
+    public String queryString(String sql,Object...p) {
+    	return this.jdbc.qryString(sql, p);
+    }     
+    public String queryStringByNameParam(String sql,JsonObject p) {
+    	return this.jdbc.qryString(sql, p);
+    }
+    
+    public Integer queryInt(String sql, Object...p) {
+    	return this.jdbc.qryInt(sql, p);
+    }
+    public Integer queryIntByNameParam(String sql, JsonObject p) {
+    	return this.jdbc.qryInt(sql, p);
+    }
+    
+    
+    
+    
 	 
 	
 }

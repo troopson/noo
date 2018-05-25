@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import noo.json.JsonArray;
 import noo.json.JsonObject;
+import noo.json.PageJsonArray;
 import noo.util.C;
 import noo.util.S;
 
@@ -53,6 +54,8 @@ public class JdbcSvr {
 	// SPRING JDBC模板接口
 	protected JdbcTemplate jdbcTemplate;
 	protected NamedParameterJdbcTemplate named;
+	
+	
 
 	@Autowired
 	public JdbcSvr(DataSource dataSource) {
@@ -365,15 +368,15 @@ public class JdbcSvr {
 		return true;
 	}
 
-	// ==============page=============================
-
+	// ==============page===支持两种变量名称的获取==========================
+    
 	public static final String PageNo = "pageno";
 	public static final String PageSize = "pagesize";
 
 	public static final String Offset = "offset";
 	public static final String Limit = "limit";
 
-	public PageList qryByPage(String sql, JsonObject param) {
+	public PageJsonArray qryByPage(String sql, JsonObject param) {
 
 		Integer pageSize = param.getInteger(PageSize);
 		if (pageSize == 0)
@@ -392,15 +395,15 @@ public class JdbcSvr {
 
 		String newsql = SqlUtil.processParam(sql, param.getMap());
 		JdbcSvr.log.debug(newsql);
-		PageList page = new PageList(newsql.toString(), param.getMap(), pageNo, pageSize, this.getNamedTemplate());
+		PageQuery page = new PageQuery(newsql.toString(), param.getMap(), pageNo, pageSize, this.getNamedTemplate());
 		page.getResultList();
-		return page;
+		return new PageJsonArray(page);
 	}
 
-	public PageList queryByPage(String sql, Object[] params, int pageNo, int pageSize) {
-		PageList page = new PageList(sql, params, pageNo, pageSize, this.getJdbcTemplate());
+	public PageJsonArray qryByPage(String sql, Object[] params, int pageNo, int pageSize) {
+		PageQuery page = new PageQuery(sql, params, pageNo, pageSize, this.getJdbcTemplate());
 		page.getResultList();
-		return page;
+		return new PageJsonArray(page);
 	}
 
 	// ================================meta=============================
@@ -501,5 +504,7 @@ public class JdbcSvr {
 	public String appendOrderby(String sql, String tableAlias, String orderby, String asc, String defaultFiled) {
 		return appendOrderby(sql, tableAlias, orderby, asc, defaultFiled, null);
 	}
+	
+	//=============================================
 
 }

@@ -31,7 +31,7 @@ public class JsonArray implements Iterable<Object>, Serializable {
    
 	private static final long serialVersionUID = 1L;
 	
-	private List<Object> list;
+	protected List<Object> list;
 	
 	  /**
 	   * Create an instance from a String of JSON
