@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
  * @author qujianjun   troopson@163.com
  * 2018年5月24日 
  */
-public class NullParamException  extends BaseException {
+public class NullParamException  extends BusinessException {
 
 
 		public NullParamException(String paramName) {

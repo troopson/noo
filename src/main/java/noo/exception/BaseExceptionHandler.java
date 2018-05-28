@@ -20,12 +20,9 @@ import org.springframework.web.context.request.WebRequest;
 @ControllerAdvice
 class BaseExceptionHandler {
 
-   
-    
-    /**
-     * Handle exceptions thrown by handlers.
-     */
-    @ExceptionHandler(value = BusinessException.class)
+
+ 
+    @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public String onLogicException(Exception exception, WebRequest request) {
@@ -33,10 +30,8 @@ class BaseExceptionHandler {
     }
     
     
-    /**
-     * Handle exceptions thrown by handlers.
-     */
-    @ExceptionHandler(value = UnAuthrizedException.class)
+   
+    @ExceptionHandler(UnAuthrizedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
     public String onUnAuthrizedException(Exception exception, WebRequest request) {
@@ -45,10 +40,8 @@ class BaseExceptionHandler {
     
     
     
-    /**
-     * Handle exceptions thrown by handlers.
-     */
-    @ExceptionHandler(value = SessionTimeoutException.class)
+   
+    @ExceptionHandler(SessionTimeoutException.class)
     @ResponseStatus(HttpStatus.REQUEST_TIMEOUT)
     @ResponseBody
     public String onSessionTimeoutException(Exception exception, WebRequest request) {
@@ -57,10 +50,8 @@ class BaseExceptionHandler {
     
     
     
-    /**
-     * Handle exceptions thrown by handlers.
-     */
-    @ExceptionHandler(value = RuntimeException.class)
+    
+    @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public String onRuntimeException(Exception exception, WebRequest request) {
@@ -68,7 +59,7 @@ class BaseExceptionHandler {
         return BaseException.unknowException(HttpStatus.BAD_REQUEST+"",exception);
     }
     
-    @ExceptionHandler(value = org.springframework.jdbc.UncategorizedSQLException.class)
+    @ExceptionHandler(org.springframework.jdbc.UncategorizedSQLException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public String onUncategorizedSQLException(Exception exception, WebRequest request) {
@@ -79,11 +70,8 @@ class BaseExceptionHandler {
     
     
     
-    
-    /**
-     * Handle exceptions thrown by handlers.
-     */
-    @ExceptionHandler(value = org.springframework.web.multipart.MultipartException.class)
+  
+    @ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public String onMultipartException(Exception exception, WebRequest request) {

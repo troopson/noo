@@ -1,7 +1,7 @@
 /**
  * 
  */
-package noo.web;
+package noo.util;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -14,7 +14,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import noo.exception.NullParamException;
 import noo.json.JsonObject;
-import noo.util.S;
 
 /**
 * @author  瞿建军      
