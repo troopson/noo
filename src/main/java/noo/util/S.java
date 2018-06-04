@@ -396,10 +396,7 @@ public class S {
 	 * 
 	      * 方法功能描述:从String获取List类型数据,
 	      * String 的格式要求是a,b,c...的格式
-	      * 
-	      * @param     参数
-	      * @return    返回
-	      * @exception 异常描述
+	      *  
 	 */
 	public static List<String> getList(String s) {
 
@@ -422,10 +419,7 @@ public class S {
 	 * 
 	      * 方法功能描述:从String获取Map类型数据,
 	      * String的格式要求是A=a1;B=b1;C=c1...的格式
-	      * 
-	      * @param     参数
-	      * @return    返回
-	      * @exception 异常描述
+	      *  
 	 */
 	public static Map<String, String> getMap(String s) {
 		if (isBlank(s))
@@ -447,41 +441,7 @@ public class S {
 		return m;
 	}
 
-	/**
-	 * 
-	      * 方法功能描述:从String获取List<Map<String, String>>类型数据,
-	      * String的格式要求是{A=a1;B=b1;C=c1},{A=a2;B=b2;C=c2}...的格式
-	      * 
-	      * @param     参数
-	      * @return    返回
-	      * @exception 异常描述
-	 */
-	public static List<Map<String, String>> getListMap(String s) {
-		if (isBlank(s))
-			return null;
 
-		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-
-		String[] v = s.split(",");
-		for (String item : v) {
-			if (isBlank(item)) {
-				continue;
-			}
-
-			item = item.trim();// 获取到{A=a1;B=b1;C=c1}
-			if (!item.startsWith("{") || !item.endsWith("}")) {
-				return null;//直接返回null,在接收处抛出异常
-			}
-
-			item = item.substring(1, item.length() - 1);//获取到A=a1;B=b1;C=c1
-			Map<String, String> m = getMap(item);
-			if (m == null) {
-				return null;// 直接返回null,在接收处抛出异常
-			}
-			list.add(m);
-		}
-		return list;
-	}
 
 	//===========================================================
 

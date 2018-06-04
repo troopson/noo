@@ -34,7 +34,7 @@ public abstract class TDao {
 	public String getTableByClassName() {
 		if(this.tableName==null) {
 			String s = this.getClass().getSimpleName();
-			s = s.replaceAll("(?i)DAO$", "");
+			s = s.replaceAll("(?i)_?DAO$", "");
 			this.tableName=  s;
 		}
 		return this.tableName;

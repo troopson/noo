@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import noo.exception.NullParamException;
+import noo.exception.NullException;
 import noo.json.JsonObject;
 
 /**
@@ -45,7 +45,7 @@ public class Req {
 		if(S.isNotBlank(require)) {
 			String[] required = require.split(",");
 			if(!j.containsAll(required))
-			   throw new NullParamException(require);
+			   throw new NullException(require);
 		}
 		
 		return j;

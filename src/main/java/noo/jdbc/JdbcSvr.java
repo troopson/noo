@@ -59,6 +59,7 @@ public class JdbcSvr {
 
 	@Autowired
 	public JdbcSvr(DataSource dataSource) {
+		log.info("Create JdbcSvr, Inject dataSource "+dataSource.hashCode());
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.named = new NamedParameterJdbcTemplate(this.jdbcTemplate);
 	}

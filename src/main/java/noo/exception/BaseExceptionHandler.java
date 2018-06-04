@@ -18,7 +18,7 @@ import org.springframework.web.context.request.WebRequest;
 * 
 */
 @ControllerAdvice
-class BaseExceptionHandler {
+public class BaseExceptionHandler {
 
 
  
