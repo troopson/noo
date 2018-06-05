@@ -11,7 +11,6 @@ import java.util.Map;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.springframework.stereotype.Component;
 
 import noo.util.S;
  
@@ -20,7 +19,7 @@ import noo.util.S;
  * @author 瞿建军    troopson@163.com
  * 2018年3月27日
  */
-@Component 
+
 public class SQLHolder {
 
 	private boolean loaded = false;

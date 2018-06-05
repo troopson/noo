@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Repository;
 
 import noo.json.JsonArray;
 import noo.json.JsonObject;
@@ -19,8 +17,7 @@ import noo.util.S;
  * @author qujianjun   troopson@163.com
  * 2016年5月7日 
  */
-@Repository
-@Primary
+
 public abstract class TDao {
 
 	@Autowired

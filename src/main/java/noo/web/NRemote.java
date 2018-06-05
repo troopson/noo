@@ -5,13 +5,9 @@ package noo.web;
 
 import javax.annotation.Resource;
 
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -24,8 +20,8 @@ import noo.json.JsonObject;
  * 2018年5月28日 
  */
 
-@Configuration
-@Component
+
+
 public class NRemote { 
 	
 	@Resource(name = "noo_rest")
@@ -69,11 +65,7 @@ public class NRemote {
 		return "http://"+sn+"/nooremote/"+bn;
 	}
 	
-	@Bean(name="noo_rest")
-    @LoadBalanced
-    RestTemplate restTemplate() {
-		return new RestTemplate(); 
-    }
+
 	
 	
 }

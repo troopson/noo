@@ -19,14 +19,12 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Component;
 
 import noo.json.JsonArray;
 import noo.json.JsonObject;
@@ -40,8 +38,7 @@ import noo.util.S;
  *         创建时间： 2016年6月12日 下午5:43:43
  * 
  */
-@Component
-@Primary
+
 //@ConditionalOnProperty(name = "spring.datasource.url")
 @SuppressWarnings("rawtypes")
 public class JdbcSvr {

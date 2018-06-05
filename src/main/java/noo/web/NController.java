@@ -9,7 +9,7 @@ import java.util.Map;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import noo.exception.IlleagalParamException;
 import noo.json.JsonObject;
@@ -19,7 +19,7 @@ import noo.util.SpringContext;
 /**
  * @author 瞿建军 troopson@163.com 2018年5月27日
  */
-@RestController
+@ResponseBody
 @RequestMapping("/nooremote/*")
 public class NController {
 
