@@ -6,9 +6,9 @@ spring helper lib
 现在流行的ORM方式，会所创建大量的值对象，比如pojo/do/dto，然后也会自定义出一套查询的语言，对sql做各种转化，我觉得这让简单的事情复杂化了，这也是这个项目之所以叫noo的含义，没有仅仅传递值的值对象，全部通过统一的Json对象代替，对数据库的查询，我会辅助以一些简便的方法，但是还是通过sql语句来完成。我认为这样的方式，会让开发更加简化快速。
 
 
-####代码示例
+#### 代码示例
 
-/**Dao**/
+**Dao**
 
 ```java
 
@@ -24,8 +24,8 @@ public class BookDao extends TDao {
 
 ```
 
-/**Service**/
- 
+**Service**
+
 ```java
 
 @Service
@@ -57,7 +57,7 @@ public class BookService {
 
 ```
 
-/**Controller**/
+**Controller**
 
 ```java
 
@@ -84,7 +84,7 @@ public class BookController {
 
 
 
-####SQL语法糖
+#### SQL语法糖
 
 
 ```java
