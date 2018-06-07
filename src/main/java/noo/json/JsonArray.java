@@ -24,9 +24,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
  
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class JsonArray implements Iterable<Object>, Serializable {
+@JsonSerialize(using = MyJsonConverter.class)
+public class JsonArray implements Iterable<Object>, Serializable, IJson {
 
    
 	private static final long serialVersionUID = 1L;
@@ -59,6 +62,9 @@ public class JsonArray implements Iterable<Object>, Serializable {
 	  }
 	
 	 
+	  public Object convertToJson() {
+		  return this.list;
+	  }
 	
 	  /**
 	   * Get the String at position {@code pos} in the array,

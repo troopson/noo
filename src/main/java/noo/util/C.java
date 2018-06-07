@@ -13,7 +13,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.collections4.map.CaseInsensitiveMap;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -391,7 +391,7 @@ public final class C {
 	
 	
 	public static Map<String, String> buildAttributeMap(String attStr) {
-		Map<String, String> result = new CaseInsensitiveMap<>();
+		Map<String, String> result = new LinkedCaseInsensitiveMap<String>();
 		if (S.isNotBlank(attStr)) {
 			attStr = attStr.trim();
 			String[] tv = attStr.split(";");

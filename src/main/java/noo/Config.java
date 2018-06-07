@@ -65,5 +65,7 @@ public class Config {
 	RestTemplate restTemplate() {
 		return new RestTemplate();
 	}
+	
+ 
 
 }

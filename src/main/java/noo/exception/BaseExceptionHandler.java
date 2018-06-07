@@ -76,7 +76,7 @@ public class BaseExceptionHandler {
     @ResponseBody
     public String onMultipartException(Exception exception, WebRequest request) {
     	exception.printStackTrace();
-        return new BaseException("file.upload.maxsize","上传的文件超过了最大限制。").toString();
+        return new BaseException("file.upload.failed",exception.getMessage()).toString();
     }
     
     

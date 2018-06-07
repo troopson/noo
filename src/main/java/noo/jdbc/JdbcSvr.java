@@ -377,18 +377,19 @@ public class JdbcSvr {
 	public PageJsonArray qryByPage(String sql, JsonObject param) {
 
 		Integer pageSize = param.getInteger(PageSize);
-		if (pageSize == 0)
+		if (pageSize==null)
 			pageSize = param.getInteger(Limit);
-		if (pageSize == null || pageSize == 0)
+		if (pageSize == null)
 			pageSize = 50;
 
 		Integer pageNo = param.getInteger(PageNo);
-		if (pageNo == 0) {
-			int offset = param.getInteger(Offset);
-			pageNo = 1 + offset / pageSize;
+		if (pageNo == null) {
+			Integer offset = param.getInteger(Offset);
+			if(offset!=null)
+			   pageNo = 1 + offset / pageSize;
 		}
 
-		if (pageNo == null || pageNo == 0)
+		if (pageNo == null || pageNo < 1 )
 			pageNo = 1;
 
 		String newsql = SqlUtil.processParam(sql, param.getMap());

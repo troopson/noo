@@ -4,32 +4,42 @@
 package noo.json;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import noo.jdbc.PageQuery;
 
 /**
  * @author qujianjun troopson@163.com 2018年5月18日
  */
+@JsonSerialize(using = MyJsonConverter.class)
 public class PageJsonArray extends JsonArray {
 
 	private static final long serialVersionUID = 1L;
 	
 	// 一页显示的记录数
-	private int numPerPage;
+	private int numPerPage=50;
 	// 记录总数
-	private int totalRows;
+	private int totalRows=0;
 	// 总页数
-	private int totalPages;
+	private int totalPages=0;
 	// 当前页码
-	private int currentPage;
+	private int currentPage=1;
 	// 起始行数
-	private int startIndex;
+	private int startIndex=0;
 	// 结束行数
-	private int lastIndex;
+	private int lastIndex=0;
 
-	PageJsonArray() {
+	@SuppressWarnings("rawtypes")
+	public PageJsonArray(List l) {
+		super(l);
+	}
+	
+	PageJsonArray() { 
 	}
 
 	public PageJsonArray(PageQuery pq) {
@@ -42,7 +52,7 @@ public class PageJsonArray extends JsonArray {
 		this.lastIndex = pq.getLastIndex();
 	}
 
-	private JsonObject toJsonObject() {
+	public JsonObject toJsonObject() {
 		JsonObject jo = new JsonObject();
 		jo.put("content", this.list);
 		// "last":true,"totalPages":1,"totalElements":5,"size":10,"number":0,"sort":null,"first":true,"numberOfElements":5
@@ -56,6 +66,18 @@ public class PageJsonArray extends JsonArray {
 
 	public String encode() {
 		return this.toJsonObject().encode();
+	}
+	
+	public Object convertToJson() {
+		Map<String,Object> jo = new HashMap<>();
+		jo.put("content", this.list);
+		// "last":true,"totalPages":1,"totalElements":5,"size":10,"number":0,"sort":null,"first":true,"numberOfElements":5
+		jo.put("totalPages", this.getTotalPages());
+		jo.put("totalElements", this.getTotalRows());
+		jo.put("size", this.getNumPerPage());
+		jo.put("number", this.getCurrentPage());
+		jo.put("numberOfElements", this.list.size());
+		return jo;
 	}
 
 	/**

@@ -5,6 +5,7 @@ import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -14,7 +15,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.apache.commons.collections4.map.CaseInsensitiveMap;
+import org.springframework.util.LinkedCaseInsensitiveMap;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import noo.util.D;
+ 
+ 
 
 /**
  * A representation of a <a href="http://json.org/">JSON</a> object in Java.
@@ -32,7 +39,8 @@ import org.apache.commons.collections4.map.CaseInsensitiveMap;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializable {
+@JsonSerialize(using = MyJsonConverter.class)
+public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializable , IJson{
 
 	private static final long serialVersionUID = 1L;
 	private Map<String, Object> map;
@@ -51,7 +59,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 * Create a new, empty instance
 	 */
 	public JsonObject() {
-		map = new CaseInsensitiveMap<String,Object>();
+		map = new LinkedCaseInsensitiveMap<Object>();
 	}
 
 	/**
@@ -772,6 +780,29 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		map.put(key, value);
 		return this;
 	}
+	
+	
+	public JsonObject put(String key, Date date) {
+		this.put(key, D.strDT(date));
+		return this;
+	}
+	
+	public JsonObject putAll(JsonObject o) {
+		if(o==null)
+			return this;
+		map.putAll(o.map);
+		return this;
+	}
+	
+	public JsonObject putAll(Map<String,Object> o) {
+		if(o==null)
+			return this;
+		for(String key: o.keySet()) {
+			this.put(key, o.get(key));
+		}
+		return this;
+	}
+
 
 	/**
 	 * Remove an entry from this object.
@@ -854,6 +885,10 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		}
 		return this;
 	}
+	
+	 public Object convertToJson() {
+		  return this.map;
+	  }
 
 	/**
 	 * Encode this JSON object as a string.
@@ -918,6 +953,8 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	
 	
     public boolean containsAll(String...required) {
+    	if(required.length==1)
+    		required = required[0].split(",");
     	for(String one: required) {
 			if(!this.map.containsKey(one))
 				return false;
