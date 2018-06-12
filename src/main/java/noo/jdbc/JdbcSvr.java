@@ -135,7 +135,7 @@ public class JdbcSvr {
 		}
 
 		sql.append(") ").append(valpiece).append(")");
-		log.debug(sql.toString());
+		log.debug(sql.toString()+"   "+C.printArray(values));
 		return this.getJdbcTemplate().update(sql.toString(), values);
 
 	}
@@ -222,7 +222,7 @@ public class JdbcSvr {
 	}
 
 	@SuppressWarnings("unchecked")
-	public int[] batchInsert2(String table, String fields, List<Map> params) {
+	public int[] batchInsert(String table, String fields, List<Map> params) {
 		if (S.isBlank(fields))
 			throw new NullPointerException();
 
@@ -247,39 +247,10 @@ public class JdbcSvr {
 			}
 			pv.add(onerow);
 		}
-
+		log.debug(sql);
 		return this.getJdbcTemplate().batchUpdate(sql, pv);
 	}
 
-	public int[] batchInsert(String table, String fields, List<Map<String, Object>> params) {
-		if (S.isBlank(fields))
-			throw new NullPointerException();
-
-		if (params == null || params.isEmpty())
-			return null;
-
-		List<Object[]> pv = new ArrayList<>();
-		String[] fs = S.splitWithComma(fields);
-		int length = fs.length;
-
-		String sql = this.createBatchInsertSql(table, fs);
-
-		for (Map<String, Object> row : params) {
-			Object[] onerow = new Object[length];
-			for (int i = 0; i < length; i++) {
-				String key = fs[i].trim();
-				Object value = row.get(key);
-				if (value == null && PrimayKey.equalsIgnoreCase(key))
-					value = C.uid();
-
-				onerow[i] = value;
-			}
-			pv.add(onerow);
-		}
-
-		return this.getJdbcTemplate().batchUpdate(sql, pv);
-
-	}
 
 	private String createBatchInsertSql(String table, String[] fields) {
 		StringBuilder sql = new StringBuilder("insert into ").append(table).append(" (");
@@ -315,6 +286,7 @@ public class JdbcSvr {
 
 	public JsonArray qry(String sql, JsonObject param) {		
 		String newsql = SqlUtil.processParam(sql, param==null?null:param.getMap());
+		log.debug(newsql+"  "+param.encode());
 		return new JsonArray(this.getNamedTemplate().query(newsql, param==null?null:param.getMap(), new MyColumnMapRowMapper()));
 	}
 
@@ -393,7 +365,7 @@ public class JdbcSvr {
 			pageNo = 1;
 
 		String newsql = SqlUtil.processParam(sql, param.getMap());
-		JdbcSvr.log.debug(newsql);
+		JdbcSvr.log.debug(newsql+"   "+param.encode());
 		PageQuery page = new PageQuery(newsql.toString(), param.getMap(), pageNo, pageSize, this.getNamedTemplate());
 		page.getResultList();
 		return new PageJsonArray(page);

@@ -161,7 +161,7 @@ public class SqlUtil {
 	
 	 
 	public static void main(String[] args) {
-		String sql ="select a from t where {p=#p} and {c=:c} and {kk=:vc} and {f=:tt} and {t not in :kk}";
+		String sql ="select a from t where {p=#p} and {c like :c} and {kk=:vc} and {f=:tt} and {t not in :kk}";
 		Map<String,Object> m = new HashMap<>();
 		m.put("p", "23");
 		m.put("c", "cv");

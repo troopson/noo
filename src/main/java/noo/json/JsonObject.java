@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import noo.util.D;
@@ -40,11 +41,13 @@ import noo.util.D;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @JsonSerialize(using = MyJsonConverter.class)
-public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializable , IJson{
+public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializable , IJson {
 
 	private static final long serialVersionUID = 1L;
 	private Map<String, Object> map;
 
+	
+	
 	/**
 	 * Create an instance from a string of JSON
 	 *
@@ -120,8 +123,9 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public String getString(String key) {
 		Objects.requireNonNull(key);
-		CharSequence cs = (CharSequence) map.get(key);
-		return cs == null ? null : cs.toString();
+		Object v = map.get(key);
+		CharSequence cs =(v instanceof CharSequence) ? (CharSequence) v: v.toString();
+		return cs == null ? null : cs.toString();		
 	}
 
 	/**
@@ -135,7 +139,12 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public Integer getInteger(String key) {
 		Objects.requireNonNull(key);
-		Number number = (Number) map.get(key);
+		Object v = map.get(key);
+		if(v instanceof CharSequence) {
+			return Integer.parseInt(v.toString());
+		}
+			
+		Number number = (Number) v;
 		if (number == null) {
 			return null;
 		} else if (number instanceof Integer) {
@@ -156,7 +165,12 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public Long getLong(String key) {
 		Objects.requireNonNull(key);
-		Number number = (Number) map.get(key);
+		Object v = map.get(key);
+		if(v instanceof CharSequence) {
+			return Long.parseLong(v.toString());
+		}
+		
+		Number number = (Number) v;
 		if (number == null) {
 			return null;
 		} else if (number instanceof Long) {
@@ -177,7 +191,12 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public Double getDouble(String key) {
 		Objects.requireNonNull(key);
-		Number number = (Number) map.get(key);
+		Object v = map.get(key);
+		if(v instanceof CharSequence) {
+			return Double.parseDouble(v.toString());
+		}
+		
+		Number number = (Number) v;
 		if (number == null) {
 			return null;
 		} else if (number instanceof Double) {
@@ -198,7 +217,12 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public Float getFloat(String key) {
 		Objects.requireNonNull(key);
-		Number number = (Number) map.get(key);
+		Object v = map.get(key);
+		if(v instanceof CharSequence) {
+			return Float.parseFloat(v.toString());
+		}
+		
+		Number number = (Number) v;
 		if (number == null) {
 			return null;
 		} else if (number instanceof Float) {
@@ -336,7 +360,8 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public String getString(String key, String def) {
 		Objects.requireNonNull(key);
-		CharSequence cs = (CharSequence) map.get(key);
+		Object v = map.get(key);
+		CharSequence cs =(v instanceof CharSequence)? (CharSequence) v : v.toString();
 		return cs != null || map.containsKey(key) ? cs == null ? null : cs.toString() : def;
 	}
 
@@ -352,7 +377,12 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public Integer getInteger(String key, Integer def) {
 		Objects.requireNonNull(key);
-		Number val = (Number) map.get(key);
+		Object v = map.get(key);
+		if(v!=null && v instanceof CharSequence) {
+			return Integer.parseInt(v.toString());
+		}
+		
+		Number val = (Number) v;
 		if (val == null) {
 			if (map.containsKey(key)) {
 				return null;
@@ -378,7 +408,12 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public Long getLong(String key, Long def) {
 		Objects.requireNonNull(key);
-		Number val = (Number) map.get(key);
+		Object v = map.get(key);
+		if(v!=null && v instanceof CharSequence) {
+			return Long.parseLong(v.toString());
+		}
+		
+		Number val = (Number) v;
 		if (val == null) {
 			if (map.containsKey(key)) {
 				return null;
@@ -404,7 +439,12 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public Double getDouble(String key, Double def) {
 		Objects.requireNonNull(key);
-		Number val = (Number) map.get(key);
+		Object v = map.get(key);
+		if(v!=null && v instanceof CharSequence) {
+			return Double.parseDouble(v.toString());
+		}
+		
+		Number val = (Number) v;
 		if (val == null) {
 			if (map.containsKey(key)) {
 				return null;
@@ -430,7 +470,12 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public Float getFloat(String key, Float def) {
 		Objects.requireNonNull(key);
-		Number val = (Number) map.get(key);
+		Object v = map.get(key);
+		if(v!=null && v instanceof CharSequence) {
+			return Float.parseFloat(v.toString());
+		}
+		
+		Number val = (Number) v;
 		if (val == null) {
 			if (map.containsKey(key)) {
 				return null;
@@ -539,6 +584,19 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		Objects.requireNonNull(key);
 		Object val = getValue(key);
 		return val != null || map.containsKey(key) ? val : def;
+	}
+	
+	
+	public Date getDate(String key, String fmt) {
+		Objects.requireNonNull(key);
+		Object v = map.get(key);
+		if(v instanceof CharSequence) {
+			return D.toDate(((CharSequence)v).toString(), null, fmt);
+		}
+		if(v instanceof Date) 
+			return (Date)v;
+		else
+			return null;
 	}
 
 	/**
@@ -774,6 +832,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 *            the value
 	 * @return a reference to this, so the API can be used fluently
 	 */
+	@JsonAnySetter
 	public JsonObject put(String key, Object value) {
 		Objects.requireNonNull(key);
 		value = Json.checkAndCopy(value, false);
@@ -794,13 +853,13 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		return this;
 	}
 	
-	public JsonObject putAll(Map<String,Object> o) {
+	public void putAll(Map<? extends String, ? extends Object> o) {
 		if(o==null)
-			return this;
+			return;
 		for(String key: o.keySet()) {
 			this.put(key, o.get(key));
 		}
-		return this;
+		return;
 	}
 
 
@@ -994,9 +1053,9 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 * Remove all the entries in this JSON object
 	 */
 	 
-	public JsonObject clear() {
+	public void clear() {
 		map.clear();
-		return this;
+		//return this;
 	}
 
 	/**
@@ -1144,4 +1203,8 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 			throw new UnsupportedOperationException();
 		}
 	}
+
+	
+
+
 }
