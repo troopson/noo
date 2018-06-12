@@ -5,6 +5,8 @@ package noo.web;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,6 +25,8 @@ import noo.json.JsonObject;
 
 
 public class NRemote { 
+	
+	public static final Logger log = LoggerFactory.getLogger(NRemote.class);
 	
 	@Resource(name = "noo_rest")
 	private RestTemplate rest;
@@ -62,7 +66,9 @@ public class NRemote {
 	public String makeNRemoteUrl(String sn, String beanMethod) {
 		int pos = beanMethod.lastIndexOf(".");
 		String bn = beanMethod.substring(0, pos)+"/"+beanMethod.substring(pos+1);
-		return "http://"+sn+"/nooremote/"+bn;
+		String url =  "http://"+sn+"/nooremote/"+bn;
+		log.debug("call remote: "+url);
+		return url;
 	}
 	
 
