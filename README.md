@@ -6,6 +6,24 @@ spring helper lib
 现在流行的ORM方式，会所创建大量的值对象，比如pojo/do/dto，然后也会自定义出一套查询的语言，对sql做各种转化，我觉得这让简单的事情复杂化了，这也是这个项目之所以叫noo的含义，没有仅仅传递值的值对象，全部通过统一的Json对象代替，对数据库的查询，我会辅助以一些简便的方法，但是还是通过sql语句来完成。我认为这样的方式，会让开发更加简化快速。
 
 
+#### Maven
+
+```xml
+<dependency>
+    <groupId>com.github.troopson</groupId>
+	<artifactId>noo</artifactId>
+	<version>1.0.2</version>
+	<exclusions>
+	    <exclusion>
+		<artifactId>*</artifactId>
+		<groupId>*</groupId>
+	    </exclusion>
+	</exclusions>
+</dependency>
+
+```
+*依赖springcloud、fastjson和guava，一般都加了，为了避免引入不同的版本，这里可以exclude掉*
+
 #### 代码示例
 
 **Dao**
@@ -92,8 +110,9 @@ public class BookController {
 JsonObject param = new JsonObject();
 param.put("au","Toe");
 param.put("vc","Australia");
+param.put("type" Arrays.asList("type-a","type-b"));
 
-book.queryByNameParam("select sn,name,price from book where {author=#au} and {country=:vc}", param);
+book.queryByNameParam("select sn,name,price from book where {author=#au} and {country=:vc} and {type in :type}", param);
 
 /*
 #au   如果param中不存在au值，该条件将被替换为1=2
