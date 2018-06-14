@@ -87,9 +87,8 @@ public class BookController {
     
     
 	@RequestMapping("/book")
-	public int createBooks() {
-			
-		JsonObject param = Req.params();
+	public int createBooks(JsonObject param) {
+			 
 		....
 		int i = service.createBook(param);
 		....
