@@ -20,6 +20,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import noo.exception.NullException;
 import noo.util.D;
  
  
@@ -1011,15 +1012,25 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	}
 	
 	
-    public boolean containsAll(String...required) {
-    	if(required.length==1)
-    		required = required[0].split(",");
-    	for(String one: required) {
+    public boolean containsAll(String...fields) {
+    	if(fields.length==1)
+    		fields = fields[0].split(",");
+    	for(String one: fields) {
 			if(!this.map.containsKey(one))
 				return false;
 		}
     	return true;
 	}
+    
+    
+    public void require(String...required) {
+    	if(required.length==1)
+    		required = required[0].split(",");
+    	for(String one: required) {
+			if(!this.map.containsKey(one))
+				throw new NullException(one);
+		}    				
+    }
 
 	/**
 	 * Get a stream of the entries in the JSON object.

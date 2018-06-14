@@ -13,7 +13,7 @@ public class NullException  extends BusinessException {
 
 
 		public NullException(String paramName) {
-			super(HttpStatus.BAD_REQUEST+"",  paramName+"不能为空！");
+			super(HttpStatus.BAD_REQUEST+"", "Param ["+ paramName+"] can not be null！");
 		}
 	  
 		private static final long serialVersionUID = 1L;

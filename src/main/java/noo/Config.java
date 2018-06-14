@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,7 +68,8 @@ public class Config {
 		return new NRemote();
 	}
 
-	@Bean(name = "noo_rest")
+	@Bean
+	@ConditionalOnMissingClass("org.springframework.web.client.RestTemplate")
 	@LoadBalanced
 	RestTemplate restTemplate() {
 		return new RestTemplate();

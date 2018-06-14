@@ -28,7 +28,7 @@ public class NRemote {
 	
 	public static final Logger log = LoggerFactory.getLogger(NRemote.class);
 	
-	@Resource(name = "noo_rest")
+	@Resource
 	private RestTemplate rest;
 	 
 	public String getString(String sn,String beanMethod,JsonObject jsonobject) {
