@@ -3,6 +3,8 @@
  */
 package noo.util;
 
+import java.util.Map;
+
 /**
  * @author qujianjun   troopson@163.com
  * 2017年8月24日 
@@ -41,6 +43,10 @@ public class SpringContext implements ApplicationContextAware {
     //通过name,以及Clazz返回指定的Bean
     public static <T> T getBean(String name,Class<T> clazz){
         return getApplicationContext().getBean(name, clazz);
+    }
+    
+    public static <T> Map<String,T> getBeansOfType(Class<T> clazs){
+ 	   return getApplicationContext().getBeansOfType(clazs);
     }
 
 }

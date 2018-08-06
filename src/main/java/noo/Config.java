@@ -10,7 +10,7 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,12 +19,13 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
+import noo.event.ListenerPool;
 import noo.exception.BaseExceptionHandler;
 import noo.jdbc.JdbcSvr;
 import noo.jdbc.SQLHolder;
 import noo.json.JsonObjectResolver;
 import noo.util.SpringContext;
-import noo.web.NController;
+import noo.web.NooStub;
 import noo.web.NRemote;
 
 /**
@@ -58,22 +59,29 @@ public class Config {
 		return new SpringContext();
 	}
 
+
 	@Bean
-	public NController controller() {
-		return new NController();
+	@ConditionalOnMissingBean(type="org.springframework.web.client.RestTemplate")
+	@LoadBalanced
+	RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
+	
+	@Bean
+	public NooStub controller() {
+		return new NooStub();
 	}
 
 	@Bean
 	public NRemote nremote() {
 		return new NRemote();
 	}
-
+	
 	@Bean
-	@ConditionalOnMissingClass("org.springframework.web.client.RestTemplate")
-	@LoadBalanced
-	RestTemplate restTemplate() {
-		return new RestTemplate();
+	public ListenerPool listenerPool() {
+		return new ListenerPool();
 	}
+
 	
 //	@Bean
 //	public NooMvcConfigurer NooWebMvcConfigurer() {

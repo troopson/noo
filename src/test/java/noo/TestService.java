@@ -6,6 +6,7 @@ package noo;
 import org.junit.Test;
 
 import noo.jdbc.TDao;
+import noo.web.NRemote;
 
 /**
  * @author qujianjun   troopson@163.com
@@ -18,8 +19,15 @@ public class TestService {
 	@Test
 	public void testGetTableName() {
 		TestDao b= new TestDao();
-		System.out.println(b.getTableByClassName());
+		System.out.println(b.tableName());
 		
+	}
+	
+	@Test
+	public void testMakeNooUrl() {
+		NRemote ns= new NRemote();
+		String s = ns.makeNRemoteUrl("test", "com.bean.TestService.testMakeNooUrl");
+		System.out.println(s);
 	}
 	
 	

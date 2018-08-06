@@ -1068,6 +1068,37 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		map.clear();
 		//return this;
 	}
+	
+	/**
+	 * compact some fields into one Json string
+	 * @param fields
+	 * @param tofield
+	 */
+	public void compact(String[] fields, String tofield) {
+		if(fields==null || fields.length==0)
+			return;
+		Map<String, Object> tmp = new HashMap<>();
+		for(String s : fields) {
+			Object v = this.remove(s);
+			if(v==null)
+				continue;
+			tmp.put(s, v);
+		}
+		if(!tmp.isEmpty())
+			this.put(tofield, Json.encode(tmp));		
+	}
+	
+	public void explode(String field) {
+		if(field==null || field.length()==0)
+			return;
+		Object s = this.remove(field);
+		if(s==null || !(s instanceof String))
+			return;
+		
+		HashMap map = Json.decodeValue((String)s, HashMap.class);
+		this.putAll(map);		
+	}
+	
 
 	/**
 	 * Is this object entry?

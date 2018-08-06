@@ -9,3 +9,4 @@ gradle/
 /.idea
 .vertx/
 gradle.properties
+maven_push.gradle

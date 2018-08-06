@@ -3,6 +3,8 @@
  */
 package noo.web;
 
+import java.util.concurrent.Executors;
+
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
@@ -25,6 +27,8 @@ import noo.json.JsonObject;
 
 
 public class NRemote { 
+	
+	public static final String NOO_REMOTE_NAME="noo"; 
 	
 	public static final Logger log = LoggerFactory.getLogger(NRemote.class);
 	
@@ -66,8 +70,35 @@ public class NRemote {
 	public String makeNRemoteUrl(String sn, String beanMethod) {
 		int pos = beanMethod.lastIndexOf(".");
 		String bn = beanMethod.substring(0, pos)+"/"+beanMethod.substring(pos+1);
-		String url =  "http://"+sn+"/nooremote/"+bn;
-		log.debug("call remote: "+url);
+		String url =  "http://"+sn+"/"+NOO_REMOTE_NAME+"/"+bn;
+		log.info("call remote: "+url);
+		return url;
+	}
+	
+	//=================================================================
+	
+	public void publishRemoteEvent(String sn,String name,JsonObject jsonobject) {
+		
+		Executors.newSingleThreadExecutor().execute(new Runnable(){
+
+			@Override
+			public void run() {
+				HttpEntity<MultiValueMap<String, String>>  m = buildHttpEntity(jsonobject);
+		        Boolean s = rest.postForObject(NRemote.this.makeNRemoteEventUrl(sn, name), m, Boolean.class);
+		        if(s)
+		            log.info("publish remote event OK!");
+		        else
+		        	log.info("publish remote event failed!");
+			}
+			
+		});		
+		
+		
+	}
+	
+	public String makeNRemoteEventUrl(String sn, String name) { 
+		String url =  "http://"+sn+"/"+NOO_REMOTE_NAME+"/event/"+name;
+		log.debug("publish remote event: "+url);
 		return url;
 	}
 	
