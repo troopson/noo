@@ -125,6 +125,8 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public String getString(String key) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
+		if(v==null)
+			return null;
 		CharSequence cs =(v instanceof CharSequence) ? (CharSequence) v: v.toString();
 		return cs == null ? null : cs.toString();		
 	}
@@ -141,14 +143,14 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Integer getInteger(String key) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
+		if(v==null)
+			return null;
 		if(v instanceof CharSequence) {
 			return Integer.parseInt(v.toString());
 		}
 			
 		Number number = (Number) v;
-		if (number == null) {
-			return null;
-		} else if (number instanceof Integer) {
+		if (number instanceof Integer) {
 			return (Integer) number; // Avoids unnecessary unbox/box
 		} else {
 			return number.intValue();
@@ -167,14 +169,14 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Long getLong(String key) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
+		if(v==null)
+			return null;
 		if(v instanceof CharSequence) {
 			return Long.parseLong(v.toString());
 		}
 		
 		Number number = (Number) v;
-		if (number == null) {
-			return null;
-		} else if (number instanceof Long) {
+		if (number instanceof Long) {
 			return (Long) number; // Avoids unnecessary unbox/box
 		} else {
 			return number.longValue();
@@ -193,14 +195,14 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Double getDouble(String key) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
+		if(v==null)
+			return null;
 		if(v instanceof CharSequence) {
 			return Double.parseDouble(v.toString());
 		}
 		
 		Number number = (Number) v;
-		if (number == null) {
-			return null;
-		} else if (number instanceof Double) {
+		if (number instanceof Double) {
 			return (Double) number; // Avoids unnecessary unbox/box
 		} else {
 			return number.doubleValue();
@@ -219,14 +221,14 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Float getFloat(String key) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
+		if(v==null)
+			return null;
 		if(v instanceof CharSequence) {
 			return Float.parseFloat(v.toString());
 		}
 		
 		Number number = (Number) v;
-		if (number == null) {
-			return null;
-		} else if (number instanceof Float) {
+		if (number instanceof Float) {
 			return (Float) number; // Avoids unnecessary unbox/box
 		} else {
 			return number.floatValue();
@@ -259,6 +261,8 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public JsonObject getJsonObject(String key) {
 		Objects.requireNonNull(key);
 		Object val = map.get(key);
+		if(val==null)
+			return null;
 		if (val instanceof Map) {
 			val = new JsonObject((Map) val);
 		}else if( val instanceof String) {
@@ -279,8 +283,12 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public JsonArray getJsonArray(String key) {
 		Objects.requireNonNull(key);
 		Object val = map.get(key);
+		if(val==null)
+			return null;
 		if (val instanceof List) {
 			val = new JsonArray((List) val);
+		}else if( val instanceof String) {
+			val = new JsonArray((String)val);
 		}
 		return (JsonArray) val;
 	}
@@ -343,6 +351,8 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Object getValue(String key) {
 		Objects.requireNonNull(key);
 		Object val = map.get(key);
+		if(val==null)
+			return null;
 		if (val instanceof Map) {
 			val = new JsonObject((Map) val);
 		} else if (val instanceof List) {
@@ -364,8 +374,11 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public String getString(String key, String def) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
+		if(v==null)
+			return def;
 		CharSequence cs =(v instanceof CharSequence)? (CharSequence) v : v.toString();
-		return cs != null || map.containsKey(key) ? cs == null ? null : cs.toString() : def;
+		//return cs != null || map.containsKey(key) ? cs == null ? null : cs.toString() : def;
+		return cs.toString();
 	}
 
 	/**
@@ -387,11 +400,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		
 		Number val = (Number) v;
 		if (val == null) {
-			if (map.containsKey(key)) {
-				return null;
-			} else {
-				return def;
-			}
+			return def;
 		} else if (val instanceof Integer) {
 			return (Integer) val; // Avoids unnecessary unbox/box
 		} else {
@@ -418,11 +427,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		
 		Number val = (Number) v;
 		if (val == null) {
-			if (map.containsKey(key)) {
-				return null;
-			} else {
-				return def;
-			}
+			return def;
 		} else if (val instanceof Long) {
 			return (Long) val; // Avoids unnecessary unbox/box
 		} else {
@@ -449,11 +454,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		
 		Number val = (Number) v;
 		if (val == null) {
-			if (map.containsKey(key)) {
-				return null;
-			} else {
-				return def;
-			}
+			return def;
 		} else if (val instanceof Double) {
 			return (Double) val; // Avoids unnecessary unbox/box
 		} else {
@@ -480,11 +481,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		
 		Number val = (Number) v;
 		if (val == null) {
-			if (map.containsKey(key)) {
-				return null;
-			} else {
-				return def;
-			}
+			return def;
 		} else if (val instanceof Float) {
 			return (Float) val; // Avoids unnecessary unbox/box
 		} else {
@@ -505,7 +502,10 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Boolean getBoolean(String key, Boolean def) {
 		Objects.requireNonNull(key);
 		Object val = map.get(key);
-		return val != null || map.containsKey(key) ? (Boolean) val : def;
+		if(val==null)
+			return def;
+		//return val != null || map.containsKey(key) ? (Boolean) val : def;
+		return (Boolean) val;
 	}
 
 	/**
@@ -520,7 +520,10 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public JsonObject getJsonObject(String key, JsonObject def) {
 		JsonObject val = getJsonObject(key);
-		return val != null || map.containsKey(key) ? val : def;
+		if(val ==null)
+			return def;
+		//return val != null || map.containsKey(key) ? val : def;
+		return val;
 	}
 
 	/**
@@ -535,7 +538,10 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	public JsonArray getJsonArray(String key, JsonArray def) {
 		JsonArray val = getJsonArray(key);
-		return val != null || map.containsKey(key) ? val : def;
+		if(val == null)
+			return def;
+		//return val != null || map.containsKey(key) ? val : def;
+		return val;
 	}
 
 	/**
@@ -551,8 +557,10 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public byte[] getBinary(String key, byte[] def) {
 		Objects.requireNonNull(key);
 		Object val = map.get(key);
-		return val != null || map.containsKey(key) ? (val == null ? null : Base64.getDecoder().decode((String) val))
-				: def;
+		if(val == null)
+			return def;
+		// return val != null || map.containsKey(key) ? (val == null ? null : Base64.getDecoder().decode((String) val)) : def;
+		return Base64.getDecoder().decode((String) val);
 	}
 
 	/**
@@ -568,9 +576,13 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Instant getInstant(String key, Instant def) {
 		Objects.requireNonNull(key);
 		Object val = map.get(key);
-		return val != null || map.containsKey(key)
+		if(val == null)
+			return def;
+		
+		/*return val != null || map.containsKey(key)
 				? (val == null ? null : Instant.from(ISO_INSTANT.parse((String) val)))
-				: def;
+				: def; */
+		return Instant.from(ISO_INSTANT.parse((String) val));
 	}
 
 	/**
@@ -586,13 +598,18 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Object getValue(String key, Object def) {
 		Objects.requireNonNull(key);
 		Object val = getValue(key);
-		return val != null || map.containsKey(key) ? val : def;
+		if(val == null)
+			return def;
+		//return val != null || map.containsKey(key) ? val : def;
+		return val;
 	}
 	
 	
 	public Date getDate(String key, String fmt) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
+		if(v == null)
+			return null;
 		if(v instanceof CharSequence) {
 			return D.toDate(((CharSequence)v).toString(), null, fmt);
 		}

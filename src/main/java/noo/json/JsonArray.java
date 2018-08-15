@@ -22,6 +22,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -583,6 +586,16 @@ public class JsonArray implements Iterable<Object>, Serializable, IJson {
 	   */
 	  public Stream<Object> stream() {
 	    return Json.asStream(iterator());
+	  }
+	  
+	  public JsonArray filter(Predicate<Object> predicate) {
+		  this.list = this.stream().filter(predicate).collect(Collectors.toList());
+		  return this;
+	  }
+	  
+	  public JsonArray map(Function<Object, Object> mapper) {
+		  this.list = this.stream().map(mapper).collect(Collectors.toList());
+		  return this;
 	  }
 	
 	  @Override
