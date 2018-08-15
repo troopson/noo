@@ -261,6 +261,8 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		Object val = map.get(key);
 		if (val instanceof Map) {
 			val = new JsonObject((Map) val);
+		}else if( val instanceof String) {
+			val = new JsonObject((String)val);
 		}
 		return (JsonObject) val;
 	}

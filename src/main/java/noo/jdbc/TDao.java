@@ -37,7 +37,7 @@ public abstract class TDao {
 		return this._tableName;
 	}
 	
-	protected String sqltext(String sqlid) {
+	public String sqltext(String sqlid) {
 		return sqlholder.getSQL(sqlid);
 	}
 	
@@ -51,6 +51,14 @@ public abstract class TDao {
 	public JsonObject getByField(String field, String value){		
 		return jdbc.get(this.tableName(), field, value);
 	}
+	
+	public JsonObject getWith(String where, Object[] params) {
+		JsonArray r = this.findBy(where, params);
+		if(r.isEmpty())
+			return null;
+		return r.getJsonObject(0);
+	}
+	
 	
 	public int insertRow(JsonObject vs){
 		return jdbc.insertRow(this.tableName(), vs);				
@@ -160,6 +168,10 @@ public abstract class TDao {
     }
     public Integer queryIntByNameParam(String sql, JsonObject p) {
     	return this.jdbc.qryInt(sql, p);
+    }
+    
+    public boolean hasRow(String sql, Object...p) {
+    	return this.jdbc.hasRow(sql, p);
     }
     
     

@@ -36,7 +36,7 @@ apply from: 'maven_push.gradle'
 
 jar {
 
-  archiveName = 'noo-1.0.3.jar'
+  archiveName = 'noo-1.0.5.jar'
 
 }
 

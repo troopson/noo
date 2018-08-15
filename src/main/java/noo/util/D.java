@@ -2,11 +2,14 @@ package noo.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -32,6 +35,10 @@ public class D {
 
 	public static Date toDate(String dateStr) {
 		return toDate(dateStr, null);
+	}
+	
+	public static String defaultTimeZone() {
+		return TimeZone.getDefault().getID();
 	}
 	
 		
@@ -80,6 +87,18 @@ public class D {
 	public static String today() {
 		LocalDate today = LocalDate.now();
 		return today.format(DateTimeFormatter.ofPattern(DateFmt));
+	}
+	
+	public static Date todayStart() {
+		LocalDate today = LocalDate.now(); 
+		ZoneId zone = ZoneId.systemDefault();     
+	    return Date.from(today.atStartOfDay().atZone(zone).toInstant()); 
+	}
+	
+	public static Date todayEnd() {
+		LocalDate today = LocalDate.now(); 
+		ZoneId zone = ZoneId.systemDefault();     
+	    return Date.from(today.atStartOfDay().atZone(zone).toInstant().minusMillis(1)); 
 	}
 	
 	public static String now(){
@@ -206,7 +225,58 @@ public class D {
 		return c.get(Calendar.MINUTE);
 	}
 	
+	public static Date dayStart(Date date) {
+		ZoneId zone = ZoneId.systemDefault(); 
+        Instant instant = date.toInstant(); 
+	    LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
+	    LocalDate localDate = localDateTime.toLocalDate();  
+	    return Date.from(localDate.atStartOfDay().atZone(zone).toInstant()); 
+	}
 	
+	public static Date dayEnd(Date date) {
+		ZoneId zone = ZoneId.systemDefault(); 
+        Instant instant = date.toInstant(); 
+	    LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
+	    LocalDate localDate = localDateTime.toLocalDate();    
+	    return Date.from(localDate.atStartOfDay().atZone(zone).toInstant().minusMillis(1)); 
+	}
+	
+	
+	public static Date firstDayOfMonth(Date date) {
+		ZoneId zone = ZoneId.systemDefault(); 
+	    Instant instant = date.toInstant(); 
+		LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
+		LocalDate localDate = localDateTime.toLocalDate(); 
+		LocalDate lastDay =localDate.with(TemporalAdjusters.firstDayOfMonth());
+	    return Date.from(lastDay.atStartOfDay().atZone(zone).toInstant()); 
+	}
+	
+	public static Date lastDayOfMonth(Date date) {
+		ZoneId zone = ZoneId.systemDefault(); 
+	    Instant instant = date.toInstant(); 
+		LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
+		LocalDate localDate = localDateTime.toLocalDate(); 
+		LocalDate lastDay =localDate.with(TemporalAdjusters.lastDayOfMonth());
+	    return Date.from(lastDay.atStartOfDay().atZone(zone).toInstant()); 
+	}
+	
+	public static Date firstDayOfWeek(Date date) {
+		ZoneId zone = ZoneId.systemDefault(); 
+	    Instant instant = date.toInstant(); 
+		LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
+		LocalDate localDate = localDateTime.toLocalDate(); 
+		LocalDate weekDate =localDate.with(TemporalAdjusters.previous(DayOfWeek.MONDAY));
+	    return Date.from(weekDate.atStartOfDay().atZone(zone).toInstant()); 
+	}
+	
+	public static Date lastDayOfWeek(Date date) {
+		ZoneId zone = ZoneId.systemDefault(); 
+	    Instant instant = date.toInstant(); 
+		LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
+		LocalDate localDate = localDateTime.toLocalDate(); 
+		LocalDate weekDate =localDate.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY));
+	    return Date.from(weekDate.atStartOfDay().atZone(zone).toInstant()); 
+	}
 	
 
 	public static void main(String[] args) throws ParseException {
@@ -283,6 +353,11 @@ public class D {
 		
 		Date d99 = D.toDate("2017-09-09");
 		System.out.println(D.strD(D.offsetDay(d99, -1,null)));
+		
+		System.out.println(D.todayStart());
+		System.out.println(D.todayEnd());
+		System.out.println(D.dayStart(D.toDate("2017-11-13 11:30:00")));
+		System.out.println(D.dayEnd(D.toDate("2017-11-13 11:30:00")));
 		
 	}
 
