@@ -156,6 +156,17 @@ public abstract class TDao {
     	return this.jdbc.qry(sql, param);
     }
     
+    public JsonObject queryOne(String sql, JsonObject p) {
+    	return this.jdbc.qryOneRow(sql, p);
+    }
+    public JsonObject queryOneRow(String sql, Object...param) {
+    	JsonArray ja =this.jdbc.qry(sql, param);
+    	if(ja.isEmpty())
+    		return null;
+    	else
+    		return ja.getJsonObject(0);
+    }
+    
     public String queryString(String sql,Object...p) {
     	return this.jdbc.qryString(sql, p);
     }     

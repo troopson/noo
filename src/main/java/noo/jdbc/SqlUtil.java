@@ -4,7 +4,6 @@
 package noo.jdbc;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +81,7 @@ public class SqlUtil {
 				int inpos= s.toLowerCase().indexOf(" in ");
 				if(inpos!=-1) {
 					String headin = s.substring(1,inpos+4);
-					Collection colv = (Collection)param.get(paramName);
+					Iterable<Object> colv = (Iterable<Object>)param.get(paramName);
 					int i=0;
 					StringBuilder inReplace= new StringBuilder(headin);
 					for(Object ech : colv) {
