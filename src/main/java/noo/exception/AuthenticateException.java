@@ -10,13 +10,13 @@ package noo.exception;
 * 
 */
 
-public class UnAuthrizedException extends BaseException {
+public class AuthenticateException extends BaseException {
 
  
 	private static final long serialVersionUID = 1L;
 
-	public UnAuthrizedException(String msg) {
-		super(ExpCode.Authrize, msg);
+	public AuthenticateException(String msg) {
+		super(ExpCode.Authenticat, msg);
 	}
 
 }

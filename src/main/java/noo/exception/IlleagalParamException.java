@@ -10,6 +10,10 @@ import org.springframework.http.HttpStatus;
  */
 public class IlleagalParamException extends BusinessException {
 
+	public IlleagalParamException(int code, String msg) {
+		super(code + "", msg);
+	}
+	
 	public IlleagalParamException(Exception e) {
 		super(HttpStatus.BAD_REQUEST + "", e.getMessage());
 	}

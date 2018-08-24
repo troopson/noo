@@ -38,8 +38,13 @@ public class BaseExceptionHandler {
         return ((UnAuthrizedException)exception).toString();
     }
     
-    
-    
+    @ExceptionHandler(AuthenticateException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public String onAuthenticateException(Exception exception, WebRequest request) {
+        return ((AuthenticateException)exception).toString();
+    }
+        
    
     @ExceptionHandler(SessionTimeoutException.class)
     @ResponseStatus(HttpStatus.REQUEST_TIMEOUT)
