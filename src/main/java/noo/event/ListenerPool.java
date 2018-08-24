@@ -57,7 +57,7 @@ public class ListenerPool implements CommandLineRunner{
 		
 		ListenerPool p = getPool();
 		if(p.listens==null)
-			return null;
+			p.init();
 		
 		List<Listener> mlist = p.listens.get(evnetName);
 		
@@ -76,6 +76,19 @@ public class ListenerPool implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 		
+		try {
+			init();
+		}catch(java.lang.IllegalStateException e) {
+			
+		}
+		
+				
+	}
+	
+	private void init() {
+		
+		this.listens = new HashMap<>();
+		
 		Map<String, Listener> i =SpringContext.getBeansOfType(Listener.class);
 		for(Listener o: i.values()){
 			  String[] eventNames= o.on();
@@ -87,15 +100,12 @@ public class ListenerPool implements CommandLineRunner{
 		
 		}
 			
-		if(this.listens!=null)
-			log.info("Event listens initialized, event type amount: "+ this.listens.size() );
-				
+		log.info("Event listens initialized, event type amount: "+ this.listens.size() );
+
 	}
 	
 	
 	private void putListen2Pool(String eventName, Listener j){
-		if(this.listens==null)
-			this.listens=new HashMap<>();
 		
 		List<Listener> l = this.listens.get(eventName);
 		if(l==null){
