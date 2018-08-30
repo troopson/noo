@@ -5,10 +5,10 @@ package noo.json;
 
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HttpMethod;
+import javax.servlet.http.HttpServletRequest; 
 
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -34,7 +34,8 @@ public final class JsonObjectResolver implements HandlerMethodArgumentResolver {
 
 		JsonObject result = null;
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-		 if(servletRequest.getMethod()!=HttpMethod.GET && servletRequest.getMethod()!=HttpMethod.HEAD) {
+		String method = servletRequest.getMethod();
+	    if(HttpMethod.GET.matches(method) && HttpMethod.HEAD.matches(method)) {
               
              String jsonBody = S.readAndCloseInputStream(servletRequest.getInputStream(), "UTF-8"); 
              if(S.isNotBlank(jsonBody))
