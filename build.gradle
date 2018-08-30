@@ -71,6 +71,7 @@ dependencies {
 	compile("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     compile "org.springframework.boot:spring-boot-starter-jdbc:$springBootVersion"
     compile "org.springframework.boot:spring-boot-starter-test:$springBootVersion"
+    compile "org.springframework.boot:spring-boot-starter-data-redis:$springBootVersion"
     
     compile 'org.springframework.cloud:spring-cloud-dependencies:Edgware.SR3'
     //compile 'org.springframework.cloud:spring-cloud-starter-ribbon:Edgware.SR3'
@@ -86,7 +87,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-actuator:$springBootVersion"
     compile "org.springframework.boot:spring-boot-devtools:$springBootVersion"     
 	 
-	  
+	compile group: 'redis.clients', name: 'jedis', version: '2.9.0'  
 	compile group: 'mysql', name: 'mysql-connector-java', version: '6.0.6'
 	//compile group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '2.2.1'
 	compile group: 'com.zaxxer', name: 'HikariCP', version: '2.6.2'

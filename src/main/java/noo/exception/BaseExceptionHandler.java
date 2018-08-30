@@ -31,11 +31,11 @@ public class BaseExceptionHandler {
     
     
    
-    @ExceptionHandler(UnAuthrizedException.class)
+    @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
     public String onUnAuthrizedException(Exception exception, WebRequest request) {
-        return ((UnAuthrizedException)exception).toString();
+        return ((AccessDeniedException)exception).toString();
     }
     
     @ExceptionHandler(AuthenticateException.class)

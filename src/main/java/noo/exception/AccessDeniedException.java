@@ -10,12 +10,12 @@ package noo.exception;
 * 
 */
 
-public class UnAuthrizedException extends BaseException {
+public class AccessDeniedException extends BaseException {
 
  
 	private static final long serialVersionUID = 1L;
 
-	public UnAuthrizedException(String msg) {
+	public AccessDeniedException(String msg) {
 		super(ExpCode.Authrize, msg);
 	}
 
