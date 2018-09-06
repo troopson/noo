@@ -60,8 +60,8 @@ public abstract class TDao {
 	}
 	
 	
-	public int insertRow(JsonObject vs){
-		return jdbc.insertRow(this.tableName(), vs);				
+	public InsertKeyHolder insertRow(JsonObject vs){
+		return jdbc.insertRowWithGenkey(this.tableName(), vs);	
 	}
 	    
 	public int insertRow(String fields,JsonObject vs){

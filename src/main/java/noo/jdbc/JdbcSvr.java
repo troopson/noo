@@ -4,9 +4,11 @@
 package noo.jdbc;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,8 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.ArgumentPreparedStatementSetter;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -71,7 +75,7 @@ public class JdbcSvr {
 
 	// =========================insert, update, delete==========================
 
-	public int insertRow(String table, JsonObject vs) {
+	public InsertKeyHolder insertRowWithGenkey(String table, JsonObject vs) {
 		int size = vs.size();
 		String[] keys = new String[size];
 		Object[] vals = new Object[size];
@@ -82,8 +86,13 @@ public class JdbcSvr {
 			vals[i] = v;
 			i = i + 1;
 		}
-		return this.insertRow(false, table, keys, vals);
+		return this.insertRow(table, keys, vals); 
 	}
+	
+	public int insertRow(String table, JsonObject vs) {
+		return this.insertRowWithGenkey(table, vs).getInsert_count();
+	}
+	
 
 	public int insertRow(String table, String fields, JsonObject vs) {
 		String[] keys = S.splitWithComma(fields);
@@ -108,9 +117,38 @@ public class JdbcSvr {
 		return this.insertRow(true, table, S.splitWithComma(fields), values);
 	}
 
-	// insert into xt_role (uuid,code,name) values()
+	 
 	public int insertRow(boolean replace, String table, String[] fields, Object[] values) {
 
+		StringBuilder sql = buildInsertSQL(replace, table, fields, values); 
+		 
+		
+		return this.getJdbcTemplate().update(sql.toString(), values);
+
+	}
+	
+	public InsertKeyHolder insertRow(String table, String[] fields, Object[] values) {
+		StringBuilder sql = buildInsertSQL(false, table, fields, values); 
+		
+		InsertKeyHolder kh = new InsertKeyHolder();
+		int i = this.getJdbcTemplate().update(new PreparedStatementCreator() {
+
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+				PreparedStatement stat = con.prepareStatement(sql.toString(),Statement.RETURN_GENERATED_KEYS);  
+				ArgumentPreparedStatementSetter as = new ArgumentPreparedStatementSetter(values);
+				as.setValues(stat);
+				return stat;
+			}
+			
+		}, kh);
+		kh.setInsert_count(i);
+		
+		return kh;
+		
+	}
+
+	private StringBuilder buildInsertSQL(boolean replace, String table, String[] fields, Object[] values) {
 		StringBuilder sql = null;
 		if (replace)
 			sql = new StringBuilder("replace into ");
@@ -136,8 +174,7 @@ public class JdbcSvr {
 
 		sql.append(") ").append(valpiece).append(")");
 		log.debug(sql.toString()+"   "+C.printArray(values));
-		return this.getJdbcTemplate().update(sql.toString(), values);
-
+		return sql;
 	}
 
 	public int updateRow(String table, String setFields,String conditionFields,  Object[] values) {

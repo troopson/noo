@@ -75,7 +75,7 @@ public class SecurityFilter implements Filter {
 		
 		String method = req.getMethod();
 		
-		if(method.equals(HttpMethod.OPTIONS.name())) {
+		if(HttpMethod.OPTIONS.matches(method)) {
 			resp.getWriter().print(0);
 			return;
 		}
@@ -88,7 +88,7 @@ public class SecurityFilter implements Filter {
 	    }
 		
 		try {	
-			if(us.isLoginUrl(requrl) && method.equalsIgnoreCase("POST")) {
+			if(us.isLoginUrl(requrl) && HttpMethod.POST.matches(method)) {
 			
 				this.doLogin(request, req, resp);
 				return;
@@ -137,7 +137,7 @@ public class SecurityFilter implements Filter {
 	private void doLogout(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String authkey = req.getHeader(HEADER_KEY);
 		if(S.isNotBlank(authkey)) {
-			this.redis.opsForValue().set(authkey, null); 
+			this.redis.delete(authkey); 
 		}
 		resp.addHeader(HEADER_KEY, "");
 		this.writeResponse(resp, "0");  

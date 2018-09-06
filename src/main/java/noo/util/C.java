@@ -453,5 +453,12 @@ public final class C {
 		}
 		reader.close();
     }
+    
+    public Set<String> asSet(String...s){ 
+    	Set<String> v = new HashSet<>();
+    	for(String a: s)
+    		v.add(a);
+    	return v;
+    }
 	
 }

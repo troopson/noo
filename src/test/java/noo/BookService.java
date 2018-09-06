@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
+import noo.jdbc.InsertKeyHolder;
 import noo.json.JsonArray;
 import noo.json.JsonObject;
 import noo.json.PageJsonArray;
@@ -56,7 +57,9 @@ public class BookService {
 	}
 	
 	public  int createBook(JsonObject b) {
-		return book.insertRow(b);
+		InsertKeyHolder kh = book.insertRow(b);
+		System.out.println("======"+kh.getKey().toString());
+		return kh.getInsert_count();
 	}
 	
 }
