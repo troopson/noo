@@ -3,10 +3,10 @@ spring helper lib
 
 用来帮助快速开发基于spring的应用程序。在mybatis/jpa之外提供另外一种简便的编程方式。
 
-现在流行的ORM方式，会所创建大量的值对象，比如pojo/do/dto，然后也会自定义出一套查询的语言，对sql做各种转化，我觉得这让简单的事情复杂化了，这也是这个项目之所以叫noo的含义，没有仅仅传递值的值对象，全部通过统一的Json对象代替，对数据库的查询，我会辅助以一些简便的方法，但是还是通过sql语句来完成。我认为这样的方式，会让开发更加简化快速。
+现在流行的ORM方式，会创建大量的值对象，比如pojo/do/dto，经常会自定义出一套查询的语言，对sql做各种转化，让简单的事情变的复杂了，这个项目，去掉了仅仅用来传递值的对象，全部通过统一的Json对象代替，对数据库的查询，辅助以一些简便的方法，但是还是通过sql语句来完成。我认为这样的方式，会让开发更加简单高效。
 
-
-#### Maven
+#### 引入noo
+**Maven**
 
 ```xml
 <dependency>
@@ -22,14 +22,16 @@ spring helper lib
 </dependency>
 
 ```
-#### Gradle
+
+*依赖springcloud、fastjson和guava，一般都加了，为了避免引入不同的版本，这里可以exclude掉*
+
+**Gradle**
 ```groovy
 
     compile group: 'com.github.troopson', name: 'noo', version: '1.0.8', transitive: false
 
 ```
 
-*依赖springcloud、fastjson和guava，一般都加了，为了避免引入不同的版本，这里可以exclude掉*
 
 #### 代码示例
 
