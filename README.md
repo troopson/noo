@@ -12,7 +12,7 @@ spring helper lib
 <dependency>
     <groupId>com.github.troopson</groupId>
 	<artifactId>noo</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.8</version>
 	<exclusions>
 	    <exclusion>
 		<artifactId>*</artifactId>
@@ -22,6 +22,13 @@ spring helper lib
 </dependency>
 
 ```
+#### Gradle
+```groovy
+
+    compile group: 'com.github.troopson', name: 'noo', version: '1.0.8', transitive: false
+
+```
+
 *依赖springcloud、fastjson和guava，一般都加了，为了避免引入不同的版本，这里可以exclude掉*
 
 #### 代码示例
@@ -118,6 +125,51 @@ book.queryByNameParam("select sn,name,price from book where {author=#au} and {co
 :vc   如果param中不存在vc值，该条件将被替换为1=1
 */
 
+```
+
+#### Security 
+
+security依赖redis，需要配置redis的支持。
+security提供了一个通用的filter，提供了一个SecuritySetting接口，编写一个实现该接口的类，定义权限控制的细节，
+security将会监听login链接，并读取username和password进行校验，通过以后会把token返回前端请求，
+前端需要将该token保存起来，在之后的每次rest请求header中设置Authentication值为该token。
+
+一个示例的后端配置类如下：
+
+```java
+
+@Configuration
+public class SecurityConfig {
+
+	@Autowired
+	private RedisTemplate<String, ?> redis;
+
+	@Autowired
+	private SecuritySetting as;
+
+    private CorsConfiguration buildConfig() {
+		CorsConfiguration corsConfiguration = new CorsConfiguration();
+		corsConfiguration.addAllowedOrigin("*"); // 1允许任何域名使用
+		corsConfiguration.addAllowedHeader("*"); // 2允许任何头
+		corsConfiguration.addAllowedMethod("*"); // 3允许任何方法（post、get等）
+		return corsConfiguration;
+	}
+
+
+	@Bean
+	public FilterRegistrationBean<SecurityFilter> testFilterRegistration() {
+
+		FilterRegistrationBean<SecurityFilter> registration = new FilterRegistrationBean<>();
+		SecurityFilter sf = new SecurityFilter();
+		sf.setRedis(redis);
+		sf.setSecuritySetting(as);
+		sf.setCorsConfiguration(this.buildConfig());
+		registration.setFilter(sf);
+		registration.addUrlPatterns("/*");
+		registration.setOrder(1);
+		return registration;
+	}
+}
 ```
 
 
