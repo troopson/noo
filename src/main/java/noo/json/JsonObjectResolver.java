@@ -35,7 +35,7 @@ public final class JsonObjectResolver implements HandlerMethodArgumentResolver {
 		JsonObject result = null;
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		String method = servletRequest.getMethod();
-	    if(HttpMethod.GET.matches(method) && HttpMethod.HEAD.matches(method)) {
+	    if(!HttpMethod.GET.matches(method) && !HttpMethod.HEAD.matches(method)) {
               
              String jsonBody = S.readAndCloseInputStream(servletRequest.getInputStream(), "UTF-8"); 
              if(S.isNotBlank(jsonBody))
