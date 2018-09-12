@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.sql.DataSource;
 
@@ -28,6 +29,7 @@ import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import noo.json.JsonArray;
@@ -310,6 +312,20 @@ public class JdbcSvr {
 
 	// ============================select===========================================
 
+	public void forEach(String sql, JsonObject param, Consumer<JsonObject> c) {
+		String newsql = SqlUtil.processParam(sql, param==null?null:param.getMap());
+		this.getNamedTemplate().query(newsql, param==null?null:param.getMap(), new RowCallbackHandler() {
+
+			private MyColumnMapRowMapper rm= new MyColumnMapRowMapper();
+			@Override
+			public void processRow(ResultSet rs) throws SQLException {
+				JsonObject j = rm.mapRow(rs, 0);
+				c.accept(j);
+			}
+			
+		} );
+	}
+	
 	public JsonArray qry(String sql) {
 		return new JsonArray(this.getJdbcTemplate().query(sql, new MyColumnMapRowMapper()));
 	}
