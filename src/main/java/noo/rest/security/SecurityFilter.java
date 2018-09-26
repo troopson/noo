@@ -4,7 +4,6 @@
 package noo.rest.security;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -119,6 +118,7 @@ public class SecurityFilter implements Filter {
 		
 	}
 
+	//从request的header中，读取Authorization信息，然后从redis中读取user信息，生成user对象
 	private User retrieveUser(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String token = req.getHeader(HEADER_KEY);
 		if(S.isBlank(token)) { 
@@ -131,6 +131,7 @@ public class SecurityFilter implements Filter {
 		}
 		
 		User u = us.fromJsonObject(new JsonObject(s));
+		u.setToken(token);
 		return u;
 	}
 
@@ -159,16 +160,19 @@ public class SecurityFilter implements Filter {
 		
 		if(us.checkUserPassword(uobj, p, req)) {
 			
-			Object ustring = us.toJsonObject(uobj).encode();
-			String authkey =  ID.uuid(); 
-			this.redis.opsForValue().set(REDIS_KEY+":"+authkey, ustring, 120L, TimeUnit.MINUTES);
+			String authkey =  ID.uuid();
+			uobj.setToken(authkey);
+			//Object ustring = us.toJsonObject(uobj).encode();
+			//String authkey =  ID.uuid(); 
+			//this.redis.opsForValue().set(REDIS_KEY+":"+authkey, ustring, 120L, TimeUnit.MINUTES);
+			uobj.updateUser(this.redis);
 			 
 			resp.setCharacterEncoding("UTF-8");
 			resp.setContentType("text/html;charset=utf-8");  
 			resp.addHeader(HEADER_KEY, authkey); 
 			
 			us.afterLoginSuccess(uobj, req); 
-			JsonObject respJson = us.toResponseJsonObject(uobj);
+			JsonObject respJson = uobj.toResponseJsonObject();
 			respJson.put(HEADER_KEY, authkey); 
 			resp.getWriter().print(respJson.encode());
 			

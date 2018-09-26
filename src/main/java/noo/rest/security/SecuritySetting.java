@@ -26,10 +26,6 @@ public interface SecuritySetting {
 	
 	public boolean canAccess(User uobj, String path);
 	
-	public JsonObject toResponseJsonObject(User uobj);
-	
-	public JsonObject toJsonObject(User uobj);
-	
 	public User fromJsonObject(JsonObject j);
 	
 	default public void afterLoginSuccess(User uo, HttpServletRequest req) {
