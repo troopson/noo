@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsProcessor;
@@ -40,7 +40,7 @@ public class SecurityFilter implements Filter {
 	private SecuritySetting us;
 	
 	@Autowired
-	private RedisTemplate<String, Object> redis;
+	private StringRedisTemplate redis;
 	
 	public static final String REDIS_KEY ="noo:session";
 	
@@ -190,9 +190,8 @@ public class SecurityFilter implements Filter {
 	public void setSecuritySetting(SecuritySetting us) {
 		this.us = us;
 	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void setRedis(RedisTemplate r) {
+ 
+	public void setRedis(StringRedisTemplate r) {
 		this.redis = r;
 	}
 

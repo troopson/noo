@@ -5,7 +5,7 @@ package noo.rest.security;
 
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import noo.json.JsonObject;
 
@@ -29,8 +29,8 @@ public abstract class User {
 		return 120L;
 	}
 	
-	public void updateUser(RedisTemplate<String, Object> redis) {
-		Object ustring = this.toJsonObject().encode(); 
+	public void updateUser(StringRedisTemplate redis) {
+		String ustring = this.toJsonObject().encode(); 
 		String authkey =  this.getToken(); 
 		redis.opsForValue().set(SecurityFilter.REDIS_KEY+":"+authkey, ustring, this.getSessionTimeoutMinutes(), TimeUnit.MINUTES);
 	}
