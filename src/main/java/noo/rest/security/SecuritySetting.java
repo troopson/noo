@@ -31,6 +31,7 @@ public interface SecuritySetting {
 	default public void afterLoginSuccess(User uo, HttpServletRequest req) {
 		
 	}
+	
 
 	
 }

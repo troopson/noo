@@ -14,6 +14,8 @@ public class ExpCode {
 	
 	public static final String Authrize ="401";
 	
-	public static final String SessionTimeout ="408";
+	public static final String SessionTimeout ="408"; 
+
+	public static final String Duplicate ="444";
 
 }

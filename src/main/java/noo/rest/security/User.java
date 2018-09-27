@@ -3,10 +3,6 @@
  */
 package noo.rest.security;
 
-import java.util.concurrent.TimeUnit;
-
-import org.springframework.data.redis.core.StringRedisTemplate;
-
 import noo.json.JsonObject;
 
 /**
@@ -27,12 +23,6 @@ public abstract class User {
 	
 	public long getSessionTimeoutMinutes() {
 		return 120L;
-	}
-	
-	public void updateUser(StringRedisTemplate redis) {
-		String ustring = this.toJsonObject().encode(); 
-		String authkey =  this.getToken(); 
-		redis.opsForValue().set(SecurityFilter.REDIS_KEY+":"+authkey, ustring, this.getSessionTimeoutMinutes(), TimeUnit.MINUTES);
 	}
 	
 	//User对象发送到页面response中的结构

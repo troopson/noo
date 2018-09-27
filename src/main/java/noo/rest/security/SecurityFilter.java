@@ -4,6 +4,7 @@
 package noo.rest.security;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -165,7 +166,7 @@ public class SecurityFilter implements Filter {
 			//Object ustring = us.toJsonObject(uobj).encode();
 			//String authkey =  ID.uuid(); 
 			//this.redis.opsForValue().set(REDIS_KEY+":"+authkey, ustring, 120L, TimeUnit.MINUTES);
-			uobj.updateUser(this.redis);
+			updateUser(uobj,this.redis);
 			 
 			resp.setCharacterEncoding("UTF-8");
 			resp.setContentType("text/html;charset=utf-8");  
@@ -179,6 +180,12 @@ public class SecurityFilter implements Filter {
 		}else { 
 			this.writeResponse(resp, "-1");  
 		}
+	}
+	
+	public static void updateUser(User u,StringRedisTemplate redis) {
+		String ustring = u.toJsonObject().encode(); 
+		String authkey =  u.getToken(); 
+		redis.opsForValue().set(SecurityFilter.REDIS_KEY+":"+authkey, ustring, u.getSessionTimeoutMinutes(), TimeUnit.MINUTES);
 	}
 	
 	private void writeResponse(HttpServletResponse resp,String msg) throws IOException {
