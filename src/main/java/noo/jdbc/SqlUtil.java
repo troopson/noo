@@ -23,47 +23,54 @@ public class SqlUtil {
 	public static String convertChn(String tableAlias, String field, String chnfields) {
 		// CONVERT(deviceModelId USING gbk)
 
-		if (S.isBlank(chnfields))
+		if (S.isBlank(chnfields)) {
 			return field;
+		}
 		chnfields = chnfields + ",";
-		if (chnfields.indexOf(field + ",") == -1) // 不包含字段
+		if (chnfields.indexOf(field + ",") == -1) {
 			return field;
+		}
 
-		if (tableAlias != null)
+		if (tableAlias != null) {
 			return "CONVERT(" + tableAlias + "." + field + " USING gbk)";
-		else
+		} else {
 			return "CONVERT(" + field + " USING gbk)";
+		}
 
 	}
 
-	private static final Pattern SQL_Injection_reg = Pattern
+	private static final Pattern SQL_INJECTION_REG = Pattern
 			.compile("select |update |delete |drop |grant |create | and | or |exec ");
 
+	private static final Pattern A_Z0_9 =Pattern.compile("[a-zA-Z_0-9]*");
+	
 	public static boolean isInjection(String param) {
-		if (S.isBlank(param))
+		if (S.isBlank(param)) {
 			return false;
+		}
 
 		// 全字母，数字的，可以超过10个字符，否则不允许
-		if (!param.matches("[a-zA-Z_0-9]*") && param.length() > 10)
+		if (!A_Z0_9.matcher(param).matches() && param.length() > 10) {
 			return true;
+		}
 
-		Matcher m = SQL_Injection_reg.matcher(param);
+		Matcher m = SQL_INJECTION_REG.matcher(param);
 		return m.find();
 	}
 	
 	//============================================
 
-	private final static Pattern ParamReg = Pattern.compile("\\{[^\\{\\}]*[=|like|in]\\W*[:|#][a-zA-Z0-9_ ]*\\}");
+	private final static Pattern PARAM_REG = Pattern.compile("\\{[^\\{\\}]*[=|like|in]\\W*[:|#][a-zA-Z0-9_ ]*\\}",Pattern.CASE_INSENSITIVE);
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static String processParam(String sql, Map param) {
-		 
 
-		Matcher m = ParamReg.matcher(sql);
+		Matcher m = PARAM_REG.matcher(sql);
 		StringBuffer newsql = new StringBuffer();
 		Map<String,Object> t = new LinkedCaseInsensitiveMap<Object>();
-		if (param != null)
+		if (param != null) {
 			t.putAll(param);
+		}
 
 		while (m.find()) {
 			String s = m.group();
@@ -96,19 +103,18 @@ public class SqlUtil {
 					}
 					m.appendReplacement(newsql, inReplace.append(" )").toString());
 				}else {
-				
 					//此处转换为spring nametemplate的格式 file=:param
 					String re = s.substring(1, s.length() - 1);
-					if(!ignore)
+					if(!ignore) {
 						re = re.replace('#', ':');
+					}
 					m.appendReplacement(newsql, re);
 					
 					//如果like类型的变量，没有%_符号，那么自动在两端加上%号
 					if(s.toLowerCase().indexOf(" like ")!=-1 &&  !S.containChar(v.toString(), "%_")){					
 						  param.put(paramName, "%"+v+"%" );
 					}
-				}
-				
+				}				
 				// param.put(paramName, v); //spring会放到自己的map中，避免大小写的问题
 			} else {
 				if(!ignore) {
@@ -118,13 +124,13 @@ public class SqlUtil {
 	
 					String temp = newsql.toString().trim().toLowerCase();
 	
-					if (temp.endsWith("where") || temp.endsWith("and") || temp.endsWith("or") || temp.endsWith("("))
+					if (temp.endsWith("where") || temp.endsWith("and") || temp.endsWith("or") || temp.endsWith("(")) {
 						newsql.append(" 1=1 ");
+					}
 				}
 			}
 		}
-		m.appendTail(newsql);
-		// System.out.println(newsql.toString());
+		m.appendTail(newsql); 
 		//replace simple
 		String rtnsql = newsql.toString();
 		if(param!=null) {
@@ -139,21 +145,21 @@ public class SqlUtil {
 				}			
 			}
 		}
-		
 		//rtnsql = rtnsql.replaceAll("\\{[a-zA-Z0-9=:_-]*\\}", "1=1");
 		return rtnsql;
-		
 	}
 	
 	public static String toStaticSQL(String sql, Map<String,?> params) {
-		if(params.isEmpty())
+		if(params.isEmpty()) {
 			return sql;
+		}
 		for(String key: params.keySet()) {
 			Object v = params.get(key);
-			if(v instanceof Number)
+			if(v instanceof Number) {
 				sql=sql.replace(":"+key+" ", v+" ");
-			else
-			    sql=sql.replace(":"+key+" ", "'"+v+"' ");
+			} else {
+				sql=sql.replace(":"+key+" ", "'"+v+"' ");
+			}
 		}
 		return sql;
 	}

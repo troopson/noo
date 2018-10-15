@@ -38,12 +38,14 @@ public final class JsonObjectResolver implements HandlerMethodArgumentResolver {
 	    if(!HttpMethod.GET.matches(method) && !HttpMethod.HEAD.matches(method)) {
               
              String jsonBody = S.readAndCloseInputStream(servletRequest.getInputStream(), "UTF-8"); 
-             if(S.isNotBlank(jsonBody))
-                result = new JsonObject(jsonBody);
+             if(S.isNotBlank(jsonBody)) {
+				result = new JsonObject(jsonBody);
+			}
 			 
 		 }
-		 if(result==null)
-			 result = new JsonObject();
+		 if(result==null) {
+			result = new JsonObject();
+		}
 		
 		for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
 			if (entry.getValue().length > 0) {

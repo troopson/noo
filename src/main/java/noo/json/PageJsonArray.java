@@ -64,10 +64,12 @@ public class PageJsonArray extends JsonArray {
 		return jo;
 	}
 
+	@Override
 	public String encode() {
 		return this.toJsonObject().encode();
 	}
 	
+	@Override
 	public Object convertToJson() {
 		Map<String,Object> jo = new HashMap<>();
 		jo.put("content", this.list);
@@ -85,6 +87,7 @@ public class PageJsonArray extends JsonArray {
 	 *
 	 * @return the buffer encoding.
 	 */
+	@Override
 	public byte[] toBuffer() {
 		return this.toJsonObject().toBuffer();
 	}
@@ -94,6 +97,7 @@ public class PageJsonArray extends JsonArray {
 	 *
 	 * @return the string encoding
 	 */
+	@Override
 	public String encodePrettily() {
 		return this.toJsonObject().encodePrettily();
 	}
@@ -103,7 +107,7 @@ public class PageJsonArray extends JsonArray {
 	 *
 	 * @return a copy
 	 */
-
+	@Override
 	public JsonArray copy() {
 		List<Object> copiedList = new ArrayList<>(this.list.size());
 		for (Object val : list) {

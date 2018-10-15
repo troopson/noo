@@ -26,15 +26,15 @@ public abstract class TDao {
 	@Autowired
 	private SQLHolder sqlholder;
 
-	private String _tableName=null;
+	private String table_name=null;
 	
 	public String tableName() {
-		if(this._tableName==null) {
+		if(this.table_name==null) {
 			String s = this.getClass().getSimpleName();
 			s = s.replaceAll("(?i)_?DAO$", "");
-			this._tableName=  s;
+			this.table_name=  s;
 		}
-		return this._tableName;
+		return this.table_name;
 	}
 	
 	public String sqltext(String sqlid) {
@@ -54,8 +54,9 @@ public abstract class TDao {
 	
 	public JsonObject getWith(String where, Object[] params) {
 		JsonArray r = this.findBy(where, params);
-		if(r.isEmpty())
+		if(r.isEmpty()) {
 			return null;
+		}
 		return r.getJsonObject(0);
 	}
 	
@@ -141,8 +142,8 @@ public abstract class TDao {
     	return this.jdbc.qryByPage(sql, param, pageNo, pageSize);
     }    
     public PageJsonArray queryByPageNameParam(String sql, JsonObject param, int pageNo, int pageSize) {
-    	param.put(JdbcSvr.PageNo, pageNo);
-    	param.put(JdbcSvr.PageSize, pageSize);
+    	param.put(JdbcSvr.PAGE_NO, pageNo);
+    	param.put(JdbcSvr.PAGE_SIZE, pageSize);
     	return this.jdbc.qryByPage(sql, param);
     }
     public PageJsonArray queryByPage(String sql, JsonObject param) { 
@@ -161,10 +162,11 @@ public abstract class TDao {
     }
     public JsonObject queryOneRow(String sql, Object...param) {
     	JsonArray ja =this.jdbc.qry(sql, param);
-    	if(ja.isEmpty())
-    		return null;
-    	else
-    		return ja.getJsonObject(0);
+    	if(ja.isEmpty()) {
+			return null;
+		} else {
+			return ja.getJsonObject(0);
+		}
     }
     
     public String queryString(String sql,Object...p) {

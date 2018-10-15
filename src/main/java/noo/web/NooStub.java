@@ -56,14 +56,16 @@ public class NooStub {
 			Object o = SpringContext.getBean(beanName);
 			
 			Method m = ReflectionUtils.findMethod(o.getClass(), method, JsonObject.class);
-			if(m!=null)
-				return ReflectionUtils.invokeMethod(m, o, param);				
+			if(m!=null) {
+				return ReflectionUtils.invokeMethod(m, o, param);
+			}				
 			
 			m = ReflectionUtils.findMethod(o.getClass(), method, Map.class);
-			if(m!=null)
+			if(m!=null) {
 				return ReflectionUtils.invokeMethod(m, o, param.getMap());
-			else
+			} else {
 				throw new IlleagalParamException("没有找到"+beanName+"/"+method);
+			}
 
 		} catch (RuntimeException e) {
 			e.printStackTrace();

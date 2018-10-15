@@ -14,9 +14,9 @@ import noo.json.JsonObject;
 public interface SecuritySetting {
 
 	
-	public User loadUserByName(String username);
+	public AbstractUser loadUserByName(String username);
 	
-	public boolean checkUserPassword(User u, String requestPassword, HttpServletRequest req);	
+	public boolean checkUserPassword(AbstractUser u, String requestPassword, HttpServletRequest req);	
 	
 	public boolean isIgnore(String url);
 	
@@ -24,11 +24,11 @@ public interface SecuritySetting {
 	
 	public boolean isLogoutUrl(String url);
 	
-	public boolean canAccess(User uobj, String path);
+	public boolean canAccess(AbstractUser uobj, String path);
 	
-	public User fromJsonObject(JsonObject j);
+	public AbstractUser fromJsonObject(JsonObject j);
 	
-	default public void afterLoginSuccess(User uo, HttpServletRequest req) {
+	default public void afterLoginSuccess(AbstractUser uo, HttpServletRequest req) {
 		
 	}
 	

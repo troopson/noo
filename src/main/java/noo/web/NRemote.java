@@ -3,7 +3,11 @@
  */
 package noo.web;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
@@ -31,6 +35,11 @@ public class NRemote {
 	public static final String NOO_REMOTE_NAME="noo"; 
 	
 	public static final Logger log = LoggerFactory.getLogger(NRemote.class);
+	
+	private static final ExecutorService ES = new ThreadPoolExecutor(2, 60,
+            0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>(1024), new ThreadPoolExecutor.AbortPolicy());
+	
 	
 	@Resource
 	private RestTemplate rest;
@@ -79,16 +88,17 @@ public class NRemote {
 	
 	public void publishRemoteEvent(String sn,String name,JsonObject jsonobject) {
 		
-		Executors.newSingleThreadExecutor().execute(new Runnable(){
+		ES.execute(new Runnable(){
 
 			@Override
 			public void run() {
 				HttpEntity<MultiValueMap<String, String>>  m = buildHttpEntity(jsonobject);
 		        Boolean s = rest.postForObject(NRemote.this.makeNRemoteEventUrl(sn, name), m, Boolean.class);
-		        if(s)
-		            log.info("publish remote event OK!");
-		        else
-		        	log.info("publish remote event failed!");
+		        if(s) {
+					log.info("publish remote event OK!");
+				} else {
+					log.info("publish remote event failed!");
+				}
 			}
 			
 		});		

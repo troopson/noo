@@ -65,7 +65,7 @@ public class JsonArray implements Iterable<Object>, Serializable, IJson {
 	    this.list = list;
 	  }
 	
-	 
+	  @Override
 	  public Object convertToJson() {
 		  return this.list;
 	  }
@@ -583,8 +583,9 @@ public class JsonArray implements Iterable<Object>, Serializable, IJson {
 	  
 	  public void forEachJsonObject(Consumer<JsonObject> jo) {
 		  this.forEach(j->{
-			  if(j instanceof JsonObject) 
-				  jo.accept((JsonObject)j);
+			  if(j instanceof JsonObject) {
+				jo.accept((JsonObject)j);
+			}
 		  });
 	  }
 	
@@ -614,10 +615,12 @@ public class JsonArray implements Iterable<Object>, Serializable, IJson {
 	
 	  @Override
 	  public boolean equals(Object o) {
-	    if (this == o)
-	      return true;
-	    if (o == null || getClass() != o.getClass())
-	      return false;
+	    if (this == o) {
+			return true;
+		}
+	    if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 	    return arrayEquals(list, o);
 	  }
 	
@@ -630,8 +633,9 @@ public class JsonArray implements Iterable<Object>, Serializable, IJson {
 	    } else {
 	      return false;
 	    }
-	    if (l1.size() != l2.size())
-	      return false;
+	    if (l1.size() != l2.size()) {
+			return false;
+		}
 	    Iterator<?> iter = l2.iterator();
 	    for (Object entry : l1) {
 	      Object other = iter.next();

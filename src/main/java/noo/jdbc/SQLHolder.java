@@ -27,18 +27,21 @@ public class SQLHolder {
 	 
 	
 	public String getSQL(String key) {
-		if(!this.loaded)
+		if(!this.loaded) {
 			this.load();
-		if(key!=null && !key.endsWith(".sql"))
+		}
+		if(key!=null && !key.endsWith(".sql")) {
 			key=key+".sql";
+		}
 		return sqls.get(key);
 	}
 	
 	
 	public synchronized void load() {
 		
-		if(loaded)
+		if(loaded) {
 			return;
+		}
 		
 		loaded = true;
 		

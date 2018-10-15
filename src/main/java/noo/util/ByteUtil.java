@@ -187,27 +187,40 @@ public class ByteUtil {
     
     
     public static boolean equals(byte[] a, byte[] b){
-    	if(a==b) return true;
-    	if((a==null && b!=null) || (a!=null && b==null)) return false;
-    	if(a.length!=b.length) return false;
+    	if(a==b) {
+			return true;
+		}
+    	if((a==null && b!=null) || (a!=null && b==null)) {
+			return false;
+		}
+    	if(a.length!=b.length) {
+			return false;
+		}
     	for(int i=0;i<a.length;i++){
-    		if(a[i]!=b[i]) 
-    			return false;
+    		if(a[i]!=b[i]) {
+				return false;
+			}
     	}
     	return true;
     }
     
     
     public static byte[] join(byte[] a,byte[] b){
-    	if(a==null) return b;
-    	if(b==null) return a;
+    	if(a==null) {
+			return b;
+		}
+    	if(b==null) {
+			return a;
+		}
     	int al=a.length;
     	int bl=b.length;
     	byte[] c=new byte[al+bl];
-    	for(int i=0; i<al;i++)
-    		c[i]=a[i];
-    	for(int i=0;i<bl;i++)
-    		c[al+i]=b[i];
+    	for(int i=0; i<al;i++) {
+			c[i]=a[i];
+		}
+    	for(int i=0;i<bl;i++) {
+			c[al+i]=b[i];
+		}
     	return c;    	
     }
  

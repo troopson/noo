@@ -10,12 +10,12 @@ package noo.exception;
 public class ExpCode {
 	
 	
-	public static final String Authenticat ="405";
+	public static final String AUTHENTICATION ="405";
 	
-	public static final String Authrize ="401";
+	public static final String AUTHORIZE ="401";
 	
-	public static final String SessionTimeout ="408"; 
+	public static final String SESSION_TIMEOUT ="408"; 
 
-	public static final String Duplicate ="444";
+	public static final String DUPLICATE ="444";
 
 }

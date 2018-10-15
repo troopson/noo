@@ -47,8 +47,9 @@ public class BigDceimalUtil {
 		BigDecimal s=new BigDecimal(0);
 		for(Map<String,Object> m: l){
 			Object o=m.get(field);
-			if(o==null)
+			if(o==null) {
 				continue;
+			}
 			try{
 				BigDecimal d=new BigDecimal(o.toString());
 				s=s.add(d);

@@ -43,8 +43,9 @@ public final class Event {
 	private Object result;
 	
 	public Event(String name, Object target){
-		if(S.isBlank(name) || target==null)
+		if(S.isBlank(name) || target==null) {
 			throw new NullPointerException();
+		}
 		
 		this.name=name;
 		this.target=target; 
@@ -63,22 +64,26 @@ public final class Event {
 	}
 	
 	public Object getParam(String key) {
-		if(params==null || S.isBlank(key))
+		if(params==null || S.isBlank(key)) {
 			return null;
+		}
 		return params.getValue(key);
 	}
 
 	public void setParams(String key, Object param) {
-		if(S.isBlank(key))
+		if(S.isBlank(key)) {
 			return;
+		}
 			
-		if(this.params==null)
+		if(this.params==null) {
 			this.params= new JsonObject();
+		}
 		
-		if(param==null)
+		if(param==null) {
 			this.params.remove(key);
-		else
+		}else {
 			this.params .put(key, param);
+		}
 	}
 
 	public Object getResult() {

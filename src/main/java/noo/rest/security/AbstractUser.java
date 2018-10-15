@@ -9,7 +9,7 @@ import noo.json.JsonObject;
  * @author qujianjun   troopson@163.com
  * 2018年8月23日 
  */
-public abstract class User {
+public abstract class AbstractUser {
 	
 	private String token;
 	

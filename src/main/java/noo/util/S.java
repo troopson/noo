@@ -37,8 +37,9 @@ public class S {
 
 	public static String getString(Map<String, ?> row, String key) {
 		Object o = row.get(key);
-		if (o == null)
+		if (o == null) {
 			return null;
+		}
 		return o.toString();
 	}
 
@@ -69,26 +70,30 @@ public class S {
 	}
 
 	public static Date toDate(String yyyyMMdd) {
-		if (yyyyMMdd == null || yyyyMMdd.length() == 0)
+		if (yyyyMMdd == null || yyyyMMdd.length() == 0) {
 			return null;
+		}
 		return java.sql.Date.valueOf(yyyyMMdd.trim());
 	}
 
 	public static Date max(Date date1, Date date2) {
-		if (date1 == null)
+		if (date1 == null) {
 			return date2;
-		if (date2 == null)
+		}
+		if (date2 == null) {
 			return date1;
+		}
 		return (date1.getTime() > date2.getTime()) ? date1 : date2;
 	}
 
 	public static int dayGap(Date date1, Date date2) {
 		long diffmillis = date1.getTime() - date2.getTime();
 		long between_days = diffmillis / (1000 * 3600 * 24);
-		if (diffmillis > 0)
+		if (diffmillis > 0) {
 			return Integer.parseInt(String.valueOf(between_days)) + 1;
-		else
+		}else {
 			return Integer.parseInt(String.valueOf(between_days));
+		}
 	}
 
 	public static boolean isNotBlank(String s) {
@@ -96,10 +101,11 @@ public class S {
 	}
 
 	public static boolean isBlank(String s) {
-		if (s == null || s.length() == 0)
+		if (s == null || s.length() == 0) {
 			return true;
-		else
+		}else {
 			return false;
+		}
 	}
 
 	public static Long getLong(Map<String, ?> m, String key) {
@@ -116,8 +122,9 @@ public class S {
 	
 	public static Set<String> split(String s, String splitor){
 		Set<String> r = new HashSet<>();
-		if(S.isBlank(s))
+		if(S.isBlank(s)) {
 			return null;
+		}
 		String[] ss = s.split(splitor);
 		for(String a: ss){
 			r.add(a);
@@ -134,35 +141,42 @@ public class S {
 	public static String readAndCloseInputStream(InputStream is, String charset) throws IOException {
 		DataInputStream dis = null;
 		BufferedReader br = null;
-		if (charset == null)
+		if (charset == null) {
 			charset = "UTF-8";
+		}
 		try {
 			StringBuilder sb = new StringBuilder();
 			dis = new DataInputStream(is);
 			br = new BufferedReader(new InputStreamReader(dis, charset));
 			String record = null;
-			if ((record = br.readLine()) != null)
+			if ((record = br.readLine()) != null) {
 				sb.append(record);
+			}
 
-			while ((record = br.readLine()) != null)
+			while ((record = br.readLine()) != null) {
 				sb.append(record).append("\n\r");
+			}
 
 			return sb.toString();
 		} catch (UnsupportedEncodingException e) {
 			return null;
 		} finally {
-			if (is != null)
+			if (is != null) {
 				is.close();
-			if (dis != null)
+			}
+			if (dis != null) {
 				dis.close();
-			if (br != null)
+			}
+			if (br != null) {
 				br.close();
+			}
 		}
 	}
 
 	public static String readFile(File f, String charset) throws IOException {
-		if (f == null || !f.isFile())
+		if (f == null || !f.isFile()) {
 			return null;
+		}
 
 		FileInputStream is = new FileInputStream(f);
 		return readAndCloseInputStream(is, charset);
@@ -179,16 +193,18 @@ public class S {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			if(os!=null)
+			if(os!=null) {
 				try {
 				os.close();
 				} catch (IOException e) {
 				}
-			if (writer != null)
+			}
+			if (writer != null) {
 				try {
 					writer.close();
 				} catch (IOException e) {
 				}
+			}
 		}
 	}
 	
@@ -201,12 +217,13 @@ public class S {
 	}
 	
 	//---------------------------------------------------
-	
+	private static Pattern chinessPattern = Pattern.compile("[\u4e00-\u9fa5]");
 	public static boolean isContainChinese(String str) {
-		if (isBlank(str))
+		if (isBlank(str)) {
 			return false;
-		Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
-		Matcher m = p.matcher(str);
+		}
+		
+		Matcher m = chinessPattern.matcher(str);
 		if (m.find()) {
 			return true;
 		}
@@ -214,8 +231,9 @@ public class S {
 	}
 	
 	public static boolean containChar(String str, String regx){
-		if (isBlank(str))
+		if (isBlank(str)) {
 			return false;
+		}
 		Pattern p = Pattern.compile("["+regx+"]");
 		Matcher m = p.matcher(str);
 		if (m.find()) {
@@ -228,30 +246,35 @@ public class S {
 	
 
 	public static boolean equals(String a, String b) {
-		if (a == null && b == null)
+		if (a == null && b == null) {
 			return true;
-		if (a == null && b != null)
+		}
+		if (a == null && b != null) {
 			return false;
+		}
 		return a.equals(b);
 	}
 
 	public static boolean equalsIgnoreCase(String a, String b) {
-		if (a == null && b == null)
+		if (a == null && b == null) {
 			return true;
-		if (a == null && b != null)
+		}
+		if (a == null && b != null) {
 			return false;
+		}
 		return a.equalsIgnoreCase(b);
 	}
 
 
 	public static String insert(String src, int pos, String clause) {
-		if (isBlank(clause))
+		if (isBlank(clause)) {
 			return src;
-		if (src.length() < pos)
+		}
+		if (src.length() < pos) {
 			return src + clause;
-		else if (pos < 0)
+		}else if (pos < 0) {
 			return clause + src;
-		else {
+	    }else {
 			return src.substring(0, pos) + clause + src.substring(pos);
 		}
 
@@ -263,8 +286,9 @@ public class S {
 	 * @return
 	 */
 	public static String reasonClean(String s) {
-		if (s == null || s.length() == 0)
+		if (s == null || s.length() == 0) {
 			return null;
+		}
 		return s.trim().replaceAll("\\s", " ").replaceAll("\\s{2,}", " ");
 	}
 
@@ -272,8 +296,9 @@ public class S {
 	 * 清除空格换行字符和注释
 	 */
 	public static String clearNote(String s) {
-		if (isBlank(s))
+		if (isBlank(s)) {
 			return s;
+		}
 		return s.replaceAll("\r|\n", " ").replaceAll("\\s{2,}|/\\*([^/*])*\\*/", " ").trim();
 	}
 
@@ -283,10 +308,12 @@ public class S {
 	 * @return
 	 */
 	public static String toHtmlQuote(String s) {
-		if (s == null || s.length() == 0)
+		if (s == null || s.length() == 0) {
 			return s;
-		if (s.indexOf("\"") != -1)
+		}
+		if (s.indexOf("\"") != -1) {
 			return s.replaceAll("\"", "&#34;");
+		}
 		return s;
 
 	}
@@ -297,15 +324,17 @@ public class S {
 	 * @return
 	 */
 	public static String join(Object[] o, char token) {
-		if (o == null || o.length == 0)
+		if (o == null || o.length == 0) {
 			return "";
+		}
 		StringBuilder sb = null;
 		for (Object obj : o) {
-			if (obj == null || "".equals(obj))
+			if (obj == null || "".equals(obj)) {
 				continue;
-			if (sb == null)
+			}
+			if (sb == null) {
 				sb = new StringBuilder(obj.toString());
-			else {
+			}else {
 				sb.append(token).append(obj.toString());
 			}
 		}
@@ -318,17 +347,20 @@ public class S {
 	 * @return
 	 */
 	public static String joinString(String[] o, String token) {
-		if (o == null || o.length == 0)
+		if (o == null || o.length == 0) {
 			return "";
+		}
 		StringBuilder sb = null;
 		for (String obj : o) {
-			if (obj == null || "".equals(obj))
+			if (obj == null || "".equals(obj)) {
 				continue;
-			if (sb == null)
+			}
+			if (sb == null) {
 				sb = new StringBuilder(obj);
-			else {
-				if (token != null)
+			}else {
+				if (token != null) {
 					sb.append(token);
+				}
 				sb.append(obj);
 			}
 		}
@@ -342,20 +374,24 @@ public class S {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static String joinString(Collection o, String token) {
-		if (o == null || o.size() == 0)
+		if (o == null || o.size() == 0) {
 			return "";
+		}
 		StringBuilder sb = null;
 		for (Object one : o) {
-			if (one == null)
+			if (one == null) {
 				continue;
+			}
 			String obj = one.toString();
-			if ("".equals(obj))
+			if ("".equals(obj)) {
 				continue;
-			if (sb == null)
+			}
+			if (sb == null) {
 				sb = new StringBuilder(obj);
-			else {
-				if (token != null)
+			}else {
+				if (token != null) {
 					sb.append(token);
+				}
 				sb.append(obj);
 			}
 		}
@@ -374,22 +410,25 @@ public class S {
 			for (String one : s) {
 				if (isNotBlank(one)) {
 					String[] as = one.split(";");
-					for (String a : as)
+					for (String a : as) {
 						r.add(a);
+					}
 				}
 			}
 		}
 		if (!r.isEmpty()) {
 			StringBuilder sb = null;
 			for (String a : r) {
-				if (sb == null)
+				if (sb == null) {
 					sb = new StringBuilder(a);
-				else
+				}else {
 					sb.append(";").append(a);
+				}
 			}
 			return sb.toString();
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	/**
@@ -400,8 +439,9 @@ public class S {
 	 */
 	public static List<String> getList(String s) {
 
-		if (isBlank(s))
+		if (isBlank(s)) {
 			return null;
+		}
 
 		List<String> list = new ArrayList<String>();
 
@@ -422,18 +462,21 @@ public class S {
 	      *  
 	 */
 	public static Map<String, String> getMap(String s) {
-		if (isBlank(s))
+		if (isBlank(s)) {
 			return null;
+		}
 
 		Map<String, String> m = new HashMap<String, String>();
 
 		String[] v = s.split(";");
 		for (String item : v) {
-			if (isBlank(item))
+			if (isBlank(item)) {
 				continue;
+			}
 			String[] pair = item.split("=");
-			if (pair.length != 2)
+			if (pair.length != 2) {
 				return null;//直接返回null,在接收处抛出异常
+			}
 			String cKey = pair[0].trim();
 			String cValue = pair[1].trim();
 			m.put(cKey, cValue);
@@ -567,10 +610,9 @@ public class S {
 		return (null == pageStr || "".equals(pageStr)) ? 1 : Integer.parseInt(pageStr);
 	}
 	
-	public static String replaceBlank(String str){
-		
-	   Pattern p = Pattern.compile("\\s*|\t|\r|\n");
-	   Matcher m = p.matcher(str);
+	public static Pattern BLANK_PATTERN = Pattern.compile("\\s*|\t|\r|\n");
+	public static String replaceBlank(String str){ 
+	   Matcher m = BLANK_PATTERN.matcher(str);
 	   String after = m.replaceAll("");
 	   return after;
 	   
@@ -597,8 +639,9 @@ public class S {
 				}
 				for (int j = 0; j < b.length; j++) {
 					int k = b[j];
-					if (k < 0)
+					if (k < 0) {
 						k += 256;
+					}
 					sb.append("%" + Integer.toHexString(k).toUpperCase());
 				}
 			}

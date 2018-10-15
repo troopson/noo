@@ -30,8 +30,8 @@ import java.util.TimeZone;
 * 
 */
 public class D {
-	public static final String DateTimeFmt = "yyyy-MM-dd HH:mm:ss";
-	public static final String DateFmt = "yyyy-MM-dd";
+	public static final String DATE_TIME_FMT = "yyyy-MM-dd HH:mm:ss";
+	public static final String DATE_FMT = "yyyy-MM-dd";
 
 	public static Date toDate(String dateStr) {
 		return toDate(dateStr, null);
@@ -43,25 +43,28 @@ public class D {
 	
 		
 	public static Date toTimeZoneDate(String dateStr,String timezone) {
-		if(S.isBlank(timezone))
+		if(S.isBlank(timezone)) {
 			return toDate(dateStr, null);
+		}
 		TimeZone t= TimeZone.getTimeZone(timezone);
 		return toDate(dateStr, t);
 	}
 	
 	public static Date toDate(String dateStr,TimeZone timezone) {
-		if (dateStr.length() == 10)
+		if (dateStr.length() == 10) {
 			dateStr = dateStr + " 00:00:00";
+		}
 		
-		return toDate(dateStr, timezone, DateTimeFmt);
+		return toDate(dateStr, timezone, DATE_TIME_FMT);
 	}
 	
 	public static Date toDate(String dateStr,TimeZone timezone, String fmt) {
 		try {
 			if (!S.isBlank(dateStr)) {				
 				SimpleDateFormat sdf = new SimpleDateFormat(fmt);
-				if(timezone!=null)
+				if(timezone!=null) {
 					sdf.setTimeZone(timezone);
+				}
 				Date date = sdf.parse(dateStr);
 				return date;
 			}
@@ -75,18 +78,19 @@ public class D {
 	
 	public static String toTimeZone(Date date,String timezone,String Fmt){
 		SimpleDateFormat sdf = new SimpleDateFormat(Fmt);
-		if(S.isNotBlank(timezone))
+		if(S.isNotBlank(timezone)) {
 			sdf.setTimeZone(TimeZone.getTimeZone(timezone));
+		}
 		return sdf.format(date);
 	}
 	
 	public static String toTimeZone(Date date,String timezone){
-		return toTimeZone(date,timezone,DateTimeFmt);		
+		return toTimeZone(date,timezone,DATE_TIME_FMT);		
 	}
 
 	public static String today() {
 		LocalDate today = LocalDate.now();
-		return today.format(DateTimeFormatter.ofPattern(DateFmt));
+		return today.format(DateTimeFormatter.ofPattern(DATE_FMT));
 	}
 	
 	public static Date todayStart() {
@@ -103,7 +107,7 @@ public class D {
 	
 	public static String now(){
 		LocalDateTime today = LocalDateTime.now();
-		return today.format(DateTimeFormatter.ofPattern(DateTimeFmt));
+		return today.format(DateTimeFormatter.ofPattern(DATE_TIME_FMT));
 	}
 
 	public static int diff(Date destday, Date nowday) {
@@ -117,8 +121,9 @@ public class D {
 	}
 	
 	public static boolean is1EarlyThan2(Date d1,Date d2){
-		if(d1.getTime()<d2.getTime())
+		if(d1.getTime()<d2.getTime()) {
 			return true;
+		}
 		return false;
 	}
 
@@ -152,10 +157,11 @@ public class D {
 	public static Date offsetDay(Date d, int i, String timezone){		
 		ZoneId zid = S.isBlank(timezone)?ZoneId.systemDefault():ZoneId.of(timezone);
 		LocalDateTime  ld = LocalDateTime.ofInstant(d.toInstant(),zid);
-		if(i>0)
+		if(i>0) {
 			ld=ld.plusDays(i);
-		else
+		} else {
 			ld=ld.minusDays(-1*i);
+		}
 		return Date.from(ld.atZone(zid).toInstant());
 		
 	}
@@ -168,8 +174,9 @@ public class D {
 	
 	private static Date translation(Date d, int field, int value, String timezone){
 		Calendar c = Calendar.getInstance();
-		if(S.isNotBlank(timezone))
+		if(S.isNotBlank(timezone)) {
 			c.setTimeZone(TimeZone.getTimeZone(timezone));
+		}
 		c.setTime(d);
 		c.add(field, value);
 		return c.getTime();
@@ -197,17 +204,18 @@ public class D {
 	//=============================================================
 	
 	public static String strD(Date d){
-		SimpleDateFormat df = new SimpleDateFormat(DateFmt);
+		SimpleDateFormat df = new SimpleDateFormat(DATE_FMT);
 		return df.format(d);
 	}
 	public static String strDT(Date d){
-		SimpleDateFormat sdf = new SimpleDateFormat(DateTimeFmt);
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_TIME_FMT);
 		return sdf.format(d);
 	}
 
 	public static String format(Date d, String patten) {
-		if(d==null)
+		if(d==null) {
 			return "";
+		}
 		Calendar c = Calendar.getInstance();
 		c.setTime(d);
 		return new SimpleDateFormat(patten).format(c.getTime());
@@ -300,7 +308,7 @@ public class D {
 		ca.add(Calendar.MINUTE, -10);
 		System.out.println("after:"+ca.get(Calendar.MINUTE));
 		Date d2=new Date(c.getTimeInMillis());
-		SimpleDateFormat sdf = new SimpleDateFormat(DateTimeFmt);
+		SimpleDateFormat sdf = new SimpleDateFormat(DATE_TIME_FMT);
 		
 		System.out.println("add 10 minutes:"+D.strDT(d2)+"   "+sdf.format(d2));
 		System.out.println(D.strDT(D.translation(now, Calendar.MINUTE, 10,null)));

@@ -22,6 +22,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsProcessor;
 import org.springframework.web.cors.DefaultCorsProcessor;
 
+import noo.exception.AuthenticateException;
 import noo.exception.BusinessException;
 import noo.exception.SessionTimeoutException;
 import noo.json.JsonObject;
@@ -97,7 +98,7 @@ public class SecurityFilter implements Filter {
 				return;
 			}else {
 			
-				User u = this.retrieveUser(req, resp);
+				AbstractUser u = this.retrieveUser(req, resp);
 				if(u==null) {
 					resp.setStatus(401);
 					resp.getWriter().print(new SessionTimeoutException().toString());
@@ -120,7 +121,7 @@ public class SecurityFilter implements Filter {
 	}
 
 	//从request的header中，读取Authorization信息，然后从redis中读取user信息，生成user对象
-	private User retrieveUser(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	private AbstractUser retrieveUser(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		String token = req.getHeader(HEADER_KEY);
 		if(S.isBlank(token)) { 
 			return null;
@@ -131,7 +132,7 @@ public class SecurityFilter implements Filter {
 			return null;
 		}
 		
-		User u = us.fromJsonObject(new JsonObject(s));
+		AbstractUser u = us.fromJsonObject(new JsonObject(s));
 		u.setToken(token);
 		return u;
 	}
@@ -149,13 +150,13 @@ public class SecurityFilter implements Filter {
 		String u = request.getParameter(this.username);
 		String p = request.getParameter(this.password);
 		if(S.isBlank(u)) {
-			this.writeResponse(resp, new BusinessException("400","必须有用户名！").toString());   
+			this.writeResponse(resp, new AuthenticateException("必须有用户名！").toString());   
 			return;
 		}
 		
-		User uobj = us.loadUserByName(u);
+		AbstractUser uobj = us.loadUserByName(u);
 		if(uobj ==null) {
-			this.writeResponse(resp, new BusinessException("400","用户不存在！").toString());  
+			this.writeResponse(resp, new AuthenticateException("用户不存在！").toString());  
 			return;
 		}
 		
@@ -178,11 +179,11 @@ public class SecurityFilter implements Filter {
 			resp.getWriter().print(respJson.encode());
 			
 		}else { 
-			this.writeResponse(resp, "-1");  
+			this.writeResponse(resp, new AuthenticateException("用户名或密码错误！").toString());  
 		}
 	}
 	
-	public static void updateUser(User u,StringRedisTemplate redis) {
+	public static void updateUser(AbstractUser u,StringRedisTemplate redis) {
 		String ustring = u.toJsonObject().encode(); 
 		String authkey =  u.getToken(); 
 		redis.opsForValue().set(SecurityFilter.REDIS_KEY+":"+authkey, ustring, u.getSessionTimeoutMinutes(), TimeUnit.MINUTES);

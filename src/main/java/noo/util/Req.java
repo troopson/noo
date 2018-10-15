@@ -44,8 +44,9 @@ public class Req {
 		 
 		if(S.isNotBlank(require)) {
 			String[] required = require.split(",");
-			if(!j.containsAll(required))
-			   throw new NullException(require);
+			if(!j.containsAll(required)) {
+				throw new NullException(require);
+			}
 		}
 		
 		return j;
@@ -76,11 +77,12 @@ public class Req {
 		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
 			ip = request.getRemoteAddr();
 		}
-		if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip))
+		if ("127.0.0.1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) {
 			try {
 				ip = InetAddress.getLocalHost().getHostAddress();
 			} catch (UnknownHostException e) {
 			}
+		}
 		return ip;
 	}
 	

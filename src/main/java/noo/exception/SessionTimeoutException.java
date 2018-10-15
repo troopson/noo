@@ -14,7 +14,7 @@ public class SessionTimeoutException extends BaseException {
 
 
 	public SessionTimeoutException() {
-		super(ExpCode.SessionTimeout, "Session超时");
+		super(ExpCode.SESSION_TIMEOUT, "Session超时");
 	}
   
 	private static final long serialVersionUID = 1L;

@@ -105,10 +105,12 @@ public class MD5 {
     //====================================================================================//
    
     public static boolean isMatch(String s,String encoded){
-    	if(S.isBlank(s) && S.isBlank(encoded))
-    		return true;
-    	if(s==null)
-    		return false;
+    	if(S.isBlank(s) && S.isBlank(encoded)) {
+			return true;
+		}
+    	if(s==null) {
+			return false;
+		}
     	String ecodeS=MD5.encode(s);
     	return ecodeS.equals(encoded);    	
     }

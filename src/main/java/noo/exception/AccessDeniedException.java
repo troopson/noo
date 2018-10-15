@@ -16,7 +16,7 @@ public class AccessDeniedException extends BaseException {
 	private static final long serialVersionUID = 1L;
 
 	public AccessDeniedException(String msg) {
-		super(ExpCode.Authrize, msg);
+		super(ExpCode.AUTHORIZE, msg);
 	}
 
 }

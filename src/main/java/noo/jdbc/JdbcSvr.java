@@ -51,7 +51,7 @@ public class JdbcSvr {
 
 	public static final Logger log = LoggerFactory.getLogger(JdbcSvr.class);
 
-	public static final String PrimayKey = "uuid";
+	public static final String PRIMARY_KEY = "uuid";
 
 	// ====================================================
 	// SPRING JDBC模板接口
@@ -104,8 +104,9 @@ public class JdbcSvr {
 		for (int i = 0; i < size; i++) {
 			String key = keys[i].trim();
 			Object v = vs.getValue(key);
-			if (v == null && PrimayKey.equalsIgnoreCase(key))
+			if (v == null && PRIMARY_KEY.equalsIgnoreCase(key)) {
 				v = C.uid();
+			}
 			vals[i] = v;
 		}
 		return this.insertRow(false, table, keys, vals);
@@ -152,17 +153,19 @@ public class JdbcSvr {
 
 	private StringBuilder buildInsertSQL(boolean replace, String table, String[] fields, Object[] values) {
 		StringBuilder sql = null;
-		if (replace)
+		if (replace) {
 			sql = new StringBuilder("replace into ");
-		else
+		} else {
 			sql = new StringBuilder("insert into ");
+		}
 
 		sql.append(table).append(" (");
 
 		StringBuilder valpiece = new StringBuilder(" values(");
 		int length = fields.length, vallength = values.length;
-		if (length != vallength)
+		if (length != vallength) {
 			throw new IllegalArgumentException("字段数量和参数数量不一致！");
+		}
 
 		for (int i = 0; i < length; i++) {
 			String afield = fields[i];
@@ -195,16 +198,18 @@ public class JdbcSvr {
 
 		for (int j = 0; j < fieldslength; j++) {
 			String afield = setFields[j];
-			if (j != 0)
+			if (j != 0) {
 				sql.append(",");
+			}
 			sql.append(afield).append("= ?");
 		}
 		sql.append(" where ");
 
 		for (int i = 0; i < condlength; i++) {
 			String afield = conditionFields[i];
-			if (i != 0)
+			if (i != 0) {
 				sql.append(" and ");
+			}
 			sql.append(afield).append("=?");
 		}
 
@@ -225,8 +230,9 @@ public class JdbcSvr {
 
 		for (int i = 0; i < condlength; i++) {
 			String afield = condition[i];
-			if (i != 0)
+			if (i != 0) {
 				sql.append(" and ");
+			}
 			sql.append(afield).append("=?");
 		}
 		log.debug(sql.toString() + "  " + C.printArray(params));
@@ -242,8 +248,9 @@ public class JdbcSvr {
 	public JsonObject get(String table, String pkfield, Object uuid) {
 		List l = this.getJdbcTemplate().queryForList("select * from " + table + " where " + pkfield + "=?",
 				new Object[] { uuid });
-		if (l == null || l.isEmpty())
+		if (l == null || l.isEmpty()) {
 			return null;
+		}
 		return new JsonObject((Map<String, Object>) l.get(0));
 	}
 
@@ -262,11 +269,13 @@ public class JdbcSvr {
 
 	@SuppressWarnings("unchecked")
 	public int[] batchInsert(String table, String fields, List<Map> params) {
-		if (S.isBlank(fields))
+		if (S.isBlank(fields)) {
 			throw new NullPointerException();
+		}
 
-		if (params == null || params.isEmpty())
+		if (params == null || params.isEmpty()) {
 			return null;
+		}
 
 		List<Object[]> pv = new ArrayList<>();
 		String[] fs = S.splitWithComma(fields);
@@ -279,8 +288,9 @@ public class JdbcSvr {
 			for (int i = 0; i < length; i++) {
 				String key = fs[i].trim();
 				Object value = row.get(key);
-				if (value == null && PrimayKey.equalsIgnoreCase(key))
+				if (value == null && PRIMARY_KEY.equalsIgnoreCase(key)) {
 					value = C.uid();
+				}
 
 				onerow[i] = value;
 			}
@@ -331,10 +341,11 @@ public class JdbcSvr {
 	}
 
 	public JsonArray qry(String sql, Object... p) {
-		if (p == null || p.length == 0)
+		if (p == null || p.length == 0) {
 			return new JsonArray(this.getJdbcTemplate().query(sql, new MyColumnMapRowMapper()));
-		else
+		} else {
 			return new JsonArray(this.getJdbcTemplate().query(sql, p, new MyColumnMapRowMapper()));
+		}
 	}
 
 	public JsonArray qry(String sql, JsonObject param) {		
@@ -346,8 +357,9 @@ public class JdbcSvr {
 	public JsonObject qryOneRow(String sql, JsonObject param) {
 
 		JsonArray lm = this.qry(sql, param);
-		if (lm == null || lm.isEmpty())
+		if (lm == null || lm.isEmpty()) {
 			return null;
+		}
 		return lm.getJsonObject(0);
 	}
 
@@ -362,16 +374,18 @@ public class JdbcSvr {
 	public String qryString(String sql, JsonObject param) {
 
 		JsonObject m = this.qryOneRow(sql, param);
-		if (m == null || m.isEmpty())
+		if (m == null || m.isEmpty()) {
 			return null;
+		}
 		return (String)m.iterator().next().getValue();
 	}
 
 	public Number qryNumber(String sql, JsonObject param) {
 
 		JsonObject m = this.qryOneRow(sql, param);
-		if (m == null || m.isEmpty())
+		if (m == null || m.isEmpty()) {
 			return 0;
+		}
 		return (Number) m.iterator().next().getValue();
 	}
 
@@ -386,36 +400,54 @@ public class JdbcSvr {
 	public boolean hasRow(String sql, Object... p) {
 
 		List l = this.getJdbcTemplate().queryForList(sql, p);
-		if (l == null || l.isEmpty())
+		if (l == null || l.isEmpty()) {
 			return false;
+		}
 		return true;
 	}
 
 	// ==============page===支持两种变量名称的获取==========================
     
-	public static final String PageNo = "pageno";
-	public static final String PageSize = "pagesize";
+	public static final String PAGE_NO = "pageno";
+	public static final String PAGE_SIZE = "pagesize";
 
-	public static final String Offset = "offset";
-	public static final String Limit = "limit";
+	public static final String OFFSET = "offset";
+	public static final String LIMIT = "limit";
+	
+	
+	public static int[] getPageSizePageNo(JsonObject param) {
+		Integer pageSize = param.getInteger(PAGE_SIZE);
+		if (pageSize==null) {
+			pageSize = param.getInteger(LIMIT);
+		}
+		if (pageSize == null) {
+			pageSize = 50;
+		}
+		
+		Integer pageNo = param.getInteger(PAGE_NO);
+		if (pageNo == null) {
+			Integer offset = param.getInteger(OFFSET);
+			if(offset!=null) {
+				pageNo = 1 + offset / pageSize;
+			}
+		}
+
+		if (pageNo == null || pageNo < 1 ) {
+			pageNo = 1;
+		}
+		
+		return new int[] {pageSize, pageNo};
+	}
+	
+	//==========================================================
+	 
 
 	public PageJsonArray qryByPage(String sql, JsonObject param) {
 
-		Integer pageSize = param.getInteger(PageSize);
-		if (pageSize==null)
-			pageSize = param.getInteger(Limit);
-		if (pageSize == null)
-			pageSize = 50;
-
-		Integer pageNo = param.getInteger(PageNo);
-		if (pageNo == null) {
-			Integer offset = param.getInteger(Offset);
-			if(offset!=null)
-			   pageNo = 1 + offset / pageSize;
-		}
-
-		if (pageNo == null || pageNo < 1 )
-			pageNo = 1;
+		int[] pageSizeNo = getPageSizePageNo(param);
+		
+		Integer pageSize = pageSizeNo[0]; 
+		Integer pageNo = pageSizeNo[1];
 
 		String newsql = SqlUtil.processParam(sql, param.getMap());
 		JdbcSvr.log.debug(newsql+"   "+param.encode());
@@ -438,8 +470,9 @@ public class JdbcSvr {
 	@SuppressWarnings("unchecked")
     String allField(String table) {
 		String t = table.toLowerCase();
-		if (tableInfo.containsKey(t))
+		if (tableInfo.containsKey(t)) {
 			return tableInfo.get(t);
+		}
 		final List<String> colname = new ArrayList<>();
 		this.getJdbcTemplate().query("select * from " + table + " where 1=2", new ResultSetExtractor() {
 			@Override
@@ -463,15 +496,17 @@ public class JdbcSvr {
 
 	String getSinglePK(String tableName) {
 		Set<String> s = getPkNames(tableName);
-		if(s==null || s.isEmpty())
+		if(s==null || s.isEmpty()) {
 			return null;
+		}
 		return s.iterator().next();
 	}
 	
 	Set<String> getPkNames(String tableName) {
 		final String lowerTable = tableName.toLowerCase();
-		if(tablepks.containsKey(lowerTable))
+		if(tablepks.containsKey(lowerTable)) {
 			return tablepks.get(lowerTable);
+		}
 		
 		Set<String> pks = this.getJdbcTemplate().execute(new ConnectionCallback<Set<String>>() {
 
@@ -482,8 +517,9 @@ public class JdbcSvr {
 					ResultSet rs = con.getMetaData().getPrimaryKeys(con.getCatalog(), null, lowerTable);
 					Set<String> pks = new HashSet<>();
 					while (rs.next()) {
-						if (pks == null)
+						if (pks == null) {
 							pks = new HashSet<String>();
+						}
 						String s = rs.getString("COLUMN_NAME");
 						pks.add(s);
 					}
@@ -494,8 +530,9 @@ public class JdbcSvr {
 			}
 
 		});
-		if(pks!=null)
+		if(pks!=null) {
 			tablepks.put(lowerTable, pks);
+		}
 		
 		return pks;
 	}
@@ -506,21 +543,25 @@ public class JdbcSvr {
 			String chnfields) {
 		if (S.isNotBlank(orderby) && !SqlUtil.isInjection(orderby)) {
 
-			if (orderby.indexOf("(") > 0)
+			if (orderby.indexOf("(") > 0) {
 				sql = sql + "order by " + orderby;
-			else
+			} else {
 				sql = sql + "order by " + SqlUtil.convertChn(tableAlias, orderby, chnfields);
+			}
 
-			if (S.isNotBlank(asc) && !SqlUtil.isInjection(asc))
+			if (S.isNotBlank(asc) && !SqlUtil.isInjection(asc)) {
 				sql = sql + " " + asc;
+			}
 		} else if (S.isNotBlank(defaultFiled)) {
-			if (defaultFiled.indexOf("(") > 0)
+			if (defaultFiled.indexOf("(") > 0) {
 				sql = sql + "order by " + defaultFiled;
-			else
+			} else {
 				sql = sql + "order by " + SqlUtil.convertChn(tableAlias, orderby, defaultFiled);
+			}
 
-			if (S.isNotBlank(asc) && !SqlUtil.isInjection(asc))
+			if (S.isNotBlank(asc) && !SqlUtil.isInjection(asc)) {
 				sql = sql + " " + asc;
+			}
 		}
 		return sql;
 	}

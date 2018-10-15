@@ -16,7 +16,7 @@ public class AuthenticateException extends BaseException {
 	private static final long serialVersionUID = 1L;
 
 	public AuthenticateException(String msg) {
-		super(ExpCode.Authenticat, msg);
+		super(ExpCode.AUTHENTICATION, msg);
 	}
 
 }

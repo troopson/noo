@@ -9,18 +9,18 @@ package noo.rest.security;
  */
 public final class AuthContext {
 
-	private static final ThreadLocal<User> local = new ThreadLocal<User>();
+	private static final ThreadLocal<AbstractUser> LOCAL = new ThreadLocal<AbstractUser>();
 	
-	public static void set(User u) {
-		local.set(u);
+	public static void set(AbstractUser u) {
+		LOCAL.set(u);
 	}
 	
-	public static User get() {
-		return local.get();
+	public static AbstractUser get() {
+		return LOCAL.get();
 	}
 	
 	public static void clear() {
-		local.remove();
+		LOCAL.remove();
 	}
 	
 	
