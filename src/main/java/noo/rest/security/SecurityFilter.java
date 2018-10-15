@@ -24,6 +24,7 @@ import org.springframework.web.cors.DefaultCorsProcessor;
 
 import noo.exception.AuthenticateException;
 import noo.exception.BusinessException;
+import noo.exception.ExpCode;
 import noo.exception.SessionTimeoutException;
 import noo.json.JsonObject;
 import noo.util.ID;
@@ -110,7 +111,7 @@ public class SecurityFilter implements Filter {
 					chain.doFilter(request, response);
 				}else { 
 					resp.setStatus(403);
-					this.writeResponse(resp, new BusinessException("403","access denied.").toString());   
+					this.writeResponse(resp, new BusinessException(ExpCode.AUTHORIZE,"没有权限访问！").toString());   
 				}
 				
 			}
