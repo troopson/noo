@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>统一登录服务</title>
+    <style type="text/css">
+    	body{
+    		font-family: arial;
+    		font-size:  12px;
+    		font-weight: 400; 
+    	}
+    	.title{
+
+    	}
+    	.item{
+    		padding:10px;
+    	}
+    	.item span{ 
+    		line-height: 26px;
+    		height: 41px; 
+    		width:20px;
+    	}
+    	.item input{ 
+    		line-height: 26px;
+    		height: 26px; 
+    		width: 180px;
+    		outline: none;
+    	}
+    	.item .submit{
+    		width: 80px;
+    		padding:5px; 
+    		font-family: arial;
+    		font-size:  12px;
+    	}
+
+    </style>
+</head>
+<body>
+  <div align="center" style="margin-top: 200px">
+	  <div align="center" style="background: lightgray; width: 400px; padding:20px">
+	  	<div align="center" class="title"><h3>统一认证平台</h3></div>
+	    <form id="loginForm" method="POST" action="{{submiturl}}">
+	        <div class="item">
+	           <span>用户：</span>
+	   	       <input placeholder="用户名" type="text" name="username"/>
+	   	    </div>
+	   	    <div class="item">
+	   	       <span>密码：</span>
+	   	       <input placeholder="密码"type="password" name ="password"/>
+	   	    </div>
+	        <input type="hidden" name="{{client_id_name}}" value="{{client_id}}"/>
+	   	    <input type="hidden" name="{{redirect_url_name}}" value="{{redirect_url}}"/>
+	        <div class="item">
+	        	<button class="submit">登录</button>
+	   	    </div>
+	    </form>
+	  </div>
+  </div>
+</body>
+</html>

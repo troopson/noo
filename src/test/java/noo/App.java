@@ -7,6 +7,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import noo.rest.security.processor.LogoutInterceptor;
+import noo.rest.security.processor.OAuth2Interceptor;
 
 /**
  * @author qujianjun   troopson@163.com
@@ -15,10 +20,21 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 @SpringBootApplication  
 @EnableEurekaClient
 @EnableDiscoveryClient
+@Configuration 
 public class App {
     public static void main(String[] args) {
         SpringApplication.run(App.class,args);
     }
+    
+    
+	
+	@Bean  
+	public OAuth2Interceptor oauth2Handler() {
+		OAuth2Interceptor  i = new OAuth2Interceptor();
+		i.setLoadAccessSecret(clientid->"ok");
+		return i;
+	}
+    
 }
 
  

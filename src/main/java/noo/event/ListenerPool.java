@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -49,14 +48,7 @@ public class ListenerPool implements CommandLineRunner{
 	
 	//异步
 	public static final void doEvent(String evnetName,Event e){
-		ES.equals(new Runnable(){
-			@Override
-			public void run() {
-				
-				callEvent(evnetName,e);
-			}
-			
-		});		
+		ES.execute(()->callEvent(evnetName,e));		
 	}
 	
 	public static final Object callEvent(String evnetName,Event e){

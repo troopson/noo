@@ -4,7 +4,9 @@
 package noo.rest.security;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -15,20 +17,16 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsProcessor;
 import org.springframework.web.cors.DefaultCorsProcessor;
 
-import noo.exception.AuthenticateException;
 import noo.exception.BusinessException;
 import noo.exception.ExpCode;
-import noo.exception.SessionTimeoutException;
-import noo.json.JsonObject;
-import noo.util.ID;
-import noo.util.S;
+import noo.rest.security.processor.RequestInterceptor;
+import noo.util.SpringContext;
 
 /**
  * @author qujianjun   troopson@163.com
@@ -38,21 +36,17 @@ import noo.util.S;
 
 public class SecurityFilter implements Filter {
   
-	
-	@Autowired
-	private SecuritySetting us;
-	
-	@Autowired
-	private StringRedisTemplate redis;
-	
-	public static final String REDIS_KEY ="noo:session";
-	
-	public static final String HEADER_KEY="Authorization";
 	 
-	public String username="username";
-	public String password="password";
+	private SecuritySetting us; 
+
+	private StringRedisTemplate redis;  
+	 
+	private UsualHandler usualprocess;
+	 
+	private List<RequestInterceptor> requestHandler;
+	 
 	
-	private CorsProcessor processor = new DefaultCorsProcessor();
+	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 	
 	private CorsConfiguration corsConfiguration = null;
 
@@ -73,7 +67,7 @@ public class SecurityFilter implements Filter {
 		HttpServletRequest req = (HttpServletRequest)request;
 		HttpServletResponse resp = (HttpServletResponse)response; 
 		
-		this.processor.processRequest(corsConfiguration, req, resp);
+		this.corsProcessor.processRequest(corsConfiguration, req, resp);
 		
 		String method = req.getMethod();
 		
@@ -90,127 +84,51 @@ public class SecurityFilter implements Filter {
 	    }
 		
 		try {	
-			if(us.isLoginUrl(requrl) && HttpMethod.POST.matches(method)) {
 			
-				this.doLogin(request, req, resp);
-				return;
-			}else if(us.isLogoutUrl(requrl)) {
-				this.doLogout(req, resp);
-				return;
-			}else {
-			
-				AbstractUser u = this.retrieveUser(req, resp);
-				if(u==null) {
-					resp.setStatus(401);
-					resp.getWriter().print(new SessionTimeoutException().toString());
-					return;
-				}
-				
-				if(us.canAccess(u, requrl)) {
-					AuthContext.set(u); 
-					chain.doFilter(request, response);
-				}else { 
-					resp.setStatus(403);
-					this.writeResponse(resp, new BusinessException(ExpCode.AUTHORIZE,"没有权限访问！").toString());   
-				}
-				
+			boolean handled = false;
+			List<RequestInterceptor> rh = this.getInterceptors();
+			for(RequestInterceptor h : rh) {
+				handled = h.process(requrl, req, resp);
+				if(handled)
+					break;
 			}
-		}finally {
-			AuthContext.clear();
-		}
-		
-	}
-
-	//从request的header中，读取Authorization信息，然后从redis中读取user信息，生成user对象
-	private AbstractUser retrieveUser(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		String token = req.getHeader(HEADER_KEY);
-		if(S.isBlank(token)) { 
-			return null;
-		}
-		
-		String s = (String)this.redis.opsForValue().get(REDIS_KEY+":"+token);
-		if(S.isBlank(s)) { 
-			return null;
-		}
-		
-		AbstractUser u = us.fromJsonObject(new JsonObject(s));
-		u.setToken(token);
-		return u;
-	}
-
-	private void doLogout(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		String authkey = req.getHeader(HEADER_KEY);
-		if(S.isNotBlank(authkey)) {
-			this.redis.delete(authkey); 
-		}
-		resp.addHeader(HEADER_KEY, "");
-		this.writeResponse(resp, "0");  
-	}
-
-	private void doLogin(ServletRequest request, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		String u = request.getParameter(this.username);
-		String p = request.getParameter(this.password);
-		if(S.isBlank(u)) {
-			this.writeResponse(resp, new AuthenticateException("必须有用户名！").toString());   
-			return;
-		}
-		
-		AbstractUser uobj = us.loadUserByName(u);
-		if(uobj ==null) {
-			this.writeResponse(resp, new AuthenticateException("用户不存在！").toString());  
-			return;
-		}
-		
-		if(us.checkUserPassword(uobj, p, req)) {
 			
-			String authkey =  ID.uuid();
-			uobj.setToken(authkey);
-			//Object ustring = us.toJsonObject(uobj).encode();
-			//String authkey =  ID.uuid(); 
-			//this.redis.opsForValue().set(REDIS_KEY+":"+authkey, ustring, 120L, TimeUnit.MINUTES);
-			updateUser(uobj,this.redis);
-			 
-			resp.setCharacterEncoding("UTF-8");
-			resp.setContentType("text/html;charset=utf-8");  
-			resp.addHeader(HEADER_KEY, authkey); 
-			
-			us.afterLoginSuccess(uobj, req); 
-			JsonObject respJson = uobj.toResponseJsonObject();
-			respJson.put(HEADER_KEY, authkey); 
-			resp.getWriter().print(respJson.encode());
-			
-		}else { 
-			this.writeResponse(resp, new AuthenticateException("用户名或密码错误！").toString());  
-		}
+			if(!handled) { 
+			    this.doUsualHandler(requrl, req, resp, chain); 
+			}
+		}catch(Throwable e){
+			e.printStackTrace();
+			resp.setStatus(403);
+			SecueHelper.writeResponse(resp, new BusinessException(ExpCode.AUTHORIZE,"没有权限访问！").toString());  
+		} 
+		
 	}
 	
-	public static void updateUser(AbstractUser u,StringRedisTemplate redis) {
-		String ustring = u.toJsonObject().encode(); 
-		String authkey =  u.getToken(); 
-		redis.opsForValue().set(SecurityFilter.REDIS_KEY+":"+authkey, ustring, u.getSessionTimeoutMinutes(), TimeUnit.MINUTES);
+	
+	private List<RequestInterceptor> getInterceptors(){
+		if(this.requestHandler==null) {
+			this.requestHandler = new ArrayList<>();
+			Map<String,RequestInterceptor> rh = SpringContext.getBeansOfType(RequestInterceptor.class);
+			if(rh !=null) { 
+				for(RequestInterceptor i : rh.values()) {
+					i.setSecuritySetting(this.us);
+					i.setRedis(this.redis);
+					this.requestHandler.add(i);
+				}
+			}
+		}
+		return this.requestHandler;
 	}
 	
-	private void writeResponse(HttpServletResponse resp,String msg) throws IOException {
-		resp.setCharacterEncoding("UTF-8");
-		resp.setContentType("text/html;charset=utf-8");  
-		resp.getWriter().print(msg);
-	}
+	private void doUsualHandler(String requrl, HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws Exception {
+		if(this.usualprocess == null)
+			this.usualprocess = new UsualHandler(this.us,this.redis);
+		
+		this.usualprocess.process(requrl, req, resp, chain);
 
-	public void setSecuritySetting(SecuritySetting us) {
-		this.us = us;
 	}
  
-	public void setRedis(StringRedisTemplate r) {
-		this.redis = r;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
+   
 
 	public CorsConfiguration getCorsConfiguration() {
 		return corsConfiguration;
@@ -219,6 +137,16 @@ public class SecurityFilter implements Filter {
 	public void setCorsConfiguration(CorsConfiguration corsConfiguration) {
 		this.corsConfiguration = corsConfiguration;
 	}
+
+	public void setSecuritySetting(SecuritySetting us) {
+		this.us = us;
+	}
+
+
+	public void setRedis(StringRedisTemplate redis) {
+		this.redis = redis;
+	}
+
 
 	@Override
 	public void destroy() {

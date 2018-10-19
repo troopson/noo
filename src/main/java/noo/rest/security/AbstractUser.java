@@ -13,7 +13,7 @@ public abstract class AbstractUser {
 	
 	private String token;
 	
-	void setToken(String s){
+	public void setToken(String s){
 		this.token = s;
 	}
 	

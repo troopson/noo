@@ -24,15 +24,17 @@ import noo.exception.BaseExceptionHandler;
 import noo.jdbc.JdbcSvr;
 import noo.jdbc.SQLHolder;
 import noo.json.JsonObjectResolver;
+import noo.rest.security.processor.LogoutInterceptor;
+import noo.rest.security.processor.LoginInterceptor;
 import noo.util.SpringContext;
-import noo.web.NooStub;
 import noo.web.NRemote;
+import noo.web.NooStub;
 
 /**
  * @author qujianjun troopson@163.com 2017年6月4日
  */
 
-@Configuration
+@Configuration 
 public class Config {
 
 	@Autowired
@@ -100,6 +102,19 @@ public class Config {
 		rslvs.addAll(ls);
 		adapter.setArgumentResolvers(rslvs);
     }
+	
+	//====================security bean============================
+	
+	@Bean  
+	public LogoutInterceptor logoutHandler() {
+		return new LogoutInterceptor();
+	}
+	
+	@Bean  
+	public LoginInterceptor userPasswordLoginHandler() {
+		return new LoginInterceptor();
+	}
+	
  
 
 }

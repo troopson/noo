@@ -2,6 +2,11 @@
 spring:
     application: 
         name: noo
+    redis:
+        host: 192.168.62.251
+        password: # Login password of the redis server.
+        port: 6379 # Redis server port.
+        database: 0
     datasource:
         url: jdbc:mysql://127.0.0.1:3306/dev?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT
         username: root
