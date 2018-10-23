@@ -212,10 +212,12 @@ public class OAuth2Interceptor extends RequestInterceptor {
 		
 		Cookie[] cookies = request.getCookies();
 		String authkey = null;
-		for(Cookie c : cookies) {
-			if(SecueHelper.HEADER_KEY.equals(c.getName())){
-				authkey = c.getValue();
-				break;
+		if(cookies!=null) {
+			for(Cookie c : cookies) {
+				if(SecueHelper.HEADER_KEY.equals(c.getName())){
+					authkey = c.getValue();
+					break;
+				}
 			}
 		}
 		
