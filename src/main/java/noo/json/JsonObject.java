@@ -623,7 +623,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Date getDate(String key, String fmt) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
-		if(v == null) {
+		if(v==null || "".equals(v)) {
 			return null;
 		}
 		if(v instanceof CharSequence) {

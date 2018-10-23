@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import noo.json.JsonObject;
+import noo.rest.security.processor.OAuth2Interceptor;
+import noo.util.Http;
+import noo.util.MD5;
 import noo.util.S;
 
 /**
@@ -50,5 +53,18 @@ public class SecueHelper {
 		return u;
 		
 	}
+	
+	public static JsonObject requestOAuthKey(String url,String code, String client_id, String secret, String redirecturl) {
+		String sign = MD5.encode(code+""+client_id+""+secret);
+		StringBuilder param = new StringBuilder(OAuth2Interceptor.PARAM_AUTHCODE).append("=").append(code).append("&")
+				      .append(OAuth2Interceptor.PARAM_CLIENTID_NAME).append("=").append(client_id).append("&")
+				      .append(OAuth2Interceptor.PARAM_REDIRECT_URL).append("=").append(redirecturl).append("&")
+				      .append(OAuth2Interceptor.PARAM_SERVER_SIGN).append("=").append(sign); 
+		
+		String result = Http.sendPost(url, param.toString());
+		System.out.println(result);
+		return new JsonObject(result);
+	}
+	
 	
 }

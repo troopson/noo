@@ -23,6 +23,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsProcessor;
 import org.springframework.web.cors.DefaultCorsProcessor;
 
+import noo.exception.BaseException;
 import noo.exception.BusinessException;
 import noo.exception.ExpCode;
 import noo.rest.security.processor.RequestInterceptor;
@@ -99,7 +100,11 @@ public class SecurityFilter implements Filter {
 		}catch(Throwable e){
 			e.printStackTrace();
 			resp.setStatus(403);
-			SecueHelper.writeResponse(resp, new BusinessException(ExpCode.AUTHORIZE,"没有权限访问！").toString());  
+			if(e instanceof BaseException) {
+				SecueHelper.writeResponse(resp, e.toString());  
+			}else {
+				SecueHelper.writeResponse(resp, new BusinessException(ExpCode.AUTHORIZE,"没有权限访问！").toString());  
+			}
 		} 
 		
 	}
