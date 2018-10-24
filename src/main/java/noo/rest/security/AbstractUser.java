@@ -11,6 +11,8 @@ import noo.json.JsonObject;
  */
 public abstract class AbstractUser {
 	
+	private String client;
+	
 	private String token;
 	
 	public void setToken(String s){
@@ -21,6 +23,14 @@ public abstract class AbstractUser {
 		return this.token;
 	}
 	
+	public String getClient() {
+		return client;
+	}
+
+	public void setClient(String client) {
+		this.client = client;
+	}
+
 	public long getSessionTimeoutMinutes() {
 		return 120L;
 	}

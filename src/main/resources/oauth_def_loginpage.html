@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>统一登录服务</title>
+	<title>登录服务</title>
     <style type="text/css">
         html, body{
             height: 100%;
@@ -21,9 +21,11 @@
     	}
     	.title{
 			height:100px;
-    		font-size:  14px;
+    		font-size:  18px;
     		color: #fdfdfd;
-    		padding-top:20px;
+    		padding-top:25px;
+    		letter-spacing: 8px;
+    		line-height: 50px;
     	}
     	.item{
     		padding:10px;
@@ -34,14 +36,14 @@
     		width:20px;
     	}
     	.item input{ 
-    		line-height: 35px;
+    		line-height: 14px;
     		height: 35px; 
     		width: 280px;
     		outline: none;
     		font-size:  14px;
     	    border-radius:2px;
     	    border: none;
-    	    padding-left:3px;
+    	    padding-left:3px; 
     	}
     	.item .submit{
     		width: 280px;
@@ -68,11 +70,11 @@
     	    color: #a1a1a1;
     	}
     	.formcenter {
-    	    background: linear-gradient(top , rgb(166, 166, 166) 3% , rgb(46, 56, 69) 95%);
-			background: -o-linear-gradient(top , rgb(166, 166, 166) 3% , rgb(46, 56, 69) 95%);
-			background: -ms-linear-gradient(top , rgb(166, 166, 166) 3% , rgb(46, 56, 69) 95%);
-			background: -moz-linear-gradient(top , rgb(166, 166, 166) 3% , rgb(46, 56, 69) 95%);
-			background: -webkit-linear-gradient(top , rgb(166, 166, 166) 3% , rgb(46, 56, 69) 95%); 
+            background: -webkit-gradient(linear,1% 1%, 1% 100%, from(#3C4A56), to(#121B24), color-stop(0.5,#27313B));
+    	    background: linear-gradient(linear,1% 1%, 1% 100%, from(#3C4A56), to(#121B24), color-stop(0.5,#27313B)) ;
+            -moz-box-shadow:0px 5px 15px #333333; 
+            -webkit-box-shadow:0px 5px 15px #333333; 
+            box-shadow:0px 5px 15px #333333;
     	    width: 340px; 
     	    height:350px; 
     	    padding:31px; 
@@ -84,11 +86,11 @@
 <body>
   <div align="center" style="padding-top: 200px">
 	  <div class="formcenter" align="center">
-	  	<div align="center" class="title"><h2>统一认证平台</h3></div>
+	  	<div align="center" class="title">系统登录服务</div>
 	    <form id="loginForm" method="POST" action="{{submiturl}}">
 	        <div class="item">
 	           <!--span>用户：</span-->
-	   	       <input placeholder="用户名" type="text" name="username"/>
+	   	       <input placeholder="用户名" spellcheck=false type="text" name="username"/>
 	   	    </div>
 	   	    <div class="item">
 	   	       <!--span>密码：</span-->

@@ -61,9 +61,17 @@ public class SecueHelper {
 				      .append(OAuth2Interceptor.PARAM_REDIRECT_URL).append("=").append(redirecturl).append("&")
 				      .append(OAuth2Interceptor.PARAM_SERVER_SIGN).append("=").append(sign); 
 		
-		String result = Http.sendPost(url, param.toString());
-		System.out.println(result);
-		return new JsonObject(result);
+		String result = null;
+		if(url.toLowerCase().startsWith("https://")) {
+			result = Http.httpsPost(url, param.toString());
+		}else {
+			result = Http.sendPost(url, param.toString());
+		}
+		 
+		if(S.isBlank(result))
+			return null; 
+		else
+			return new JsonObject(result);
 	}
 	
 	

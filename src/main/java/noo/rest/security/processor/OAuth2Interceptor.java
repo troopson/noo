@@ -48,8 +48,8 @@ public class OAuth2Interceptor extends RequestInterceptor {
 
 	//================================================
 
-	private String loginSubmitUrl ="/oauth2login_submit";  //登录提交的请求链接
-	private String loginPageUrl ="/oauth2login_page";      //登录页面的显示链接
+	private String loginSubmitUrl ="/oauthlogin_submit";  //登录提交的请求链接
+	private String loginPageUrl ="/oauthlogin";      //登录页面的显示链接
 	private String serverRequestUrl ="/accessToken";       //服务器请求authentic的链接 
 	private String redirectPath="/noo/redirect";           //认证服务器做转发用的专门链接
 	
@@ -136,8 +136,10 @@ public class OAuth2Interceptor extends RequestInterceptor {
 		
 		AbstractUser u = SecueHelper.retrieveUser(authenticationKey, us, redis);
 		if(u==null) {
-			throw new AuthenticateException("用户不存在！") ;
+			throw new AuthenticateException("AuthCode失效，用户不存在！") ;
 		}
+		//这里设置一下clientid，这样实现者可以在toResponseJsonObject方法中判断一下，来决定是否要给不同的client返回不同的内容
+		u.setClient(client_id);
 		
 		JsonObject j = new JsonObject();
 		j.put("access_token", authenticationKey);
@@ -172,6 +174,7 @@ public class OAuth2Interceptor extends RequestInterceptor {
 			
 			String authkey =  ID.uuid();
 			uobj.setToken(authkey); 
+			uobj.setClient(client_id);
 			SecueHelper.updateUser(uobj,this.redis);
 			
 			String code = ID.uuid();
