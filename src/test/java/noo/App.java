@@ -39,6 +39,7 @@ public class App {
 	public AccessCodeInterceptor accessCodeHandler() {
 		AccessCodeInterceptor  i = new AccessCodeInterceptor();
 		i.setSecret_load(key->key);
+		i.setUseOnce(true);
 		return i;
 	}
     

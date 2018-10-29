@@ -35,6 +35,8 @@ public class AccessCodeInterceptor extends RequestInterceptor {
 	   
 	private Function<String,String> secret_load; //load secret of key
 	
+	private boolean useOnce = true;  //code只能用一次　
+	
 	@Override
 	public boolean process(String requrl, HttpServletRequest req, HttpServletResponse resp)
 			throws Exception {
@@ -44,11 +46,15 @@ public class AccessCodeInterceptor extends RequestInterceptor {
 			return true;
 		}else if(this.is_CheckTokenUrl(requrl)) {
 			String code = req.getParameter(CODE);
-			String s = this.redis.opsForValue().get(TOKEN_PREFIX+code);
-			if(S.isNotBlank(s))
+			String k = TOKEN_PREFIX+code;
+			String s = this.redis.opsForValue().get(k);
+			if(S.isNotBlank(s)) { 
+				if(this.useOnce)
+					this.redis.delete(k);
 				SecueHelper.writeResponse(resp, "true");
-			else
+			}else {
 				SecueHelper.writeResponse(resp, "false");
+			}
 			return true;
 	    }else {
 			return false;
@@ -88,7 +94,7 @@ public class AccessCodeInterceptor extends RequestInterceptor {
 	 
 	private String genCode() {
 		String id = ID.uuid();
-		this.redis.opsForValue().set(TOKEN_PREFIX+id, "0", 3600L, TimeUnit.SECONDS);
+		this.redis.opsForValue().set(TOKEN_PREFIX+id, "0", 60L, TimeUnit.MINUTES);
 		return id;
 	} 
  
@@ -101,6 +107,10 @@ public class AccessCodeInterceptor extends RequestInterceptor {
 		this.secret_load = secret_load;
 	}
 	
+
+	public void setUseOnce(boolean useOnce) {
+		this.useOnce = useOnce;
+	}
 
 	public static String getCode(String url, String accessKey, String accessSecret) {
 		String result = null;

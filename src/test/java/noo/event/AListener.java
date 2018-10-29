@@ -20,7 +20,7 @@ public class AListener implements Listener {
 	}
 
 	@Override
-	public void done(Event e) {
+	public void invoke(Event e) {
 		JsonObject p = e.params();
 		System.out.println(p==null? "params is null": p.encode());
 		System.out.println(e.getName()+"  "+e.getTarget().getClass().getName());

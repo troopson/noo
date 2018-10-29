@@ -94,13 +94,13 @@ dependencies {
     //compile "org.springframework.cloud:spring-cloud-starter"
    //compile "org.springframework.cloud:spring-cloud-starter"
     
-    compile 'org.springframework.cloud:spring-cloud-dependencies:Edgware.SR3'
+    //compile 'org.springframework.cloud:spring-cloud-dependencies:Edgware.SR3'
     //compile 'org.springframework.cloud:spring-cloud-starter-ribbon:Edgware.SR3'
     //compile 'org.springframework.cloud:spring-cloud-starter-eureka:Edgware.SR3'  
     //compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-server', version: '2.0.0.RC1'
-    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client', version: '2.0.0.RC1'
-    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-ribbon', version: '2.0.0.RC1'
-    compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.0.0.RC1'
+    //compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client', version: '2.0.0.RC1'
+    //compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-ribbon', version: '2.0.0.RC1'
+    //compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-hystrix', version: '2.0.0.RC1'
     
     //compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-eureka-client', version: '1.4.4.RELEASE'
     //compile group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-ribbon', version: '1.4.4.RELEASE'

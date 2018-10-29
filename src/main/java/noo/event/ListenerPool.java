@@ -68,7 +68,7 @@ public class ListenerPool implements CommandLineRunner{
 		}
 		
 		for(Listener u : mlist) {
-			u.done(e);
+			u.invoke(e);
 		}
 		
 		return e.getResult();

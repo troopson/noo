@@ -14,6 +14,6 @@ public interface Listener {
 	
 	public abstract String[] on();
 	 
-	public abstract void done(Event e); 
+	public abstract void invoke(Event e); 
 
 }
