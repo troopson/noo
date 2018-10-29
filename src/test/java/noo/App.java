@@ -10,7 +10,7 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import noo.rest.security.processor.LogoutInterceptor;
+import noo.rest.security.processor.AccessCodeInterceptor;
 import noo.rest.security.processor.OAuth2Interceptor;
 
 /**
@@ -32,6 +32,13 @@ public class App {
 	public OAuth2Interceptor oauth2Handler() {
 		OAuth2Interceptor  i = new OAuth2Interceptor();
 		i.setLoadAccessSecret(clientid->"ok");
+		return i;
+	}
+	
+	@Bean  
+	public AccessCodeInterceptor accessCodeHandler() {
+		AccessCodeInterceptor  i = new AccessCodeInterceptor();
+		i.setSecret_load(key->key);
 		return i;
 	}
     

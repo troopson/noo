@@ -5,6 +5,7 @@ package noo.rest.security.processor;
 
 import java.io.IOException;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,6 +37,13 @@ public class LogoutInterceptor extends RequestInterceptor {
 			this.redis.delete(authkey); 
 		}
 		resp.addHeader(SecueHelper.HEADER_KEY, "");
+		
+		Cookie c = new Cookie(SecueHelper.HEADER_KEY,"");
+		c.setHttpOnly(true);
+		c.setPath("/");
+		c.setMaxAge(0);
+		resp.addCookie(c);
+		
 		SecueHelper.writeResponse(resp, "0");  
 	}
  

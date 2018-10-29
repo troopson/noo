@@ -40,6 +40,8 @@ public class OAuth2Interceptor extends RequestInterceptor {
 	public static String PARAM_REDIRECT_URL ="redirect_url"; 
 	public static String PARAM_SERVER_SIGN="sign";  //服务器端请求时的签名变量的名称
 	
+	public static String ACCESS_TOKEN ="access_token";
+	
 	//===========可配置属性================== 
 	
 	
@@ -51,6 +53,7 @@ public class OAuth2Interceptor extends RequestInterceptor {
 	private String loginSubmitUrl ="/oauthlogin_submit";  //登录提交的请求链接
 	private String loginPageUrl ="/oauthlogin";      //登录页面的显示链接
 	private String serverRequestUrl ="/accessToken";       //服务器请求authentic的链接 
+	private String checkAccessTokenUrl = "/checkAccessToken"; //校验某个AccessToken是否真实
 	private String redirectPath="/noo/redirect";           //认证服务器做转发用的专门链接
 	
 	
@@ -100,6 +103,16 @@ public class OAuth2Interceptor extends RequestInterceptor {
 	    	JsonObject key = this.tradeAuthenticatKey(req, resp); 
 			SecueHelper.writeResponse(resp,key.encode()); 
 			return true;
+		}else if(this.isCheckAccessToken(requrl)) {
+			//校验某个AccessToken是否真实
+			String at = req.getParameter(ACCESS_TOKEN);
+			AbstractUser u = SecueHelper.retrieveUser(at, us, redis);
+			if(u==null) {
+				SecueHelper.writeResponse(resp, "false");
+			}else {
+				SecueHelper.writeResponse(resp, "true");
+			}
+			return true;
 		}else {
 			return false;
 		} 
@@ -142,7 +155,7 @@ public class OAuth2Interceptor extends RequestInterceptor {
 		u.setClient(client_id);
 		
 		JsonObject j = new JsonObject();
-		j.put("access_token", authenticationKey);
+		j.put(ACCESS_TOKEN, authenticationKey);
 		j.put("expires_in", 3600);
 		j.put("principal", u.toResponseJsonObject());
 		
@@ -284,6 +297,14 @@ public class OAuth2Interceptor extends RequestInterceptor {
 	
 	private boolean isRedirectPath(String path) {
 		if(path.endsWith(this.redirectPath)) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	private boolean isCheckAccessToken(String path) {
+		if(path.endsWith(this.checkAccessTokenUrl)) {
 			return true;
 		}else {
 			return false;
