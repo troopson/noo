@@ -29,11 +29,11 @@ apply from: 'maven_push.gradle'
 jar {
     enabled = true
     baseName = 'noo'
-    version =  '1.0.17'
-    archiveName = 'noo-1.0.17.jar'
+    version =  '1.0.19'
+    archiveName = 'noo-1.0.19.jar'
     manifest {
         attributes 'Implementation-Title': 'noo',
-                   'Implementation-Version': '1.0.17' 
+                   'Implementation-Version': '1.0.19' 
     }
 }
  

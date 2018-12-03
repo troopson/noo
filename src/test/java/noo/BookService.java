@@ -8,8 +8,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-
 import noo.jdbc.InsertKeyHolder;
 import noo.json.JsonArray;
 import noo.json.JsonObject;
@@ -24,8 +22,7 @@ public class BookService {
 
 	@Autowired
 	private BookDao book;
-	
-	@HystrixCommand(fallbackMethod="doqueryHystrix")
+	 
 	public JsonArray doquery(Map<String,String> j) {
 		//System.out.println(j.encodePrettily());
 		System.out.println(j);

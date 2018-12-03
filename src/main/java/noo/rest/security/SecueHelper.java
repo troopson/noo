@@ -43,13 +43,16 @@ public class SecueHelper {
 		if(S.isBlank(token))
 			return null;
 		
-		String s = (String) redis.opsForValue().get(SecueHelper.REDIS_KEY + ":" + token);
+		String rkey = SecueHelper.REDIS_KEY + ":" + token;
+		String s = (String) redis.opsForValue().get(rkey);
 		if (S.isBlank(s)) {
 			return null;
 		}
 
 		AbstractUser u = us.fromJsonObject(new JsonObject(s));
 		u.setToken(token);
+		//更新redis中的缓存时间
+		redis.expire(rkey,  u.getSessionTimeoutMinutes(), TimeUnit.MINUTES);
 		return u;
 		
 	}

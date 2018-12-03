@@ -59,6 +59,7 @@ public class OAuth2Interceptor extends RequestInterceptor {
 	
 	private String loginhtml=null;   //缓存登录页面的内容
 	
+	private OAuth2ProcInf procInf =null;
 	
 	
 	//{"access_token":"409ace4f7308fbd3e236addef0e0f1dd","expires_in":3600}
@@ -176,6 +177,10 @@ public class OAuth2Interceptor extends RequestInterceptor {
 			throw new AuthenticateException("必须有client和redirecturl信息！") ;
 		} 
 		
+		//调用接口，进行登录的后续检查
+		if(this.procInf !=null )
+			this.procInf.checkLogin(request);
+		
 		this.getClientIdSecret(client_id);
 		
 		AbstractUser uobj = us.loadUserByName(u);
@@ -243,9 +248,9 @@ public class OAuth2Interceptor extends RequestInterceptor {
 		
 			String code = ID.uuid();
 			
-			String mkey = this.makeKey(client_id, redirecturl, code);
+			String codekey = this.makeKey(client_id, redirecturl, code);
 			
-			this.redis.opsForValue().set(mkey, authkey,3600,TimeUnit.SECONDS);  
+			this.redis.opsForValue().set(codekey, authkey,3600,TimeUnit.SECONDS);  
 			
 			String client_url = makeRealRedirectUrl(redirecturl,code,client_id);
 			
@@ -319,10 +324,12 @@ public class OAuth2Interceptor extends RequestInterceptor {
 				InputStream is = this.getClass().getResourceAsStream("/"+loginPageFile);
 				this.loginhtml = S.readAndCloseInputStream(is, "UTF-8"); 
 			}
-			return this.loginhtml.replace("{{submiturl}}", contextPath+""+this.loginSubmitUrl)
+			String content = this.loginhtml.replace("{{submiturl}}", contextPath+""+this.loginSubmitUrl)
 			.replace("{{client_id}}", clientid)
 			.replace("{{redirect_url}}", redirect_url);
-			
+			if(this.procInf!=null)
+				content = this.procInf.transferHtml(content);
+			return content;
 		} catch (IOException e) { 
 			e.printStackTrace();
 			return "error in load login page!";

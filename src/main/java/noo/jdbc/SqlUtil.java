@@ -80,8 +80,8 @@ public class SqlUtil {
 				lst =  s.lastIndexOf("#");
 				ignore=false;
 			}
-			String paramName = s.substring(lst + 1, s.length() - 1);
-			// System.out.println(paramName);
+			String paramName = s.substring(lst + 1, s.length() - 1).trim();
+			//System.out.println("["+paramName+"]");
 			Object v = t.get(paramName);
 			if (v != null && !"".equals(v) ) {
 				//先判断是否有in关键词，如果有，将List值展开，并替换原有的变量字符串，展开后的值放到param中
@@ -110,9 +110,9 @@ public class SqlUtil {
 					}
 					m.appendReplacement(newsql, re);
 					
-					//如果like类型的变量，没有%_符号，那么自动在两端加上%号
+					//如果like类型的变量，没有%_符号，那么自动在右端加上%号
 					if(s.toLowerCase().indexOf(" like ")!=-1 &&  !S.containChar(v.toString(), "%_")){					
-						  param.put(paramName, "%"+v+"%" );
+						  param.put(paramName, v+"%" );
 					}
 				}				
 				// param.put(paramName, v); //spring会放到自己的map中，避免大小写的问题
@@ -166,7 +166,7 @@ public class SqlUtil {
 	
 	 
 	public static void main(String[] args) {
-		String sql ="select a from t where {p=#p} and {c like :c} and {kk=:vc} and {f=:tt} and {t not in :kk}";
+		String sql ="select a from t where {p=#p } and {c like :c} and {kk=:vc} and {f=:tt} and {t not in :kk}";
 		Map<String,Object> m = new HashMap<>();
 		m.put("p", "23");
 		m.put("c", "cv");

@@ -384,7 +384,7 @@ public class JdbcSvr {
 
 		JsonObject m = this.qryOneRow(sql, param);
 		if (m == null || m.isEmpty()) {
-			return 0;
+			return -1;
 		}
 		return (Number) m.iterator().next().getValue();
 	}
@@ -393,7 +393,7 @@ public class JdbcSvr {
 		try {
 			return this.getJdbcTemplate().queryForObject(sql, p, Integer.class);
 		} catch (IncorrectResultSizeDataAccessException e) {
-			return 0;
+			return -1;
 		}
 	}
 
