@@ -24,6 +24,8 @@ public class SecueHelper {
 
 	public static final String REDIS_KEY ="noo:session";
 	
+	public static final String REDIS_USER_KEY ="noo:user:session";
+	
 	public static final String HEADER_KEY="Authorization";
 	
 	
@@ -37,6 +39,7 @@ public class SecueHelper {
 		String ustring = u.toJsonObject().encode(); 
 		String authkey =  u.getToken(); 
 		redis.opsForValue().set(SecueHelper.REDIS_KEY+":"+authkey, ustring, u.getSessionTimeoutMinutes(), TimeUnit.MINUTES);
+		redis.opsForValue().set(SecueHelper.REDIS_USER_KEY+":"+u.getId(),authkey, u.getSessionTimeoutMinutes(), TimeUnit.MINUTES);
 	}
 	
 	public static AbstractUser retrieveUser(String token,SecuritySetting us,StringRedisTemplate redis) {
@@ -53,8 +56,17 @@ public class SecueHelper {
 		u.setToken(token);
 		//更新redis中的缓存时间
 		redis.expire(rkey,  u.getSessionTimeoutMinutes(), TimeUnit.MINUTES);
+		
+		String ukey = SecueHelper.REDIS_USER_KEY+":"+u.getId();
+		redis.expire(ukey,  u.getSessionTimeoutMinutes(), TimeUnit.MINUTES);
 		return u;
 		
+	}
+	
+	/*获取userid对应的token信息*/
+	public static String getTokenByUserid(String userid,StringRedisTemplate redis) {
+		String ukey = SecueHelper.REDIS_USER_KEY+":"+userid;
+		return redis.opsForValue().get(ukey);
 	}
 	
 	public static JsonObject requestOAuthKey(String url,String code, String client_id, String secret, String redirecturl) {

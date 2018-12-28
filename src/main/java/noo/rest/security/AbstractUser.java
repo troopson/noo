@@ -15,6 +15,16 @@ public abstract class AbstractUser {
 	
 	private String token;
 	
+	private String id;
+	
+	public void setId(String id) {
+		this.id = id;
+	}
+	
+	public String getId() {
+		return this.id;
+	}
+	
 	public void setToken(String s){
 		this.token = s;
 	}
