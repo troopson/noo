@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -1037,6 +1039,22 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		}
 		return new JsonObject(copiedMap);
 	}
+	
+	
+	public JsonObject copy(String...keys) {
+		Map<String, Object> copiedMap;
+		if (map instanceof LinkedHashMap) {
+			copiedMap = new LinkedHashMap<>(map.size());
+		} else {
+			copiedMap = new HashMap<>(map.size());
+		}
+		for(String s: keys) {
+			Object val = map.get(s);
+			val = Json.checkAndCopy(val, true); 
+			copiedMap.put(s, val); 
+		} 
+		return new JsonObject(copiedMap);
+	}
 
 	/**
 	 * Get the underlying {@code Map} as is.
@@ -1092,6 +1110,12 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	@Override
 	public Iterator<Map.Entry<String, Object>> iterator() {
 		return new Iter(map.entrySet().iterator());
+	}
+	
+	
+	public JsonArray filterValue(Predicate<Object> filter) {
+		List<Object> l = map.values().stream().filter(filter).collect(Collectors.toList()); 
+		return new JsonArray(l);
 	}
 
 	/**

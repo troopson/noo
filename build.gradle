@@ -22,18 +22,17 @@ apply plugin: 'java'
 apply plugin: 'maven' 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'  
-apply from: 'maven_push.gradle' 
- 
+apply from: 'maven_push.gradle'  
  
 
 jar {
     enabled = true
     baseName = 'noo'
-    version =  '1.0.20'
-    archiveName = 'noo-1.0.20.jar'
+    version =  '1.0.21'
+    archiveName = 'noo-1.0.21.jar'
     manifest {
         attributes 'Implementation-Title': 'noo',
-                   'Implementation-Version': '1.0.20' 
+                   'Implementation-Version': '1.0.21' 
     }
 }
  

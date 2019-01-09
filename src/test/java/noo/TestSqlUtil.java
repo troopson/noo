@@ -1,13 +1,15 @@
 package noo;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Test;
 
-import noo.jdbc.PageQuery;
 import noo.jdbc.SqlUtil;
 import noo.json.JsonArray;
 import noo.json.JsonObject;
@@ -73,6 +75,21 @@ public class TestSqlUtil {
 		System.out.println(m.encode());
 		
 		
+		
+	}
+	
+	@Test
+	public void testDate() {
+		
+		long l = -28800000;
+		
+		
+		
+		LocalDate ld = LocalDate.ofEpochDay(l);
+		
+		String s = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(ld);
+		
+		System.out.println(s);
 		
 	}
 	

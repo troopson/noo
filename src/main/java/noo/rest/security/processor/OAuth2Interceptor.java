@@ -107,7 +107,8 @@ public class OAuth2Interceptor extends RequestInterceptor {
 		}else if(this.isCheckAccessToken(requrl)) {
 			//校验某个AccessToken是否真实
 			String at = req.getParameter(ACCESS_TOKEN);
-			AbstractUser u = SecueHelper.retrieveUser(at, us, redis);
+			String client_type = SecueHelper.getClient_type(req);
+			AbstractUser u = SecueHelper.retrieveUser(at, us, client_type, redis);
 			if(u==null) {
 				SecueHelper.writeResponse(resp, "false");
 			}else {
@@ -148,7 +149,8 @@ public class OAuth2Interceptor extends RequestInterceptor {
 		if(authenticationKey!=null)
 			this.redis.delete(mkey);
 		
-		AbstractUser u = SecueHelper.retrieveUser(authenticationKey, us, redis);
+		String client_type = SecueHelper.getClient_type(request);
+		AbstractUser u = SecueHelper.retrieveUser(authenticationKey, us, client_type, redis);
 		if(u==null) {
 			throw new AuthenticateException("AuthCode失效，用户不存在！") ;
 		}
@@ -193,7 +195,8 @@ public class OAuth2Interceptor extends RequestInterceptor {
 			String authkey =  ID.uuid();
 			uobj.setToken(authkey); 
 			uobj.setClient(client_id);
-			SecueHelper.updateUser(uobj,this.redis);
+			String client_type = SecueHelper.getClient_type(request);
+			SecueHelper.updateUser(uobj,client_type,this.redis);
 			
 			String code = ID.uuid();
 			
@@ -242,7 +245,8 @@ public class OAuth2Interceptor extends RequestInterceptor {
 			}
 		}
 		
-		AbstractUser user = SecueHelper.retrieveUser(authkey, us, redis);  
+		String client_type = SecueHelper.getClient_type(request);
+		AbstractUser user = SecueHelper.retrieveUser(authkey, us, client_type, redis);  
 		 
 		if(user!=null) {
 		

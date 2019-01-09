@@ -23,7 +23,7 @@ spring helper lib
 
 ```
 
-*依赖springcloud、fastjson和guava，一般都加了，为了避免引入不同的版本，这里可以exclude掉*
+*依赖fastjson和guava，一般都加了，为了避免引入不同的版本，这里可以exclude掉*
 
 **Gradle**
 ```groovy

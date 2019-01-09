@@ -78,7 +78,9 @@ public class LoginInterceptor extends RequestInterceptor {
 			throws IOException {
 		String authkey =  ID.uuid();
 		uobj.setToken(authkey); 
-		SecueHelper.updateUser(uobj,this.redis);
+		
+		String client_system = SecueHelper.getClient_type(request);
+		SecueHelper.updateUser(uobj,client_system,this.redis);
 		 
 		resp.setCharacterEncoding("UTF-8");
 		resp.setContentType("text/html;charset=utf-8");  
