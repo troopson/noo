@@ -26,6 +26,7 @@ import org.springframework.web.cors.DefaultCorsProcessor;
 import noo.exception.BaseException;
 import noo.exception.BusinessException;
 import noo.exception.ExpCode;
+import noo.exception.SessionTimeoutException;
 import noo.rest.security.processor.RequestInterceptor;
 import noo.util.SpringContext;
 
@@ -99,10 +100,14 @@ public class SecurityFilter implements Filter {
 			}
 		}catch(Throwable e){
 			e.printStackTrace();
-			resp.setStatus(403);
-			if(e instanceof BaseException) {
+			if(e instanceof SessionTimeoutException) { 
+				resp.setStatus(401);
+				SecueHelper.writeResponse(resp, e.toString());
+			}else if(e instanceof BaseException) {
+				resp.setStatus(400);
 				SecueHelper.writeResponse(resp, e.toString());  
 			}else {
+				resp.setStatus(403);
 				SecueHelper.writeResponse(resp, new BusinessException(ExpCode.AUTHORIZE,"没有权限访问！").toString());  
 			}
 		} 

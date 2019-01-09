@@ -16,6 +16,10 @@ public class SessionTimeoutException extends BaseException {
 	public SessionTimeoutException() {
 		super(ExpCode.SESSION_TIMEOUT, "Session超时");
 	}
+	
+	public SessionTimeoutException(String msg) {
+		super(ExpCode.SESSION_TIMEOUT, msg);
+	}
   
 	private static final long serialVersionUID = 1L;
 
