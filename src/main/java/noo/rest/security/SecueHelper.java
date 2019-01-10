@@ -30,13 +30,16 @@ public class SecueHelper {
 
 	public static final String HEADER_KEY = "Authorization";
 
+	//前端传递过来的，表明是什么端的变量名称
+	public static final String CLIENT = "_client";
+
 	public static void writeResponse(HttpServletResponse resp, String msg) throws IOException {
 		resp.setCharacterEncoding("UTF-8");
 		resp.setContentType("text/html;charset=utf-8");
 		resp.getWriter().print(msg);
 	}
 
-	public static void updateUser(AbstractUser u, String client_type, StringRedisTemplate redis) {
+	public static void updateUser(AbstractUser u,  StringRedisTemplate redis) {
 		String ustring = u.toJsonObject().encode();
 		String authkey = u.getToken();
 		
@@ -45,8 +48,8 @@ public class SecueHelper {
 
 			@Override
 			public Object doInRedis(RedisConnection connection) throws DataAccessException {
+				String client_uid_key = makeRedisClientUseridKey(u.getClient(), u.getId());
 				setEx(connection, SecueHelper.REDIS_KEY + ":" + authkey, u.getSessionTimeoutMinutes(), ustring); 
-				String client_uid_key = makeRedisClientUseridKey(client_type, u.getId());
 				setEx(connection, client_uid_key, u.getSessionTimeoutMinutes(), authkey);
 				return null;
 			}
@@ -70,9 +73,7 @@ public class SecueHelper {
 
 		AbstractUser u = us.fromJsonObject(new JsonObject(s));
 		u.setToken(token);
-		// 更新redis中的缓存时间
-
-		String ukey = makeRedisClientUseridKey(client_type, u.getId());
+		// 更新redis中的缓存时间  
 
 		// redis.expire(rkey, u.getSessionTimeoutMinutes(), TimeUnit.MINUTES);
 		// redis.expire(ukey, u.getSessionTimeoutMinutes(), TimeUnit.MINUTES);
@@ -81,22 +82,26 @@ public class SecueHelper {
 
 			@Override
 			public Object doInRedis(RedisConnection connection) throws DataAccessException {
+				String ukey = makeRedisClientUseridKey(client_type, u.getId());
 				expire(connection, rkey, u.getSessionTimeoutMinutes());
 				expire(connection, ukey, u.getSessionTimeoutMinutes());
 				return null;
 			}
 
 		});
+		
+		u.setClient(client_type);
 
 		return u;
 
 	}
 	
+	
 	//获取客户端系统的类型，比如是web还是app还是其他，一种类型的系统，可能不允许重复登录
-	public static String getClient_type(HttpServletRequest req) {
-		String client_system = req.getParameter("client_type");
+	public static String getClient(HttpServletRequest req) {
+		String client_system = req.getParameter(CLIENT);
 		if(S.isBlank(client_system))
-			client_system = req.getHeader("client_type");
+			client_system = req.getHeader(CLIENT);
 		return client_system;
 	}
 	
@@ -105,8 +110,10 @@ public class SecueHelper {
 		return SecueHelper.REDIS_USER_KEY + ":" +theclient+":"+ userid;
 	}
 
-	/* 获取userid对应的token信息 */
-	public static String getTokenByUserid(String userid, String client_type, StringRedisTemplate redis) {
+	/* 获取userid最后一次登录的token信息 */
+	public static String getLastLoginTokenOfUser(AbstractUser uobj, StringRedisTemplate redis) {
+		String userid = uobj.getId();
+		String client_type = uobj.getClient();
 		String ukey = makeRedisClientUseridKey(client_type, userid);
 		return redis.opsForValue().get(ukey);
 	}
@@ -115,7 +122,7 @@ public class SecueHelper {
 			String redirecturl) {
 		String sign = MD5.encode(code + "" + client_id + "" + secret);
 		StringBuilder param = new StringBuilder(OAuth2Interceptor.PARAM_AUTHCODE).append("=").append(code).append("&")
-				.append(OAuth2Interceptor.PARAM_CLIENTID_NAME).append("=").append(client_id).append("&")
+				.append(SecueHelper.CLIENT).append("=").append(client_id).append("&")
 				.append(OAuth2Interceptor.PARAM_REDIRECT_URL).append("=").append(redirecturl).append("&")
 				.append(OAuth2Interceptor.PARAM_SERVER_SIGN).append("=").append(sign);
 

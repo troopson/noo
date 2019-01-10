@@ -34,7 +34,7 @@ public class OAuth2Interceptor extends RequestInterceptor {
 	public static final String AUTH_CODE_PRE="noo.auth20code";
 	
 	public static String PARAM_AUTHCODE ="code";	  //redirect的时候，返回的授权码名称
-	public static String PARAM_CLIENTID_NAME="client_id";	//client_id参数名称
+	//public static String PARAM_CLIENTID_NAME="_client";	//client_id参数名称
 	public static String PARAM_USERNAME="username";  
 	public static String PARAM_PASSWORD="password";
 	public static String PARAM_REDIRECT_URL ="redirect_url"; 
@@ -86,7 +86,7 @@ public class OAuth2Interceptor extends RequestInterceptor {
 	    }else if(this.isRedirectPath(requrl)) {
 			//用来进行跳转的页面
 			String redirecturl = req.getParameter(PARAM_REDIRECT_URL); 
-			String client_id = req.getParameter(PARAM_CLIENTID_NAME);
+			String client_id = req.getParameter(SecueHelper.CLIENT);
 			String code = req.getParameter(PARAM_AUTHCODE); 
            
 			if( S.isBlank(redirecturl) || S.isBlank(client_id) || S.isBlank(code)) {
@@ -107,7 +107,7 @@ public class OAuth2Interceptor extends RequestInterceptor {
 		}else if(this.isCheckAccessToken(requrl)) {
 			//校验某个AccessToken是否真实
 			String at = req.getParameter(ACCESS_TOKEN);
-			String client_type = SecueHelper.getClient_type(req);
+			String client_type = SecueHelper.getClient(req);
 			AbstractUser u = SecueHelper.retrieveUser(at, us, client_type, redis);
 			if(u==null) {
 				SecueHelper.writeResponse(resp, "false");
@@ -126,7 +126,7 @@ public class OAuth2Interceptor extends RequestInterceptor {
 	private JsonObject tradeAuthenticatKey(HttpServletRequest request, HttpServletResponse resp) throws IOException {
 		
 		String code = request.getParameter(PARAM_AUTHCODE);
-		String client_id = request.getParameter(PARAM_CLIENTID_NAME);
+		String client_id = request.getParameter(SecueHelper.CLIENT);
 		String redirecturl = request.getParameter(PARAM_REDIRECT_URL);
 		String sign = request.getParameter(PARAM_SERVER_SIGN); 
 		
@@ -148,14 +148,11 @@ public class OAuth2Interceptor extends RequestInterceptor {
 		String authenticationKey = this.redis.opsForValue().get(mkey);
 		if(authenticationKey!=null)
 			this.redis.delete(mkey);
-		
-		String client_type = SecueHelper.getClient_type(request);
-		AbstractUser u = SecueHelper.retrieveUser(authenticationKey, us, client_type, redis);
+		 
+		AbstractUser u = SecueHelper.retrieveUser(authenticationKey, us, client_id, redis);
 		if(u==null) {
 			throw new AuthenticateException("AuthCode失效，用户不存在！") ;
-		}
-		//这里设置一下clientid，这样实现者可以在toResponseJsonObject方法中判断一下，来决定是否要给不同的client返回不同的内容
-		u.setClient(client_id);
+		} 
 		
 		JsonObject j = new JsonObject();
 		j.put(ACCESS_TOKEN, authenticationKey);
@@ -169,7 +166,7 @@ public class OAuth2Interceptor extends RequestInterceptor {
 	private void doLogin(HttpServletRequest request, HttpServletResponse resp) throws IOException {
 		String u = request.getParameter(PARAM_USERNAME);
 		String p = request.getParameter(PARAM_PASSWORD);
-		String client_id = request.getParameter(PARAM_CLIENTID_NAME);
+		String client_id = request.getParameter(SecueHelper.CLIENT);
 		String redirecturl = request.getParameter(PARAM_REDIRECT_URL);
 		
 		if(S.isBlank(u)) {
@@ -194,9 +191,8 @@ public class OAuth2Interceptor extends RequestInterceptor {
 			
 			String authkey =  ID.uuid();
 			uobj.setToken(authkey); 
-			uobj.setClient(client_id);
-			String client_type = SecueHelper.getClient_type(request);
-			SecueHelper.updateUser(uobj,client_type,this.redis);
+			uobj.setClient(client_id); 
+			SecueHelper.updateUser(uobj,this.redis);
 			
 			String code = ID.uuid();
 			
@@ -212,7 +208,7 @@ public class OAuth2Interceptor extends RequestInterceptor {
 			c.setMaxAge(3600);
 			resp.addCookie(c);
 			  
-			String path = this.redirectPath+"?"+ PARAM_REDIRECT_URL+"="+URLEncoder.encode(redirecturl,"UTF-8")+"&"+PARAM_CLIENTID_NAME+"="+client_id+"&"+PARAM_AUTHCODE+"="+code;
+			String path = this.redirectPath+"?"+ PARAM_REDIRECT_URL+"="+URLEncoder.encode(redirecturl,"UTF-8")+"&"+SecueHelper.CLIENT+"="+client_id+"&"+PARAM_AUTHCODE+"="+code;
 			resp.sendRedirect(request.getContextPath()+path);  //先跳到自己的一个path，写了cookie以后，再由那个页面负责真正的跳转
 			resp.flushBuffer();
 			
@@ -225,7 +221,7 @@ public class OAuth2Interceptor extends RequestInterceptor {
 	//为实现oss，显示登录页面时判断是否直接跳转
 	private void doShowLoginPage(HttpServletRequest request, HttpServletResponse resp) throws IOException {
 		
-		String client_id = request.getParameter(PARAM_CLIENTID_NAME);
+		String client_id = request.getParameter(SecueHelper.CLIENT);
 		String redirecturl = request.getParameter(PARAM_REDIRECT_URL); 
 		 
 		if(S.isBlank(client_id) || S.isBlank(redirecturl)) {
@@ -244,9 +240,8 @@ public class OAuth2Interceptor extends RequestInterceptor {
 				}
 			}
 		}
-		
-		String client_type = SecueHelper.getClient_type(request);
-		AbstractUser user = SecueHelper.retrieveUser(authkey, us, client_type, redis);  
+		 
+		AbstractUser user = SecueHelper.retrieveUser(authkey, us, client_id, redis);  
 		 
 		if(user!=null) {
 		
@@ -271,7 +266,7 @@ public class OAuth2Interceptor extends RequestInterceptor {
 	
 	private String makeRealRedirectUrl(String redirecturl, String authcode, String client_id)  {
 		try {
-			return redirecturl+(redirecturl.indexOf("?")>0?"&":"?")+PARAM_AUTHCODE+"="+authcode+"&"+PARAM_CLIENTID_NAME+"="+client_id+"&"+PARAM_REDIRECT_URL+"="+URLEncoder.encode(redirecturl,"UTF-8"); 
+			return redirecturl+(redirecturl.indexOf("?")>0?"&":"?")+PARAM_AUTHCODE+"="+authcode+"&"+SecueHelper.CLIENT+"="+client_id+"&"+PARAM_REDIRECT_URL+"="+URLEncoder.encode(redirecturl,"UTF-8"); 
 			 
 		} catch (UnsupportedEncodingException e) { 
 			e.printStackTrace();

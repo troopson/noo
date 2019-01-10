@@ -60,8 +60,9 @@ public class UsualHandler  {
 		if (S.isBlank(token)) {
 			return null;
 		}
-		String client_system = SecueHelper.getClient_type(req);
-		return SecueHelper.retrieveUser(token, us, client_system,redis); 
+		String client_type = SecueHelper.getClient(req);
+		AbstractUser ab =  SecueHelper.retrieveUser(token, us, client_type,redis);  
+		return ab;
 	}
 	
 	
