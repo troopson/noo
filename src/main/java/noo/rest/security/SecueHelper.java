@@ -31,7 +31,7 @@ public class SecueHelper {
 	public static final String HEADER_KEY = "Authorization";
 
 	//前端传递过来的，表明是什么端的变量名称
-	public static final String CLIENT = "_client";
+	public static final String CLIENT = "r_client";
 
 	public static void writeResponse(HttpServletResponse resp, String msg) throws IOException {
 		resp.setCharacterEncoding("UTF-8");

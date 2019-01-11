@@ -13,7 +13,7 @@ public class BaseException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	private String code=null;
+	protected String code=null;
 	
 	public BaseException(String code,String msg){
 		super(msg);
