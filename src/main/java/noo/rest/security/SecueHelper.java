@@ -31,7 +31,9 @@ public class SecueHelper {
 	public static final String HEADER_KEY = "Authorization";
 
 	//前端传递过来的，表明是什么端的变量名称
-	public static final String CLIENT = "r_client";
+	public static final String CLIENT = "request-client";
+	//默认的client值，如果前端没有传递这个值，就是默认值
+	public static final String DEFAULT_CLIENT = "web";
 
 	public static void writeResponse(HttpServletResponse resp, String msg) throws IOException {
 		resp.setCharacterEncoding("UTF-8");
@@ -106,7 +108,7 @@ public class SecueHelper {
 	}
 	
 	private static String makeRedisClientUseridKey(String client_type, String userid) {
-		String theclient = client_type ==null ? "web":client_type;
+		String theclient = client_type ==null ? DEFAULT_CLIENT :client_type;
 		return SecueHelper.REDIS_USER_KEY + ":" +theclient+":"+ userid;
 	}
 
