@@ -4,6 +4,8 @@
 package noo.rest.security;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -62,6 +64,28 @@ public class SecueHelper {
 		// redis.opsForValue().set(SecueHelper.REDIS_USER_KEY+":"+u.getId(),authkey,
 		// u.getSessionTimeoutMinutes(), TimeUnit.MINUTES);
 	}
+	
+	public static void deleteUserLoginInfo(HttpServletRequest req, StringRedisTemplate redis,SecuritySetting us, String auth) {
+		if(S.isBlank(auth))
+			return;
+		
+		String client = getClient(req);
+		String sessionkey = SecueHelper.REDIS_KEY + ":" + auth;
+		String sessionval = redis.opsForValue().get(sessionkey);
+		//System.out.println(sessionval);
+		List<String> ls = new ArrayList<>();
+		ls.add(sessionkey);
+		if(S.isNotBlank(sessionval)) {
+			AbstractUser u = us.fromJsonObject(new JsonObject(sessionval));
+			String userid = u.getId(); 
+			String client_uid_key = makeRedisClientUseridKey(client, userid);  
+			ls.add(client_uid_key);
+		}
+		//System.out.println(ls);
+		redis.delete(ls);
+		 
+	}
+	
 
 	public static AbstractUser retrieveUser(String token, SecuritySetting us, String client_type, StringRedisTemplate redis) {
 		if (S.isBlank(token))

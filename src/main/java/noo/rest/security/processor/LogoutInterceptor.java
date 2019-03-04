@@ -32,9 +32,10 @@ public class LogoutInterceptor extends RequestInterceptor {
 	}
 	
 	private void doLogout(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		String authkey = req.getHeader(SecueHelper.HEADER_KEY);
+		String authkey = req.getHeader(SecueHelper.HEADER_KEY); 
 		if(S.isNotBlank(authkey)) {
-			this.redis.delete(authkey); 
+			SecueHelper.deleteUserLoginInfo(req, redis, us, authkey);
+			//this.redis.delete(authkey); 
 		}
 		resp.addHeader(SecueHelper.HEADER_KEY, "");
 		
