@@ -497,7 +497,9 @@ public class JsonArray implements Iterable<Object>, Serializable, IJson {
 	   * @return the number of items
 	   */
 	  public int size() {
-	    return list.size();
+		 if(list==null)
+			  return 0;
+	     return list.size();
 	  }
 	
 	  /**
@@ -506,6 +508,8 @@ public class JsonArray implements Iterable<Object>, Serializable, IJson {
 	   * @return true if zero, false otherwise
 	   */
 	  public boolean isEmpty() {
+		if(list == null)
+			return true;
 	    return list.isEmpty();
 	  }
 	
@@ -524,7 +528,10 @@ public class JsonArray implements Iterable<Object>, Serializable, IJson {
 	   * @return  a reference to this, so the API can be used fluently
 	   */
 	  public JsonArray clear() {
-	    list.clear();
+		  if(this.list == null)
+			  this.list = new ArrayList();
+		  else
+			  list.clear();
 	    return this;
 	  }
 	
@@ -582,6 +589,8 @@ public class JsonArray implements Iterable<Object>, Serializable, IJson {
 	  
 	  
 	  public void forEachJsonObject(Consumer<JsonObject> jo) {
+		  if(this.list==null || this.list.isEmpty())
+			  return;
 		  this.forEach(j->{
 			  if(j instanceof JsonObject) {
 				jo.accept((JsonObject)j);
