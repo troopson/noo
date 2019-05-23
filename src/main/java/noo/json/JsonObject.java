@@ -146,7 +146,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Integer getInteger(String key) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
-		if(v==null) {
+		if(v==null || "".equals(v)) {
 			return null;
 		}
 		if(v instanceof CharSequence) {
@@ -173,7 +173,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Long getLong(String key) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
-		if(v==null) {
+		if(v==null || "".equals(v)) {
 			return null;
 		}
 		if(v instanceof CharSequence) {
@@ -200,7 +200,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Double getDouble(String key) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
-		if(v==null) {
+		if(v==null || "".equals(v)) {
 			return null;
 		}
 		if(v instanceof CharSequence) {
@@ -227,7 +227,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Float getFloat(String key) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
-		if(v==null) {
+		if(v==null || "".equals(v)) {
 			return null;
 		}
 		if(v instanceof CharSequence) {
@@ -405,7 +405,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	public Integer getInteger(String key, Integer def) {
 		Objects.requireNonNull(key);
 		Object v = map.get(key);
-		if(v!=null && v instanceof CharSequence) {
+		if(v!=null &&  !"".equals(v) && v instanceof CharSequence) {
 			return Integer.parseInt(v.toString());
 		}
 		

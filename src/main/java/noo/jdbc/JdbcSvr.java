@@ -362,6 +362,16 @@ public class JdbcSvr {
 		}
 		return lm.getJsonObject(0);
 	}
+	
+	public JsonObject qryOne(String sql, Object...param) {
+
+		JsonArray lm = this.qry(sql, param);
+		if (lm == null || lm.isEmpty()) {
+			return null;
+		}
+		return lm.getJsonObject(0);
+	} 
+	
 
 	public String qryString(String sql, Object... p) {
 		try {

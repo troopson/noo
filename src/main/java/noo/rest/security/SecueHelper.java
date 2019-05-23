@@ -52,9 +52,10 @@ public class SecueHelper {
 
 			@Override
 			public Object doInRedis(RedisConnection connection) throws DataAccessException {
+				String client_type= u.getClient();
 				String client_uid_key = makeRedisClientUseridKey(u.getClient(), u.getId());
-				setEx(connection, SecueHelper.REDIS_KEY + ":" + authkey, u.getSessionTimeoutMinutes(), ustring); 
-				setEx(connection, client_uid_key, u.getSessionTimeoutMinutes(), authkey);
+				setEx(connection, SecueHelper.REDIS_KEY + ":" + authkey, u.getSessionTimeoutMinutes(client_type), ustring); 
+				setEx(connection, client_uid_key, u.getSessionTimeoutMinutes(client_type), authkey);
 				return null;
 			}
 
@@ -109,8 +110,8 @@ public class SecueHelper {
 			@Override
 			public Object doInRedis(RedisConnection connection) throws DataAccessException {
 				String ukey = makeRedisClientUseridKey(client_type, u.getId());
-				expire(connection, rkey, u.getSessionTimeoutMinutes());
-				expire(connection, ukey, u.getSessionTimeoutMinutes());
+				expire(connection, rkey, u.getSessionTimeoutMinutes(client_type));
+				expire(connection, ukey, u.getSessionTimeoutMinutes(client_type));
 				return null;
 			}
 

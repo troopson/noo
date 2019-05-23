@@ -33,13 +33,28 @@ public class TestJson {
 		a.put("dd", d);
 		a.put("dd2", d2);
 		a.put("t2", t);
+		a.put("t2", t);
+		a.put("int1", "");
+		a.put("int2", "10");
 		
 		System.out.println(a.getString("aaa"));
 		System.out.println(a.getString("aaa","def"));
 		System.out.println(a.getString("bbb"));
+		System.out.println(a.getInteger("int1"));
+		System.out.println(a.getInteger("int2"));
 		
 		System.out.println(a.encode());
 		System.out.println(a.encodePrettily());
+		
+		String s="null";
+		JsonArray j =new JsonArray(s);
+		System.out.println(j.getList()==null);
+		System.out.println(j.isEmpty());
+		j.forEachJsonObject(aa->{
+			System.out.println("--------");
+			System.out.println(aa==null);
+			System.out.println(aa.encodePrettily());
+		});
 		
 	}
 

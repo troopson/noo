@@ -41,7 +41,7 @@ public abstract class AbstractUser {
 		this.client = client;
 	} 
 
-	public long getSessionTimeoutMinutes() {
+	public long getSessionTimeoutMinutes(String client) {
 		return 120L;
 	}
 	
