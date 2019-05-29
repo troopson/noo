@@ -3,6 +3,7 @@
  */
 package noo.exception;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,7 +21,8 @@ import org.springframework.web.context.request.WebRequest;
 @ControllerAdvice
 public class BaseExceptionHandler {
 
-
+	@Autowired
+	private ExceptionProcessor processor;
  
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -60,7 +62,9 @@ public class BaseExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public String onRuntimeException(Exception exception, WebRequest request) {
-    	exception.printStackTrace();    	
+    	exception.printStackTrace();  
+    	if(processor!=null)
+    		processor.process(exception);
         return BaseException.unknowException(HttpStatus.BAD_REQUEST+"",exception);
     }
     
@@ -69,6 +73,8 @@ public class BaseExceptionHandler {
     @ResponseBody
     public String onUncategorizedSQLException(Exception exception, WebRequest request) {
     	exception.printStackTrace();
+    	if(processor!=null)
+    		processor.process(exception);
     	UncategorizedSQLException u = (UncategorizedSQLException)exception;
         return BaseException.unknowException(HttpStatus.BAD_REQUEST+"",u.getSQLException());
     }
@@ -81,6 +87,8 @@ public class BaseExceptionHandler {
     @ResponseBody
     public String onMultipartException(Exception exception, WebRequest request) {
     	exception.printStackTrace();
+    	if(processor!=null)
+    		processor.process(exception);
         return new BaseException("file.upload.failed",exception.getMessage()).toString();
     }
     
