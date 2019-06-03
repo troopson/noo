@@ -81,5 +81,11 @@ public class UserService implements SecuritySetting {
 		return j.mapTo(User.class); 
 	}
 
+
+	@Override
+	public boolean checkClient(String u, String p, String client_type) { 
+		return true;
+	}
+
 	 
 }

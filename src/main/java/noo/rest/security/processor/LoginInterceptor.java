@@ -58,8 +58,12 @@ public class LoginInterceptor extends RequestInterceptor {
 			return;
 		}
 		
-		if(us.checkUserPassword(uobj, p, request)) {
+		
+		String client_type = SecueHelper.getClient(request); 
+		
+		if(us.checkUserPassword(uobj, p, request) && us.checkClient(u,p,client_type)) {
 			
+			uobj.setClient(client_type);
 			setupContextOnCheckSuccess(request, resp, uobj);
 			
 		}else { 
@@ -77,10 +81,7 @@ public class LoginInterceptor extends RequestInterceptor {
 	protected void setupContextOnCheckSuccess(HttpServletRequest request, HttpServletResponse resp, AbstractUser uobj)
 			throws IOException {
 		String authkey =  ID.uuid();
-		uobj.setToken(authkey); 
-		
-		String client_type = SecueHelper.getClient(request);
-		uobj.setClient(client_type);
+		uobj.setToken(authkey);  
 		
 		SecueHelper.updateUser(uobj,this.redis);
 		 
