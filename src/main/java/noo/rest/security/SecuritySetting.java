@@ -18,7 +18,9 @@ public interface SecuritySetting {
 	
 	public boolean checkUserPassword(AbstractUser u, String requestPassword, HttpServletRequest req);	
 	
-	public boolean checkClient(String username, String requestPassword, String client_type);
+	default public boolean checkClient(String username, String requestPassword, String client_type) {
+		return true;
+	}
 	
 	public boolean isIgnore(String url);
 	

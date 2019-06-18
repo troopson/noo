@@ -49,7 +49,9 @@ public abstract class AbstractUser {
     public abstract JsonObject toResponseJsonObject();
 	
     //User对象保存为JsonObject的结构
-	public abstract JsonObject toJsonObject();
+	public JsonObject toJsonObject() {
+		return this.toResponseJsonObject();
+	}
 	
 	
 	

@@ -21,7 +21,7 @@ import org.springframework.web.context.request.WebRequest;
 @ControllerAdvice
 public class BaseExceptionHandler {
 
-	@Autowired
+	@Autowired(required=false)
 	private ExceptionProcessor processor;
  
     @ExceptionHandler(BusinessException.class)

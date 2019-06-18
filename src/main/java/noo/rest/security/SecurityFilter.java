@@ -39,7 +39,7 @@ import noo.util.SpringContext;
 public class SecurityFilter implements Filter {
   
 	 
-	private SecuritySetting us; 
+	protected SecuritySetting us; 
 
 	private StringRedisTemplate redis;  
 	 
@@ -48,9 +48,9 @@ public class SecurityFilter implements Filter {
 	private List<RequestInterceptor> requestHandler;
 	 
 	
-	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
+	protected CorsProcessor corsProcessor = new DefaultCorsProcessor();
 	
-	private CorsConfiguration corsConfiguration = null;
+	protected CorsConfiguration corsConfiguration = null;
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {

@@ -5,6 +5,7 @@ package noo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
@@ -70,15 +71,17 @@ public class Config {
 	
 	
 	@Autowired
-	private RequestMappingHandlerAdapter adapter; 
+	private Set<RequestMappingHandlerAdapter> adapters; 
 	 
 	@PostConstruct
     public void addArgumentResolvers() {
-		List<HandlerMethodArgumentResolver> ls = adapter.getArgumentResolvers();
-		List<HandlerMethodArgumentResolver> rslvs = new ArrayList<>();
-		rslvs.add(new JsonObjectResolver());
-		rslvs.addAll(ls);
-		adapter.setArgumentResolvers(rslvs);
+		for(RequestMappingHandlerAdapter adapter: adapters) {
+			List<HandlerMethodArgumentResolver> ls = adapter.getArgumentResolvers();
+			List<HandlerMethodArgumentResolver> rslvs = new ArrayList<>();
+			rslvs.add(new JsonObjectResolver());
+			rslvs.addAll(ls);
+			adapter.setArgumentResolvers(rslvs);
+		}
     }
 	
 	//====================security bean============================
