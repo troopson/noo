@@ -24,7 +24,6 @@ import noo.rest.security.AbstractUser;
 import noo.rest.security.AuthContext;
 import noo.rest.security.SecueHelper;
 import noo.rest.security.SecurityFilter;
-import noo.util.ID;
 import noo.util.S;
 
 /**
@@ -63,7 +62,7 @@ public class DelegateSecurityFilter extends SecurityFilter {
 		try {	
 			
 			if(delegateUs.isLoginUrl(requrl)){
-				AbstractUser u = delegateUs.doLogin(req, resp);
+				AbstractUser u = delegateUs.loginByDelegate(req, resp);
 				if(u==null) {
 					throw new AuthenticateException("用户不存在！");
 				}
@@ -71,7 +70,7 @@ public class DelegateSecurityFilter extends SecurityFilter {
 				
 			}else if(delegateUs.isLogoutUrl(requrl)){	
 				AbstractUser u = this.retrieveUser(req, resp); 
-				delegateUs.doLogout(req,u);
+				delegateUs.doLogout(req,u); 
 			}else { 
 			    this.process(requrl, req, resp, chain); 
 			}
@@ -128,8 +127,7 @@ public class DelegateSecurityFilter extends SecurityFilter {
 	
 	protected void setupContextOnCheckSuccess(HttpServletRequest request, HttpServletResponse resp, AbstractUser uobj)
 			throws IOException {
-		String authkey =  ID.uuid();
-		uobj.setToken(authkey);   
+		String authkey =  uobj.getToken();
 		 
 		resp.setCharacterEncoding("UTF-8");
 		resp.setContentType("text/html;charset=utf-8");  

@@ -18,7 +18,7 @@ public interface DelegateSecuritySetting {
 
 	boolean isLogoutUrl(String requrl);
 	
-	AbstractUser doLogin(HttpServletRequest req,HttpServletResponse resp);
+	AbstractUser loginByDelegate(HttpServletRequest req,HttpServletResponse resp);
 	
 	void doLogout(HttpServletRequest req,AbstractUser u);
 
