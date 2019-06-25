@@ -25,6 +25,7 @@ import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,6 +45,7 @@ public class Json {
   static {
     // Non-standard JSON but we allow C style comments in our JSON
     mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+    mapper.configure(Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
 
     prettyMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
     prettyMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
