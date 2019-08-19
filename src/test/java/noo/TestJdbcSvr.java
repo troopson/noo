@@ -7,6 +7,7 @@ import org.junit.Test;
 import com.zaxxer.hikari.HikariDataSource;
 
 import noo.jdbc.JdbcSvr;
+import noo.json.JsonArray;
 import noo.json.JsonObject;
 
 public class TestJdbcSvr {
@@ -36,6 +37,7 @@ public class TestJdbcSvr {
 		System.out.println(jso.encodePrettily());
 		
 	}
+ 
 	
 	@Test
 	public void testQueryPage2() { 
@@ -45,6 +47,18 @@ public class TestJdbcSvr {
 		param.put("pageSize", 3);
 		JdbcSvr svr = new JdbcSvr(ds);
 		JsonObject jso = svr.qryMoreRowStartFrom("select uuid, mobile from xs_xs where {uuid>:maxid} order by uuid limit {pageSize}", param,"uuid");
+		System.out.println(jso.encodePrettily());
+		
+	}
+	
+	@Test
+	public void testQueryPage3() { 
+		 
+		JsonObject param = new JsonObject();
+		param.put("maxid", 132);
+		param.put("pageSize", 3);
+		JdbcSvr svr = new JdbcSvr(ds);
+		JsonArray jso = svr.qry("select uuid, mobile from xs_xs where {uuid=:maxid} order by uuid limit {pageSize}", param);
 		System.out.println(jso.encodePrettily());
 		
 	}
