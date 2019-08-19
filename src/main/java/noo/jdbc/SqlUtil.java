@@ -60,7 +60,7 @@ public class SqlUtil {
 	
 	//============================================
 
-	private final static Pattern PARAM_REG = Pattern.compile("\\{[^\\{\\}]*[=|like|in]\\W*[:|#][a-zA-Z0-9_ ]*\\}",Pattern.CASE_INSENSITIVE);
+	private final static Pattern PARAM_REG = Pattern.compile("\\{[^\\{\\}]*[=|like|in|>|<]\\W*[:|#][a-zA-Z0-9_ ]*\\}",Pattern.CASE_INSENSITIVE);
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static String processParam(String sql, Map param) {
@@ -130,10 +130,10 @@ public class SqlUtil {
 		if(param!=null) {
 			for(Object k: param.keySet()) {
 				Object v = param.get(k);
-				if(k instanceof String && v instanceof String) {
-					String key = (String)k;
-					String val = (String)v;
-					if(Pattern.matches("[a-zA-Z0-9_-]*", val)) {
+				if(k instanceof String) {
+					String key = (String)k; 
+					if( v instanceof Number || (v!=null && v instanceof String && Pattern.matches("[a-zA-Z0-9_-]*", (String)v))) {
+						String val = v==null? "" : v.toString();
 						rtnsql = rtnsql.replace("{"+key+"}", val);
 					}
 				}			

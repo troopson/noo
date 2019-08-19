@@ -472,11 +472,25 @@ public class JdbcSvr {
 		return new PageJsonArray(page);
 	}
 	
+	public JsonObject qryMoreRowStartFrom(String sql, JsonObject param, String byField) {
+		int[] pageSizeNo = getPageSizePageNo(param);
+		
+		Integer pageSize = pageSizeNo[0];   
+		
+		if(sql.toLowerCase().indexOf(" limit ") == -1)
+			sql = sql +" limit "+pageSize;
+		JsonArray jary = this.qry(sql, param);
+		return this.doReturnMore(jary, pageSize, byField); 
+	}
 	
 	public JsonObject qryMoreRowStartFrom(String sql, Object[] params, int pageSize, String byField) {
-		if(sql.indexOf(" limit ") == -1)
+		if(sql.toLowerCase().indexOf(" limit ") == -1)
 			sql = sql +" limit "+pageSize;
 		JsonArray jary = this.qry(sql, params);
+		return this.doReturnMore(jary, pageSize, byField);
+	}
+	
+	private JsonObject doReturnMore(JsonArray jary, int pageSize, String byField) {
 		int size = jary.size();
 		JsonObject jo = jary.getJsonObject(size-1);
 		Object value = jo.getValue(byField);
