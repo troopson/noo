@@ -88,9 +88,9 @@ public class SqlUtil {
 				int inpos= s.toLowerCase().indexOf(" in ");
 				if(inpos!=-1) {
 					String headin = s.substring(1,inpos+4);
-					Iterable<Object> colv = (Iterable<Object>)param.get(paramName);
+					Iterable<Object> colv = (Iterable<Object>)param.get(paramName); 
 					int i=0;
-					StringBuilder inReplace= new StringBuilder(headin);
+					StringBuilder inReplace= new StringBuilder(headin); 
 					for(Object ech : colv) {
 						String in_name = paramName+"_"+i;
 						if(i==0) {
@@ -101,7 +101,11 @@ public class SqlUtil {
 						i=i+1;
 						param.put(in_name, ech);						
 					}
-					m.appendReplacement(newsql, inReplace.append(" )").toString());
+					if (i>0)
+						m.appendReplacement(newsql, inReplace.append(" )").toString());
+					else {
+						appendReplacement(newsql, ignore, m);
+					}
 				}else {
 					//此处转换为spring nametemplate的格式 file=:param
 					String re = s.substring(1, s.length() - 1);
@@ -117,17 +121,7 @@ public class SqlUtil {
 				}				
 				// param.put(paramName, v); //spring会放到自己的map中，避免大小写的问题
 			} else {
-				if(!ignore) {
-					m.appendReplacement(newsql, "1=2");
-				}else {				
-					m.appendReplacement(newsql, "");
-	
-					String temp = newsql.toString().trim().toLowerCase();
-	
-					if (temp.endsWith("where") || temp.endsWith("and") || temp.endsWith("or") || temp.endsWith("(")) {
-						newsql.append(" 1=1 ");
-					}
-				}
+				appendReplacement(newsql, ignore, m);
 			}
 		}
 		m.appendTail(newsql); 
@@ -147,6 +141,14 @@ public class SqlUtil {
 		}
 		//rtnsql = rtnsql.replaceAll("\\{[a-zA-Z0-9=:_-]*\\}", "1=1");
 		return rtnsql;
+	}
+	
+	public static void appendReplacement(StringBuffer newsql,boolean ignore, Matcher m) {
+		if(!ignore) {
+			m.appendReplacement(newsql, "1=2");
+		}else {				
+			m.appendReplacement(newsql, "1=1"); 
+		}
 	}
 	
 	public static String toStaticSQL(String sql, Map<String,?> params) {

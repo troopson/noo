@@ -6,6 +6,7 @@ package noo.json;
 import java.util.Date;
 
 import noo.util.D;
+import noo.util.MD5;
 
 /**
  * @author qujianjun   troopson@163.com
@@ -55,6 +56,14 @@ public class TestJson {
 			System.out.println(aa==null);
 			System.out.println(aa.encodePrettily());
 		});
+
+		System.out.println((int)'	');
+		String st="{\"ip\":\"124.112.46.237\",\"name\":\"章如林\",\"time\":\"[25/Jun/2019:11:07:47 +0800]\",\"referer\":\"http://www.cyikao.com/zg/2019_ysjncjcx_PC/?wt.mc_id=sem-yikao-A360-pc-yis-2scj-40-hdl-yis\",\"mc_id\":\"sem-yikao-A360-pc-yis-2scj-40-hdl-yis\",\"remark\":\"准考证：	340419150S0004\",\"sid\":\"9\",\"mobile\":\"13865102415\"}";
+		
+		JsonObject js = new JsonObject(st);
+		System.out.println(js.encodePrettily());
+		
+		System.out.println(MD5.encode("offcn.misoffcn.crm.hdSCHD190723701264839666260.00"));
 		
 	}
 

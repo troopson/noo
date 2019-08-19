@@ -7,14 +7,15 @@ spring:
         password: # Login password of the redis server.
         port: 6379 # Redis server port.
         database: 0
-    datasource:
-        url: jdbc:mysql://127.0.0.1:3306/dev?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT
+    datasource: 
+        url: jdbc:mysql://192.168.62.251:3306/crmcust?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&serverTimezone=Asia/Shanghai
         username: root
-        password: 412200 
-        maximumPoolSize: 5
+        password: "0123456789"
         driver-class-name: com.mysql.cj.jdbc.Driver
-        hikari: 
-            idle-timeout: 10000
+        hikari:  
+            idle-timeout: 30000
+            maximum-pool-size: 15
+            connection-test-query: SELECT 1
             
  
 eureka: 

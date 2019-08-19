@@ -471,6 +471,22 @@ public class JdbcSvr {
 		page.getResultList();
 		return new PageJsonArray(page);
 	}
+	
+	
+	public JsonObject qryMoreRowStartFrom(String sql, Object[] params, int pageSize, String byField) {
+		if(sql.indexOf(" limit ") == -1)
+			sql = sql +" limit "+pageSize;
+		JsonArray jary = this.qry(sql, params);
+		int size = jary.size();
+		JsonObject jo = jary.getJsonObject(size-1);
+		Object value = jo.getValue(byField);
+		JsonObject result = new JsonObject();
+		result.put("content", jary);
+		result.put("maxid", value);
+		if(size < pageSize)
+			result.put("is_end", 0);
+		return result;
+	}
 
 	// ================================meta=============================
 
