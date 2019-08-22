@@ -490,15 +490,19 @@ public class JdbcSvr {
 		return this.doReturnMore(jary, pageSize, byField);
 	}
 	
-	private JsonObject doReturnMore(JsonArray jary, int pageSize, String byField) {
-		int size = jary.size();
-		JsonObject jo = jary.getJsonObject(size-1);
-		Object value = jo.getValue(byField);
+	private JsonObject doReturnMore(JsonArray jary, int pageSize, String byField) { 
 		JsonObject result = new JsonObject();
-		result.put("content", jary);
-		result.put("maxid", value);
-		if(size < pageSize)
-			result.put("is_end", 0);
+		if(jary==null) {
+			jary= new JsonArray();
+		    result.put("is_end", 0);
+		}else {
+			int size =  jary.size();
+		    JsonObject jo = jary.getJsonObject(size-1); 
+		    result.put("maxid", jo.getValue(byField));
+		    if(size < pageSize)
+				result.put("is_end", 0);
+		}
+		result.put("content", jary); 
 		return result;
 	}
 

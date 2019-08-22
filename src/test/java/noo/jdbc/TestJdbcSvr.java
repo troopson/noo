@@ -1,4 +1,4 @@
-package noo;
+package noo.jdbc;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -59,6 +59,18 @@ public class TestJdbcSvr {
 		param.put("pageSize", 3);
 		JdbcSvr svr = new JdbcSvr(ds);
 		JsonArray jso = svr.qry("select uuid, mobile from xs_xs where {uuid=:maxid} order by uuid limit {pageSize}", param);
+		System.out.println(jso.encodePrettily());
+		
+	}
+	
+	@Test
+	public void testQueryPage4() { 
+		 
+		JsonObject param = new JsonObject();
+		param.put("maxid", 132);
+		param.put("pageSize", 3);
+		JdbcSvr svr = new JdbcSvr(ds);
+		JsonArray jso = svr.qry("select uuid, mobile from xs_xs where 1=2 and {uuid=:maxid} order by uuid limit {pageSize}", param);
 		System.out.println(jso.encodePrettily());
 		
 	}
