@@ -492,7 +492,7 @@ public class JdbcSvr {
 	
 	private JsonObject doReturnMore(JsonArray jary, int pageSize, String byField) { 
 		JsonObject result = new JsonObject();
-		if(jary==null) {
+		if(jary==null || jary.isEmpty()) {
 			jary= new JsonArray();
 		    result.put("is_end", 0);
 		}else {
