@@ -3,12 +3,12 @@ spring:
     application: 
         name: noo
     redis:
-        host: 192.168.62.251
+        host: 192.168.64.251
         password: # Login password of the redis server.
         port: 6379 # Redis server port.
         database: 0
     datasource: 
-        url: jdbc:mysql://192.168.62.251:3306/crmcust?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://192.168.64.251:3306/crmcust?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&serverTimezone=Asia/Shanghai
         username: root
         password: "0123456789"
         driver-class-name: com.mysql.cj.jdbc.Driver

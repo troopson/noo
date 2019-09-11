@@ -3,7 +3,7 @@ spring:
     application: 
         name: noo_test
     redis:
-        host: 192.168.62.251
+        host: 192.168.64.251
         password: # Login password of the redis server.
         port: 6379 # Redis server port.
         database: 0

@@ -18,10 +18,12 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -615,6 +617,13 @@ public class JsonArray implements Iterable<Object>, Serializable, IJson {
 	  public JsonArray map(Function<Object, Object> mapper) {
 		  this.list = this.stream().map(mapper).collect(Collectors.toList());
 		  return this;
+	  }
+	  
+	  
+	  public void distinct() {
+		  Set<Object> s =new HashSet();
+		  s.addAll(this.list);
+		  this.list = new ArrayList<>(s); 
 	  }
 	
 	  @Override
