@@ -57,6 +57,8 @@ public class PageQuery implements Serializable {
 			throw new IllegalArgumentException("PageInation.sql is null,please initial it first. ");
 		}
 
+		numPerPage = numPerPage>2000? 2000: numPerPage;
+		
 		// 计算总记录数
 		StringBuffer totalSQL = new StringBuffer(" SELECT count(*) FROM ( ");
 		totalSQL.append(sql);
@@ -101,6 +103,8 @@ public class PageQuery implements Serializable {
 		} else if (sql == null || sql.equals("")) {
 			throw new IllegalArgumentException("PageInation.sql is null,please initial it first. ");
 		}
+		
+		numPerPage = numPerPage>2000? 2000: numPerPage;
 
 		// 计算总记录数
 		StringBuffer totalSQL = new StringBuffer(" SELECT count(*) FROM ( ");

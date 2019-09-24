@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import noo.util.D;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -209,6 +212,8 @@ public class Json {
       val = Base64.getEncoder().encodeToString((byte[])val);
     } else if (val instanceof Instant) {
       val = ISO_INSTANT.format((Instant) val);
+    }else if (val instanceof Date) {
+    	val =  D.strDT((Date)val);
     } else {
       throw new IllegalStateException("Illegal type in JsonObject: " + val.getClass());
     }

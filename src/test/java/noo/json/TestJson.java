@@ -37,6 +37,8 @@ public class TestJson {
 		a.put("t2", t);
 		a.put("int1", "");
 		a.put("int2", "10");
+		Object o = new Date();
+		a.put("date", o);
 		
 		System.out.println(a.getString("aaa"));
 		System.out.println(a.getString("aaa","def"));
