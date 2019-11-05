@@ -451,8 +451,11 @@ public class JdbcSvr {
 	
 	//==========================================================
 	 
-
 	public PageJsonArray qryByPage(String sql, JsonObject param) {
+		return this.qryByPage(sql, param, true);
+	}
+
+	public PageJsonArray qryByPage(String sql, JsonObject param, boolean isQueryTotal) {
 
 		int[] pageSizeNo = getPageSizePageNo(param);
 		
@@ -461,13 +464,13 @@ public class JdbcSvr {
 
 		String newsql = SqlUtil.processParam(sql, param.getMap());
 		JdbcSvr.log.debug(newsql+"   "+param.encode());
-		PageQuery page = new PageQuery(newsql.toString(), param.getMap(), pageNo, pageSize, this.getNamedTemplate());
+		PageQuery page = new PageQuery(newsql.toString(), param.getMap(), pageNo, pageSize, this.getNamedTemplate(),isQueryTotal);
 		page.getResultList();
 		return new PageJsonArray(page);
 	}
 
 	public PageJsonArray qryByPage(String sql, Object[] params, int pageNo, int pageSize) {
-		PageQuery page = new PageQuery(sql, params, pageNo, pageSize, this.getJdbcTemplate());
+		PageQuery page = new PageQuery(sql, params, pageNo, pageSize, this.getJdbcTemplate(),true);
 		page.getResultList();
 		return new PageJsonArray(page);
 	}

@@ -6,9 +6,9 @@ import org.junit.Test;
 
 import com.zaxxer.hikari.HikariDataSource;
 
-import noo.jdbc.JdbcSvr;
 import noo.json.JsonArray;
 import noo.json.JsonObject;
+import noo.json.PageJsonArray;
 
 public class TestJdbcSvr {
 	
@@ -17,7 +17,7 @@ public class TestJdbcSvr {
 	@BeforeClass
 	public static void setUp() {
 		ds = new HikariDataSource();
-		ds.setJdbcUrl("jdbc:mysql://192.168.62.251:3306/crmdev?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&serverTimezone=Asia/Shanghai");
+		ds.setJdbcUrl("jdbc:mysql://192.168.64.251:3306/crmdev?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&serverTimezone=Asia/Shanghai");
 		ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		ds.setUsername("root");
 		ds.setPassword("0123456789"); 
@@ -71,6 +71,26 @@ public class TestJdbcSvr {
 		param.put("pageSize", 3);
 		JdbcSvr svr = new JdbcSvr(ds);
 		JsonArray jso = svr.qry("select uuid, mobile from xs_xs where 1=2 and {uuid=:maxid} order by uuid limit {pageSize}", param);
+		System.out.println(jso.encodePrettily());
+		
+	}
+	
+	@Test
+	public void testQueryByPage_NoCount() {  
+		 
+		JdbcSvr svr = new JdbcSvr(ds);
+		JsonObject param = new JsonObject();
+		PageJsonArray jso = svr.qryByPage("select uuid, mobile from xs_xs where mobile is not null", param, false);
+		System.out.println(jso.encodePrettily());
+		
+	}
+	
+	@Test
+	public void testQueryByPage_HasCount() {  
+		 
+		JdbcSvr svr = new JdbcSvr(ds);
+		JsonObject param = new JsonObject();
+		PageJsonArray jso = svr.qryByPage("select uuid, mobile from xs_xs where mobile is not null", param);
 		System.out.println(jso.encodePrettily());
 		
 	}

@@ -32,6 +32,8 @@ public class PageQuery implements Serializable {
 	private int lastIndex;
 	// 结果集存放List
 	private List resultList;
+	
+	private transient boolean isQueryTotalCount = true;
 
 	public PageQuery(String sql) {
 	}
@@ -50,7 +52,7 @@ public class PageQuery implements Serializable {
 	 * @param jTemplate
 	 *            JdbcTemplate实例
 	 */
-	public PageQuery(String sql, Object[] args, int currentPage, int numPerPage, JdbcTemplate jTemplate) {
+	public PageQuery(String sql, Object[] args, int currentPage, int numPerPage, JdbcTemplate jTemplate, boolean query_total) {
 		if (jTemplate == null) {
 			throw new IllegalArgumentException("PageInation.jTemplate is null,please initial it first. ");
 		} else if (sql == null || sql.equals("")) {
@@ -59,19 +61,25 @@ public class PageQuery implements Serializable {
 
 		numPerPage = numPerPage>2000? 2000: numPerPage;
 		
-		// 计算总记录数
-		StringBuffer totalSQL = new StringBuffer(" SELECT count(*) FROM ( ");
-		totalSQL.append(sql);
-		totalSQL.append(" ) totalTable ");
-
-		// 总记录数
-		setTotalRows(jTemplate.queryForObject(totalSQL.toString(), args, Integer.class));
+		this.isQueryTotalCount = query_total;
+		
+		if(this.isQueryTotalCount) {
+			// 计算总记录数
+			StringBuffer totalSQL = new StringBuffer(" SELECT count(*) FROM ( ");
+			totalSQL.append(sql);
+			totalSQL.append(" ) totalTable ");
+	
+			// 总记录数
+			setTotalRows(jTemplate.queryForObject(totalSQL.toString(), args, Integer.class));
+		}else {
+			this.setTotalRows(0);
+		}
 
 		// 设置每页显示记录数
 		setNumPerPage(numPerPage);
-
+ 
 		// 计算总页数
-		setTotalPages();
+		setTotalPages(); 
 
 		// 设置要显示的页数
 		setCurrentPage(currentPage);
@@ -97,7 +105,7 @@ public class PageQuery implements Serializable {
 
 	// 提供一个可以执行命名参数的方法
 	public PageQuery(String sql, Map<String, ?> args, int currentPage, int numPerPage,
-			NamedParameterJdbcTemplate jTemplate) {
+			NamedParameterJdbcTemplate jTemplate, boolean query_total) {
 		if (jTemplate == null) {
 			throw new IllegalArgumentException("PageInation.jTemplate is null,please initial it first. ");
 		} else if (sql == null || sql.equals("")) {
@@ -105,14 +113,19 @@ public class PageQuery implements Serializable {
 		}
 		
 		numPerPage = numPerPage>2000? 2000: numPerPage;
-
-		// 计算总记录数
-		StringBuffer totalSQL = new StringBuffer(" SELECT count(*) FROM ( ");
-		totalSQL.append(sql);
-		totalSQL.append(" ) totalTable ");
-
-		// 总记录数
-		setTotalRows(jTemplate.queryForObject(totalSQL.toString(), args, Integer.class));
+		
+		this.isQueryTotalCount = query_total;
+		if(this.isQueryTotalCount) {
+			// 计算总记录数
+			StringBuffer totalSQL = new StringBuffer(" SELECT count(*) FROM ( ");
+			totalSQL.append(sql);
+			totalSQL.append(" ) totalTable ");
+	
+			// 总记录数
+			setTotalRows(jTemplate.queryForObject(totalSQL.toString(), args, Integer.class));
+		}else {
+			setTotalRows(0);
+		}
 
 		// 设置每页显示记录数
 		setNumPerPage(numPerPage);
@@ -171,7 +184,7 @@ public class PageQuery implements Serializable {
 		if (currentPage < 1) {
 			currentPage = 1;
 		}
-		if (currentPage > this.totalPages) {
+		if (this.isQueryTotalCount && currentPage > this.totalPages) {
 			currentPage = this.totalPages;
 		}
 		this.currentPage = currentPage;
@@ -229,7 +242,9 @@ public class PageQuery implements Serializable {
 
 	// 计算结束时候的索引
 	public void setLastIndex() {
-		if (totalRows < numPerPage) {
+		if(!this.isQueryTotalCount) {  //如果不查询总条数，直接计算LastIndex
+			this.lastIndex = currentPage * numPerPage;
+		}else if (totalRows < numPerPage) {
 			this.lastIndex = totalRows;
 		} else if ((totalRows % numPerPage == 0) || (totalRows % numPerPage != 0 && currentPage < totalPages)) {
 			this.lastIndex = currentPage * numPerPage;
@@ -237,5 +252,6 @@ public class PageQuery implements Serializable {
 			this.lastIndex = totalRows;
 		}
 	}
+ 
 
 }

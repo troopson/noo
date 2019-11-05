@@ -5,11 +5,13 @@ import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -208,7 +210,14 @@ public class Json {
       } else {
         val = new JsonArray((List)val);
       }
-    } else if (val instanceof byte[]) {
+    } else if (val instanceof Set) {
+    	 List t = new ArrayList((Set)val);
+    	 if (copy) {
+	        val = (new JsonArray(t)).copy();
+	      } else {
+	        val = new JsonArray(t);
+	      }
+    }else if (val instanceof byte[]) {
       val = Base64.getEncoder().encodeToString((byte[])val);
     } else if (val instanceof Instant) {
       val = ISO_INSTANT.format((Instant) val);
