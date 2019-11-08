@@ -83,7 +83,7 @@ public class TestSumcount {
 		DataSet ds  = new DataSet();
 		
 		ExprUnit sc = new ExprUnit();
-		sc.addExpr("test", "bb+cc*dd-ee",0);  
+		sc.addExpr("test", "bb+cc*dd-ee",0  );  
 		ds.addUnit(sc);
 		ds.transform(jary);
 		
