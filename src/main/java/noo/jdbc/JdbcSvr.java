@@ -515,7 +515,7 @@ public class JdbcSvr {
 	private static Map<String, Set<String>> tablepks = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
-    String allField(String table) {
+    public String allField(String table) {
 		String t = table.toLowerCase();
 		if (tableInfo.containsKey(t)) {
 			return tableInfo.get(t);
@@ -549,7 +549,7 @@ public class JdbcSvr {
 		return s.iterator().next();
 	}
 	
-	Set<String> getPkNames(String tableName) {
+	public Set<String> getPkNames(String tableName) {
 		final String lowerTable = tableName.toLowerCase();
 		if(tablepks.containsKey(lowerTable)) {
 			return tablepks.get(lowerTable);
