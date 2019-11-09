@@ -60,7 +60,14 @@ public class SqlUtil {
 	
 	//============================================
 
-	private final static Pattern PARAM_REG = Pattern.compile("\\{[^\\{\\}]*[=|like|in|>|<]\\W*[:|#][a-zA-Z0-9_ ]*\\}",Pattern.CASE_INSENSITIVE);
+	public final static Pattern PARAM_REG = Pattern.compile("\\{[^\\{\\}]*[=|like|in|>|<]\\W*[:|#][a-zA-Z0-9_ ]*\\}",Pattern.CASE_INSENSITIVE);
+	
+	public final static Pattern CLEAN_AND1_1 = Pattern.compile(" and[ ]+1=1", Pattern.CASE_INSENSITIVE);
+	
+	public static String replaceParam(String sql, String with) {
+		Matcher m = PARAM_REG.matcher(sql); 
+		return cleanAND1_1(m.replaceAll(with));
+	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static String processParam(String sql, Map param) {
@@ -139,8 +146,12 @@ public class SqlUtil {
 				}			
 			}
 		}
-		//rtnsql = rtnsql.replaceAll("\\{[a-zA-Z0-9=:_-]*\\}", "1=1");
-		return rtnsql;
+		//rtnsql = rtnsql.replaceAll("\\{[a-zA-Z0-9=:_-]*\\}", "1=1"); 
+		return cleanAND1_1(rtnsql);
+	}
+	
+	private static String cleanAND1_1(String sql) {
+		return CLEAN_AND1_1.matcher(sql).replaceAll(" ");
 	}
 	
 	public static void appendReplacement(StringBuffer newsql,boolean ignore, Matcher m) {

@@ -513,32 +513,42 @@ public class JdbcSvr {
 
 	private static Map<String, String> tableInfo = new HashMap<>();
 	private static Map<String, Set<String>> tablepks = new HashMap<>();
-
-	@SuppressWarnings("unchecked")
+ 
     public String allField(String table) {
 		String t = table.toLowerCase();
 		if (tableInfo.containsKey(t)) {
 			return tableInfo.get(t);
 		}
 		final List<String> colname = new ArrayList<>();
-		this.getJdbcTemplate().query("select * from " + table + " where 1=2", new ResultSetExtractor() {
+		String sql= "select * from " + table + " where 1=2";
+		getSQLMeta(sql, j->{
+			colname.add(j.getString("columnName"));
+		});
+		String fs = C.join(colname, ",");
+		tableInfo.put(t, fs);
+		return fs;
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public void getSQLMeta(String sql, Consumer<JsonObject> c) { 
+		
+		 this.getJdbcTemplate().query(sql, new ResultSetExtractor() {
 			@Override
 			public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
 
 				ResultSetMetaData meta = rs.getMetaData();
 				int colnum = meta.getColumnCount();
 				for (int i = 0; i < colnum; i++) {
-					colname.add(meta.getColumnName(i + 1));
-				}
-
+					JsonObject j = new JsonObject();
+					j.put("columnName", meta.getColumnName(i + 1));
+					j.put("columnType", meta.getColumnType(i + 1));
+					j.put("columnDisplaySize", meta.getColumnDisplaySize(i + 1));
+					c.accept(j);
+				} 
 				return null;
-			}
-
-		});
-		String fs = C.join(colname, ",");
-		tableInfo.put(t, fs);
-		return fs;
-
+			} 
+		}); 
 	}
 
 	String getSinglePK(String tableName) {

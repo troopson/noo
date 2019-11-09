@@ -1,5 +1,8 @@
 package noo.jdbc;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -95,5 +98,20 @@ public class TestJdbcSvr {
 		
 	}
 	
+	@Test
+	public void testGetField() {
+		JdbcSvr svr = new JdbcSvr(ds);
+		String s = svr.allField("xs_xs");
+		System.out.println(s);
+	}
+	
+	@Test
+	public void testGetSQLField() {
+		JdbcSvr svr = new JdbcSvr(ds);
+		svr.getSQLMeta("select * from xs_xs where {name=:name} limit 0", c->System.out.println(c)); 
+	}
+	
+
+
 
 }

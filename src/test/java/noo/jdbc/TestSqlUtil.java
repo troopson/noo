@@ -51,6 +51,22 @@ public class TestSqlUtil {
 		System.out.println(s2);
 	}
 	
+	@Test
+	public void testReplaceAnd() {
+		String sql="select as and and 2=1 from aaa r where {r.l=:l} and  {r.f=:f} and {r.t=#t} AND {r.x=:x} " ;
+		Map m = new HashMap();
+		String s2 = SqlUtil.processParam(sql, m);
+		System.out.println(s2);
+	}
+	
+	
+	@Test
+	public void testCleanParam() {
+		String sql="select as and and 2=1 from aaa r where {r.l=:l} and  {r.f=:f} and {r.t=#t} AND {r.x=:x} " ;
+	    String s2 = SqlUtil.replaceParam(sql,"1=2");
+		System.out.println(s2);
+	}
+	
 	
 	@Test
 	public void testJsonArrayEncode() {
@@ -96,6 +112,8 @@ public class TestSqlUtil {
 		
 		
 	}
+	
+
 	
 	@Test
 	public void testDate() {
