@@ -19,12 +19,12 @@ public class TestSqlUtil {
 	
 	@Test
 	public void testParseEvent() { 
-		String sql ="select a from t where {c in #c} and {f=:f}"; 
+		String sql ="select a from t where {c in #cdd} and {f=:fdd}"; 
 		 
 		 
 		String s2 = SqlUtil.parseEvent(sql, p->{
 			System.out.println(p[0]+" "+p[1]);
-			return p[1] +" "+p[0]+" '1' ";
+			return  " '1' ";
 		});
 		
 		System.out.println(s2);

@@ -192,6 +192,7 @@ public class SqlUtil {
 				ignore=false;
 			}
 			String paramName = s.substring(lst + 1, s.length() - 1).trim();
+			String fieldAndOprt=s.substring(1,lst);
 			//System.out.println("["+paramName+"]");
 
 		    String oprt = "=";
@@ -209,7 +210,7 @@ public class SqlUtil {
 			if(S.isBlank(replaceMent))
 				appendReplacement(newsql, ignore, m);
 			else
-				m.appendReplacement(newsql, replaceMent); 
+				m.appendReplacement(newsql, fieldAndOprt+replaceMent); 
 		}
 		m.appendTail(newsql);  
 		String rtnsql = newsql.toString();  
