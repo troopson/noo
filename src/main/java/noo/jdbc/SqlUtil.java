@@ -195,10 +195,14 @@ public class SqlUtil {
 			//System.out.println("["+paramName+"]");
 
 		    String oprt = "=";
-			int inpos= s.toLowerCase().indexOf(" in "); 
-			if(inpos!=-1) 
+		    String expr = s.toLowerCase();
+		    if(expr.contains(" not in "))
+		    	oprt = " not in ";
+		    else if(expr.contains(" not like "))
+		    	oprt = " not like ";
+		    else if(expr.contains(" in ")) 
 				oprt = "in";
-			else if(s.toLowerCase().indexOf(" like ")!=-1)
+			else if(expr.contains(" like "))
 				oprt = "like";
 			
 			String replaceMent = f.apply(new String[] {oprt, paramName});

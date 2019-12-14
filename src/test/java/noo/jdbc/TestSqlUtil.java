@@ -7,14 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import org.junit.Test;
 
-import com.zaxxer.hikari.HikariDataSource;
-
-import noo.jdbc.JdbcSvr;
-import noo.jdbc.SqlUtil;
 import noo.json.JsonArray;
 import noo.json.JsonObject;
 import noo.json.PageJsonArray;
@@ -22,6 +16,20 @@ import noo.json.PageJsonArray;
 
 public class TestSqlUtil {
 	
+	
+	@Test
+	public void testParseEvent() { 
+		String sql ="select a from t where {c in #c} and {f=:f}"; 
+		 
+		 
+		String s2 = SqlUtil.parseEvent(sql, p->{
+			System.out.println(p[0]+" "+p[1]);
+			return p[1] +" "+p[0]+" '1' ";
+		});
+		
+		System.out.println(s2);
+				
+	}
 	
 	
 	@Test
