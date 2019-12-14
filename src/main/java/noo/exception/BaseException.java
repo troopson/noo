@@ -22,11 +22,11 @@ public class BaseException extends RuntimeException {
 	
 	@Override
 	public String toString(){
-		return "{\"code\":\""+this.code+"\", \"message\":\""+this.getMessage()+"\" }";
+		return "{\"code\":\""+this.code+"\", \"message\":\""+this.getMessage().replace("\"", "'")+"\" }";
 	}
 	
 	public static String unknowException(String code, Exception e){
-		return "{\"code\":\""+code+"\", \"message\":\""+e.getMessage()+"\" }";
+		return "{\"code\":\""+code+"\", \"message\":\""+e.getMessage().replace("\"", "'")+"\" }";
 	}
 	
 }

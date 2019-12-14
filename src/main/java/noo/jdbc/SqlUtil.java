@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -175,6 +176,40 @@ public class SqlUtil {
 			}
 		}
 		return sql;
+	}
+	 
+	public static String parseEvent(String sql, Function<String[], String> f) {
+
+		Matcher m = PARAM_REG.matcher(sql);
+		StringBuffer newsql = new StringBuffer(); 
+
+		while (m.find()) {
+			String s = m.group();
+			int lst = s.lastIndexOf(":");
+			boolean ignore=true;
+			if(lst==-1) {
+				lst =  s.lastIndexOf("#");
+				ignore=false;
+			}
+			String paramName = s.substring(lst + 1, s.length() - 1).trim();
+			//System.out.println("["+paramName+"]");
+
+		    String oprt = "=";
+			int inpos= s.toLowerCase().indexOf(" in "); 
+			if(inpos!=-1) 
+				oprt = "in";
+			else if(s.toLowerCase().indexOf(" like ")!=-1)
+				oprt = "like";
+			
+			String replaceMent = f.apply(new String[] {oprt, paramName});
+			if(S.isBlank(replaceMent))
+				appendReplacement(newsql, ignore, m);
+			else
+				m.appendReplacement(newsql, replaceMent); 
+		}
+		m.appendTail(newsql);  
+		String rtnsql = newsql.toString();  
+		return cleanAND1_1(rtnsql);
 	}
 	
 	 
