@@ -88,6 +88,7 @@ public class SumCountUnit implements IProcessUnit {
 		if(Cvals!=null)
 			Cvals.forEach((k,v)->srow.put(k, v.size()));
 		
+		srow.put(RowTag.TAG_ROW_CUE, RowTag.SUM_ROW);
 		ja.add(srow);
 		 
 	} 
