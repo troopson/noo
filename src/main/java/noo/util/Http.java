@@ -27,8 +27,8 @@ import javax.net.ssl.X509TrustManager;
  */
 public class Http {
 	
-	public static final int CONNECT_TIMEOUT=10*1000;
-	public static final int READ_TIMEOUT = 10*1000;
+	public static final int CONNECT_TIMEOUT=20*1000;
+	public static final int READ_TIMEOUT = 20*1000;
 	
 	/*
 	 * 向指定URL发送GET方法的请求
