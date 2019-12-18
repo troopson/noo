@@ -26,6 +26,10 @@ import javax.net.ssl.X509TrustManager;
  * @author qujianjun troopson@163.com 2018年10月22日
  */
 public class Http {
+	
+	public static final int CONNECT_TIMEOUT=10*1000;
+	public static final int READ_TIMEOUT = 10*1000;
+	
 	/*
 	 * 向指定URL发送GET方法的请求
 	 * 
@@ -41,6 +45,8 @@ public class Http {
 			URL realUrl = new URL(urlNameString);
 			// 打开和URL之间的连接
 			URLConnection connection = realUrl.openConnection();
+			connection.setConnectTimeout(CONNECT_TIMEOUT);
+			connection.setReadTimeout(READ_TIMEOUT);
 			// 设置通用的请求属性
 			connection.setRequestProperty("accept", "*/*");
 			connection.setRequestProperty("connection", "Keep-Alive");
@@ -79,8 +85,8 @@ public class Http {
 			URL realUrl = new URL(url);
 			// 打开和URL之间的连接
 			URLConnection conn = realUrl.openConnection();
-			// conn.setConnectTimeout(3000);
-			// conn.setReadTimeout(3000);
+			conn.setConnectTimeout(CONNECT_TIMEOUT);
+			conn.setReadTimeout(READ_TIMEOUT);
 
 			// 设置通用的请求属性
 			conn.setRequestProperty("accept", "*/*");
@@ -140,6 +146,8 @@ public class Http {
 		SSLSocketFactory ssf = ctx.getSocketFactory();
  
 		HttpsURLConnection httpsConn = (HttpsURLConnection) url.openConnection();
+		httpsConn.setConnectTimeout(CONNECT_TIMEOUT);
+		httpsConn.setReadTimeout(READ_TIMEOUT);
 		httpsConn.setSSLSocketFactory(ssf);
 		httpsConn.setHostnameVerifier(new HostnameVerifier() {
 			@Override
@@ -160,6 +168,8 @@ public class Http {
 			URL realUrl = new URL(urlNameString);
 			// 打开和URL之间的连接
 			HttpsURLConnection connection = getHttpsURLConnection(realUrl, "GET"); 
+			connection.setConnectTimeout(CONNECT_TIMEOUT);
+			connection.setReadTimeout(READ_TIMEOUT);
 			// 设置通用的请求属性
 			connection.setRequestProperty("accept", "*/*");
 			connection.setRequestProperty("connection", "Keep-Alive");
@@ -187,8 +197,8 @@ public class Http {
 			URL realUrl = new URL(url);
 			// 打开和URL之间的连接
 			HttpsURLConnection conn = getHttpsURLConnection(realUrl, "POST");
-			// conn.setConnectTimeout(3000);
-			// conn.setReadTimeout(3000);
+			conn.setConnectTimeout(CONNECT_TIMEOUT);
+			conn.setReadTimeout(READ_TIMEOUT);
 
 			// 设置通用的请求属性
 			conn.setRequestProperty("accept", "*/*");
