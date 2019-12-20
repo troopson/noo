@@ -3,6 +3,8 @@
  */
 package noo.exception;
 
+import noo.json.JsonObject;
+
 /**
 * @author  瞿建军      
 * 
@@ -22,11 +24,17 @@ public class BaseException extends RuntimeException {
 	
 	@Override
 	public String toString(){
-		return "{\"code\":\""+this.code+"\", \"message\":\""+this.getMessage().replace("\"", "'")+"\" }";
+		JsonObject j = new JsonObject();
+		j.put("code", this.code);
+		j.put("message", this.getMessage());
+		return j.encode();
 	}
 	
 	public static String unknowException(String code, Exception e){
-		return "{\"code\":\""+code+"\", \"message\":\""+e.getMessage().replace("\"", "'")+"\" }";
+		JsonObject j = new JsonObject();
+		j.put("code", code);
+		j.put("message", e.getMessage());
+		return j.encode(); 
 	}
 	
 }
