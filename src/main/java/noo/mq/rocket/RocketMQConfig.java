@@ -5,13 +5,11 @@ package noo.mq.rocket;
 
 import org.apache.rocketmq.client.log.ClientLogger;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
 
 
 /**
  * @author qujianjun troopson@163.com 2018年8月31日
+ * 可以在Configuration中定义producer和consumer bean
  */
 /*
 @Configuration
@@ -19,26 +17,12 @@ import org.springframework.context.annotation.Lazy;
 @ConditionalOnProperty("rocketmq.address")
 */
 public class RocketMQConfig {
-
-	  
-	@Value("${rocketmq.address}")
-	private String onsaddr;
-	
-	@Value("${rocketmq.producerid}")
-	private String producerid;
-	
-	@Value("${rocketmq.consumerid}")
-	private String consumerid;
  
+	private String onsaddr;
+	    
 	
-	@Value("${rocketmq.send_timeout:10000}")
-	private String send_timeout;
-	
-	@Value("${rocketmq.consumer_thread:3}")
-	private String consumer_thread;
-	  
-	
-	public RocketMQConfig() {
+	public RocketMQConfig(String onsaddr) {
+		this.onsaddr = onsaddr;
 		System.setProperty(ClientLogger.CLIENT_LOG_LEVEL, "WARN");
 		System.setProperty(RemotingHelper.ROCKETMQ_REMOTING, "WARN");
 	}
@@ -53,21 +37,23 @@ public class RocketMQConfig {
 	     onsaddr: http://onsaddr-internal.aliyun.com:8080/rocketmq/nsaddr4client-internal   
 	 */
 	
-	
-	@Bean
-	@Lazy
-	public RocketProducer createProducer() {
+
+	public RocketProducer createProducer(String producerid,Integer send_timeout) {
 		
+		if(send_timeout==null || send_timeout<=0)
+			send_timeout=10000;
 		RocketProducer rmp = new RocketProducer();
-		rmp.start(this.producerid, this.onsaddr, Integer.parseInt(this.send_timeout));
+		rmp.start(producerid, this.onsaddr, send_timeout);
 		return rmp;
 		
 	}
 	
-	@Bean
-	public RocketConsumerHolder createConsumer() {
+
+	public RocketConsumerHolder createConsumer(String consumerid,Integer consumer_thread_num) {
 		 
-	    RocketConsumerHolder ch = new RocketConsumerHolder(this.consumerid, this.onsaddr, Integer.parseInt(this.consumer_thread)); 
+		if(consumer_thread_num==null || consumer_thread_num<=0)
+			consumer_thread_num = 3;
+	    RocketConsumerHolder ch = new RocketConsumerHolder(consumerid, this.onsaddr, consumer_thread_num); 
 	    return ch;
 		
 	}
