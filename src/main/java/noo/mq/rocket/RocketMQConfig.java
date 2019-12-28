@@ -6,19 +6,18 @@ package noo.mq.rocket;
 import org.apache.rocketmq.client.log.ClientLogger;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
 
 /**
  * @author qujianjun troopson@163.com 2018年8月31日
  */
+/*
 @Configuration
 @ConditionalOnClass(org.apache.rocketmq.client.producer.DefaultMQProducer.class)
 @ConditionalOnProperty("rocketmq.address")
+*/
 public class RocketMQConfig {
 
 	  
