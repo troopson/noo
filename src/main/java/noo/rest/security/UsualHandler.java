@@ -59,6 +59,7 @@ public class UsualHandler  {
 		String token = req.getHeader(SecueHelper.HEADER_KEY);
 		if (S.isBlank(token) && SecueHelper.isWebSocket(req)) { 
 			token = req.getHeader("Sec-WebSocket-Protocol");  
+			resp.setHeader("Sec-WebSocket-Protocol", token);
 		}
 		if (S.isBlank(token)) { 
 			return null;
