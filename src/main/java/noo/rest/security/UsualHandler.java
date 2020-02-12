@@ -57,9 +57,13 @@ public class UsualHandler  {
 	// 从request的header中，读取Authorization信息，然后从redis中读取user信息，生成user对象
 	private AbstractUser retrieveUser(HttpServletRequest req,HttpServletResponse resp) throws IOException {
 		String token = req.getHeader(SecueHelper.HEADER_KEY);
-		if (S.isBlank(token)) {
-			return null;
+		if (S.isBlank(token) && SecueHelper.isWebSocket(req)) { 
+			token = req.getHeader("Sec-WebSocket-Protocol");  
 		}
+		if (S.isBlank(token)) { 
+			return null;
+		} 
+		
 		String client_type = SecueHelper.getClient(req);
 		AbstractUser ab =  SecueHelper.retrieveUser(token, us, client_type,redis);  
 		return ab;

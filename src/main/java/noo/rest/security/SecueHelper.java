@@ -31,11 +31,22 @@ public class SecueHelper {
 	public static final String REDIS_USER_KEY = "noo:user:session";
 
 	public static final String HEADER_KEY = "Authorization";
+	
+	//Upgrade: websocket
+	public static final String WEBSOCKET_KEY = "Upgrade";
 
 	//前端传递过来的，表明是什么端的变量名称
 	public static final String CLIENT = "request-client";
 	//默认的client值，如果前端没有传递这个值，就是默认值
 	public static final String DEFAULT_CLIENT = "web";
+	
+	
+	public static boolean isWebSocket(HttpServletRequest req) {
+		String ws = req.getHeader(WEBSOCKET_KEY);
+		if("websocket".equalsIgnoreCase(ws))
+			return true;
+		return false;
+	}
 
 	public static void writeResponse(HttpServletResponse resp, String msg) throws IOException {
 		resp.setCharacterEncoding("UTF-8");
