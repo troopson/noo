@@ -39,6 +39,7 @@ public final class JsonObjectResolver implements HandlerMethodArgumentResolver {
               
              String jsonBody = S.readAndCloseInputStream(servletRequest.getInputStream(), "UTF-8"); 
              if(S.isNotBlank(jsonBody)) {
+            	//jsonBody = jsonBody.replace("<script>", "");
 				result = new JsonObject(jsonBody);
 			}
 			 
