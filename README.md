@@ -1,9 +1,7 @@
 # noo
 spring helper lib
 
-用来帮助快速开发基于spring的应用程序。在mybatis/jpa之外提供另外一种简便的编程方式。
-
-现在流行的ORM方式，会创建大量的值对象，比如pojo/do/dto，经常会自定义出一套查询的语言，对sql做各种转化，让简单的事情变的复杂了，这个项目，去掉了仅仅用来传递值的对象，全部通过统一的Json对象代替，对数据库的查询，辅助以一些简便的方法，但是还是通过sql语句来完成。我认为这样的方式，会让开发更加简单高效。
+用来帮助快速开发基于spring的应用程序。在mybatis/jpa之外提供另外一种选择。
 
 #### 引入noo
 **Maven**
@@ -12,7 +10,7 @@ spring helper lib
 <dependency>
     <groupId>com.github.troopson</groupId>
 	<artifactId>noo</artifactId>
-	<version>1.0.8</version>
+	<version>1.0.52</version>
 	<exclusions>
 	    <exclusion>
 		<artifactId>*</artifactId>
@@ -129,50 +127,6 @@ book.queryByNameParam("select sn,name,price from book where {author=#au} and {co
 
 ```
 
-#### Security 
-
-security依赖redis，需要配置redis的支持。
-security提供了一个通用的filter，提供了一个SecuritySetting接口，编写一个实现该接口的类，定义权限控制的细节，
-security将会监听login链接，并读取username和password进行校验，通过以后会把token返回前端请求，
-前端需要将该token保存起来，在之后的每次rest请求header中设置Authentication值为该token。
-
-一个示例的后端配置类如下：
-
-```java
-
-@Configuration
-public class SecurityConfig {
-
-	@Autowired
-	private RedisTemplate<String, ?> redis;
-
-	@Autowired
-	private SecuritySetting as;
-
-    private CorsConfiguration buildConfig() {
-		CorsConfiguration corsConfiguration = new CorsConfiguration();
-		corsConfiguration.addAllowedOrigin("*"); // 1允许任何域名使用
-		corsConfiguration.addAllowedHeader("*"); // 2允许任何头
-		corsConfiguration.addAllowedMethod("*"); // 3允许任何方法（post、get等）
-		return corsConfiguration;
-	}
-
-
-	@Bean
-	public FilterRegistrationBean<SecurityFilter> testFilterRegistration() {
-
-		FilterRegistrationBean<SecurityFilter> registration = new FilterRegistrationBean<>();
-		SecurityFilter sf = new SecurityFilter();
-		sf.setRedis(redis);
-		sf.setSecuritySetting(as);
-		sf.setCorsConfiguration(this.buildConfig());
-		registration.setFilter(sf);
-		registration.addUrlPatterns("/*");
-		registration.setOrder(1);
-		return registration;
-	}
-}
-```
 
 
 
