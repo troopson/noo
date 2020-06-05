@@ -32,6 +32,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
+import noo.exception.BusinessException;
 import noo.json.JsonArray;
 import noo.json.JsonObject;
 import noo.json.PageJsonArray;
@@ -627,6 +628,33 @@ public class JdbcSvr {
 		return appendOrderby(sql, tableAlias, orderby, asc, defaultFiled, null);
 	}
 	
-	//=============================================
-
+	//---------------------------------------------------------------
+	
+	/*
+	 * 检查SQL语句的安全性，避免对数据库修改的sql操作
+	 */
+	public static boolean isSelectSQL(String sql) {
+		if(!sql.startsWith("select ") ||  sql.contains("drop ")  || sql.contains("truncate ")     || sql.contains("delete ")
+				|| sql.contains("update ") || sql.contains("alter ") || sql.contains("create ") || sql.contains("insert ")
+				|| sql.contains("grant ") || sql.contains("exec ") || sql.contains(";") ) {
+			return false;
+		}else
+			return true;
+	}
+	
+	/*
+	 * 检查参数的安全性，避免SQL注入的情况
+	 */
+	public static void checkSecurityVariable(String value) {
+		if(S.isBlank(value))
+			return;
+		if(value.contains("select ") || value.contains("drop ")  || value.contains("truncate ")     || value.contains("delete ") 
+				  || value.contains("update ") || value.contains("alter ") || value.contains("create ") || value.contains("insert ")
+				  || value.contains("grant ") || value.contains("exec ") || value.contains(";") || value.contains("'") 
+				  || (value.contains(" ") && value.length()>12) ) {
+			log.error("危险SQL参数:\r\n"+value);
+			throw new BusinessException("参数值中包含非法的字符！");
+		}
+	}
+	
 }

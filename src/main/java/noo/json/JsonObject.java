@@ -1039,7 +1039,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		}
 		return new JsonObject(copiedMap);
 	}
-	
+	 
 	
 	public JsonObject copy(String...keys) {
 		Map<String, Object> copiedMap;
@@ -1050,6 +1050,23 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 		}
 		for(String s: keys) {
 			Object val = map.get(s);
+			val = Json.checkAndCopy(val, true); 
+			copiedMap.put(s, val); 
+		} 
+		return new JsonObject(copiedMap);
+	}
+	
+	public JsonObject copyNotNull(String...keys) {
+		Map<String, Object> copiedMap;
+		if (map instanceof LinkedHashMap) {
+			copiedMap = new LinkedHashMap<>(map.size());
+		} else {
+			copiedMap = new HashMap<>(map.size());
+		}
+		for(String s: keys) {
+			Object val = map.get(s);
+			if(val==null || "".equals(val))
+				continue;
 			val = Json.checkAndCopy(val, true); 
 			copiedMap.put(s, val); 
 		} 

@@ -87,6 +87,7 @@ dependencies {
 	
 	compile 'org.apache.rocketmq:rocketmq-client:4.3.0'
 	compile group: 'com.scireum', name: 'parsii', version: '4.0'
+	compile group: 'commons-codec', name: 'commons-codec', version: '1.14'
 	
     testCompile 'junit:junit:4.12'
      
