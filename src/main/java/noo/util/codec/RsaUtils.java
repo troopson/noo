@@ -24,7 +24,6 @@ import noo.exception.BusinessException;
  * 描述：Rsa 公钥加密解密工具类
  * </p>
  *
- * @author <a href="mailto:zhouwenbin@ctsi.com.cn">Wen-pin Chou</a>
  */
 public final class RsaUtils {
 

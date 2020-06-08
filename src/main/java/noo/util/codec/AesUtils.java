@@ -16,25 +16,11 @@ import noo.exception.BusinessException;
  
 
 /**
- * <code>AesUtils</code>是一个Aes 加解密工具。
- *
- * <p>
- *
- * <ul>
- * <li>在这个加解密工具来中，使用的加密算法为AES加密算法，模式为CBC，填充方式为PKCS5Padding；可参考{@value
- * #CIPHER_ALGORITHM}。以下Aes加解密使用的块长度为默认128位，所以在使用密钥和偏移量的时候，密钥长度要大于16位；{@linkplain
- * #getRandomString(int) 生成随机串}时，可以选择长度为16、24、32等。
- * <li>加密过程是： 明文串->{@linkplain #encrypt(String, String, String) AES加密}->{@linkplain
- * Base64#encodeBase64String(byte[]) Base64转码}->密文串。
- * <li>解密过程是：密文串->{@linkplain Base64#decodeBase64(String) Base64解码}->{@linkplain
- * #decrypt(String, String, String)
- * AES解密}->明文串。
- * <li>使用示例：
  * <pre>
  *    ...
  *    String key = AesUtils.getRandomString(16);
  *    String iv = AesUtils.getRandomString(16);
- *    String plainText = "AES CBC模式加密";
+ *    String plainText = "CBC模式加密";
  *    // 加密
  *    String cipherText = AesUtils.encrypt(plainText, key, iv);
  *    // 解密
@@ -43,7 +29,6 @@ import noo.exception.BusinessException;
  *      </pre>
  * </ul>
  *
- * @author <a href="mailto:zhouwenbin@ctsi.com.cn">Wen-pin Chou</a>
  * @see #getRandomString(int)
  * @see #encrypt(String, String, String)
  * @see #decrypt(String, String, String)
