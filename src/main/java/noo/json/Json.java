@@ -3,7 +3,6 @@ package noo.json;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -180,7 +179,8 @@ public class Json {
   static Object checkAndCopy(Object val, boolean copy) {
     if (val == null) {
       // OK
-    } else if (val instanceof Number && !(val instanceof BigDecimal)) {
+   // } else if (val instanceof Number && !(val instanceof BigDecimal)) {
+    } else if (val instanceof Number) {
       // OK
     } else if (val instanceof Boolean) {
       // OK

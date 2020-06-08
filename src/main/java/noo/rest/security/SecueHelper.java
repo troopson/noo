@@ -98,7 +98,39 @@ public class SecueHelper {
 		 
 	}
 	
+	/**
+	 * 校验某个用户的token是否合法，通常用来做接口请求的合法性校验
+	 * @param userid
+	 * @param token
+	 * @param us
+	 * @param redis
+	 * @return
+	 */
+	public static boolean isTokenValid(String userid, String token, SecuritySetting us,StringRedisTemplate redis) {
+		if (S.isBlank(token) || S.isBlank(userid))
+			return false;
 
+		String rkey = SecueHelper.REDIS_KEY + ":" + token;
+		String s = (String) redis.opsForValue().get(rkey);
+		if (S.isBlank(s)) {
+			return false;
+		}
+
+		AbstractUser u = us.fromJsonObject(new JsonObject(s));
+		if(userid.equals(u.getId()))
+			return true;
+		return false;
+	}
+	
+
+	/**
+	 * 依据token获取用户对象
+	 * @param token
+	 * @param us
+	 * @param client_type
+	 * @param redis
+	 * @return
+	 */
 	public static AbstractUser retrieveUser(String token, SecuritySetting us, String client_type, StringRedisTemplate redis) {
 		if (S.isBlank(token))
 			return null;

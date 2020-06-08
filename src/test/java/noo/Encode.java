@@ -13,7 +13,7 @@ public class Encode {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		System.out.println("0-9:"('0')+"  "+encode_mapping('9'));
+		System.out.println("0-9:"+encode_mapping('0')+"  "+encode_mapping('9'));
 		System.out.println("a-z:"+encode_mapping('a')+"  "+encode_mapping('z'));
 		System.out.println("A-Z:"+encode_mapping('A')+"  "+encode_mapping('Z')); 
 		
