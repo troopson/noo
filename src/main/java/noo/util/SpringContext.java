@@ -23,6 +23,12 @@ public class SpringContext implements ApplicationContextAware {
         if(SpringContext.applicationContext == null) {
             SpringContext.applicationContext = applicationContext;
         } 
+      
+    }
+    
+    //获取某个属性值
+    public static String getProperty(String key) {
+    	 return applicationContext.getEnvironment().getProperty(key);
     }
 
     //获取applicationContext

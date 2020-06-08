@@ -5,7 +5,6 @@ package noo.mq.rocket;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,18 +28,25 @@ public class RocketProducer {
 
 	public static final Log log = LogFactory.getLog(RocketProducer.class);
 	
-	public static final String EXPCEPTION_REDIS_KEY="mq_producer_failed_key";
+	public static final String EXPCEPTION_REDIS_KEY="mq_producer_failed_key"; 
+	//不需要延迟
+	public static final int NO_DELAY = -1;
 
 	private DefaultMQProducer producer;
 	
 	private StringRedisTemplate redis;
-	
-
-	
+	 
+	private boolean isAlert = false;
 
 	public void setRedis(StringRedisTemplate redis) {
 		this.redis = redis;
 	}
+	
+	public void setAlert(boolean alert) {
+		this.isAlert = alert;
+	}
+	
+	
 
 	public void start(String producerid, String address, int timeout) {
 
@@ -63,12 +69,16 @@ public class RocketProducer {
 
 	// 同步发送消息，只要不抛异常就是成功
 	public void sendMsg(String topic, String tag, JsonObject j) throws Exception {
+		this.sendMsg(topic, tag, j,NO_DELAY);
+	}
+	// 同步发送消息，只要不抛异常就是成功
+	public void sendMsg(String topic, String tag, JsonObject j,int delayLevel) throws Exception {
 
 		if (S.isBlank(topic)) {
 			return;
 		}
 
-		Message msg = createMessage(topic, tag, j);
+		Message msg = createMessage(topic, tag, j, delayLevel);
 
 		try {
 			SendResult sendResult = this.producer.send(msg);
@@ -86,66 +96,47 @@ public class RocketProducer {
 
 	}
 
-	public void sendMsgAsync(String topic, String tag, JsonObject j, boolean retryOnfail) throws Exception {
-
-		this.sendMsg(topic, tag, j, new SendCallback() {
-			@Override
-			public void onSuccess(SendResult sendResult) {
-				if (log.isDebugEnabled()) {
-					log.debug("Send MQ Msg:" + sendResult.getMsgId() + ",  topic:" + topic + " tag:" + tag + " content:"
-							+ j.encode());
-				}
-			}
-
-			@Override
-			public void onException(Throwable e) {
-				if(RocketProducer.this.redis!=null) {
-					//如果发送失败了，放到redis中保存24小时，可以通过定时任务补发
-					JsonObject vs = new JsonObject();
-					vs.put("topic", topic);
-					if(S.isNotBlank(tag))
-						vs.put("tag", tag);
-					vs.put("v", j);
-					
-					RocketProducer.this.redis.opsForList().leftPush(EXPCEPTION_REDIS_KEY, vs.encode());
-					RocketProducer.this.redis.expire(EXPCEPTION_REDIS_KEY, 24, TimeUnit.HOURS);
-					log.info("Send MQ Msg failed, push MQ msg into redis. topic:"+ topic + " tag:" + tag + " content:" + j.encode());
-				}else
-					log.error("Send MQ Msg failed, topic:" + topic + " tag:" + tag + " content:" + j.encode());
-				
-				e.printStackTrace();
-			}
-		});
+	
+	public void sendMsgAsync(String topic, String tag, JsonObject j) throws Exception { 
+		this.sendMsgAsync(topic, tag, j, NO_DELAY, false); 
 	}
 	
-	public void sendMsgAsync(String topic, String tag, JsonObject j) throws Exception {
-
-		this.sendMsgAsync(topic, tag, j, false);
+	public void sendMsgAsync(String topic, String tag, JsonObject j, boolean retryOnfail) throws Exception { 
+		this.sendMsgAsync(topic, tag, j, NO_DELAY, retryOnfail); 
 	}
 
-	public void sendMsg(String topic, String tag, JsonObject j, SendCallback callback) throws Exception {
+	//异步发送，设置延迟级别，映射conf/broker.conf 配置文件中的延迟时间,0表示不延迟
+	//messageDelayLevel = 1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
+	public void sendMsgAsync(String topic, String tag, JsonObject j, int delayLevel, boolean retryOnfail) throws Exception {
 		if (S.isBlank(topic)) {
 			return;
 		}
 
-		if (log.isDebugEnabled()) {
+		if (log.isDebugEnabled()) 
 			log.debug("Send MQ Msg: ,   topic:" + topic + " tag:" + tag + " content:" + j.encode());
-		}
+		
+		
+		Message msg = createMessage(topic, tag, j, delayLevel); 
+		this.sendMsg(msg, new RocketSendCallback(msg,this.isAlert,this.redis));
+	}
 
-		Message msg = createMessage(topic, tag, j);
+
+	public void sendMsg(Message msg, SendCallback callback) throws Exception {  
 		this.producer.send(msg, callback);
 	}
+
+	
 
 	public void sendOnewayMsg(String topic, String tag, JsonObject j) throws Exception {
 		if (S.isBlank(topic)) {
 			return;
 		}
 
-		if (log.isDebugEnabled()) {
+		if (log.isDebugEnabled()) 
 			log.debug("Send MQ Msg,  topic:" + topic + " tag:" + tag + " content:" + j.encode());
-		}
+		
 
-		Message msg = createMessage(topic, tag, j);
+		Message msg = createMessage(topic, tag, j,-1);
 		this.producer.sendOneway(msg);
 	}
 
@@ -160,7 +151,7 @@ public class RocketProducer {
 
 		List<Message> lmsg = new ArrayList<Message>();
 		j.forEachJsonObject(c -> {
-			Message msg = createMessage(topic, tag, c);
+			Message msg = createMessage(topic, tag, c, NO_DELAY);
 			lmsg.add(msg);
 		});
 
@@ -184,15 +175,21 @@ public class RocketProducer {
 			}
 		}
 
-	}
+	} 
+	 
 
-	private Message createMessage(String topic, String tag, JsonObject j) {
+	private Message createMessage(String topic, String tag, JsonObject j, int level) {
 		Message msg = new Message();
 		msg.setTopic(topic);
 		msg.setTags(tag);
 		msg.setBody(j.encode().getBytes());
 		msg.setKeys(ID.uuid());
+		if(level != NO_DELAY)
+			msg.setDelayTimeLevel(level);
 		return msg;
 	}
 
-}
+} 
+
+	
+

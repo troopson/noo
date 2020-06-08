@@ -22,8 +22,11 @@ public class RocketMessageAdapter implements MessageListenerConcurrently {
 
 
 	public static final Log log = LogFactory.getLog(RocketProducer.class);
+	
 
 	private RocketConsumer rl;
+	
+
 	 
 	
 	public RocketMessageAdapter(RocketConsumer l) {
@@ -42,10 +45,15 @@ public class RocketMessageAdapter implements MessageListenerConcurrently {
 			   JsonObject mbody = new JsonObject(s);
  
 			   if(log.isDebugEnabled()) {
-				log.debug("Consumer MQ Msg, topic:"+m.getTopic()+"  tag:"+m.getTags()+"  content:"+s);
-			}
-			   
-			   rl.consumer(mbody, m.getTags(), m,  context);
+				    log.debug("Consumer MQ Msg, topic:"+m.getTopic()+"  tag:"+m.getTags()+"  content:"+s);
+			   }
+			    //如果需要对消费的消息做去重，这里验证一下，设定的时间内不允许重复消费
+			    if(mbody.containsKey(RocketConsumer.UNIQUE_ID)) {
+				     boolean b = ConsumDupCheck.is_consumed(m.getTopic(), m.getTags(), mbody.getString(RocketConsumer.UNIQUE_ID));
+				     if(b)
+					    continue;
+			    }
+			    rl.consumer(mbody, m.getTags(), m,  context);
 		   }
 		} catch (Exception e) {
 			e.printStackTrace();

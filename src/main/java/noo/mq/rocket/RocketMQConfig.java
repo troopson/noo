@@ -4,27 +4,43 @@
 package noo.mq.rocket;
 
 import org.apache.rocketmq.client.log.ClientLogger;
-import org.apache.rocketmq.remoting.common.RemotingHelper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 
 /**
  * @author qujianjun troopson@163.com 2018年8月31日
- * 可以在Configuration中定义producer和consumer bean
  */
-/*
 @Configuration
 @ConditionalOnClass(org.apache.rocketmq.client.producer.DefaultMQProducer.class)
 @ConditionalOnProperty("rocketmq.address")
-*/
 public class RocketMQConfig {
- 
+
+	  
+	@Value("${rocketmq.address}")
 	private String onsaddr;
-	    
 	
-	public RocketMQConfig(String onsaddr) {
-		this.onsaddr = onsaddr;
+	@Value("${rocketmq.producerid}")
+	private String producerid;
+	
+	@Value("${rocketmq.consumerid}")
+	private String consumerid;
+ 
+	
+	@Value("${rocketmq.send_timeout:10000}")
+	private String send_timeout;
+	
+	@Value("${rocketmq.consumer_thread:3}")
+	private String consumer_thread;
+	 
+	
+	public RocketMQConfig() {
 		System.setProperty(ClientLogger.CLIENT_LOG_LEVEL, "WARN");
-		System.setProperty(RemotingHelper.ROCKETMQ_REMOTING, "WARN");
 	}
 	
 	/*
@@ -37,25 +53,32 @@ public class RocketMQConfig {
 	     onsaddr: http://onsaddr-internal.aliyun.com:8080/rocketmq/nsaddr4client-internal   
 	 */
 	
-
-	public RocketProducer createProducer(String producerid,Integer send_timeout) {
+	
+	@Bean
+	public RocketProducer createProducer(StringRedisTemplate redis,Environment evn) {
 		
-		if(send_timeout==null || send_timeout<=0)
-			send_timeout=10000;
 		RocketProducer rmp = new RocketProducer();
-		rmp.start(producerid, this.onsaddr, send_timeout);
+		rmp.start(this.producerid, this.onsaddr, Integer.parseInt(this.send_timeout));
+		rmp.setRedis(redis);
+		String profile = evn.getActiveProfiles()[0];
+		if("prod".equals(profile))
+			rmp.setAlert(true);
 		return rmp;
 		
 	}
 	
-
-	public RocketConsumerHolder createConsumer(String consumerid,Integer consumer_thread_num) {
+	@Bean
+	public RocketConsumerHolder createConsumer() {
 		 
-		if(consumer_thread_num==null || consumer_thread_num<=0)
-			consumer_thread_num = 3;
-	    RocketConsumerHolder ch = new RocketConsumerHolder(consumerid, this.onsaddr, consumer_thread_num); 
+	    RocketConsumerHolder ch = new RocketConsumerHolder(this.consumerid, this.onsaddr, Integer.parseInt(this.consumer_thread)); 
 	    return ch;
 		
+	}
+	
+	@Bean
+	public ConsumDupCheck createConsumDupCheck() {
+		ConsumDupCheck c = new ConsumDupCheck();
+		return c;
 	}
 	
 	 

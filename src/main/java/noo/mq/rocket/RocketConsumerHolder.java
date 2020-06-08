@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
+import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import noo.util.C;
@@ -63,11 +64,10 @@ public class RocketConsumerHolder{
 	
 	@PostConstruct
 	public void startConsumers() throws MQClientException {
+		
 		if (types == null || types.isEmpty()) {
 			return;
 		}
-		
-		System.out.println("==========here=============");
 
 		try {
 			for (RocketConsumer r : types) {
@@ -106,6 +106,8 @@ public class RocketConsumerHolder{
 		cb.setConsumeThreadMin(thread);
 		cb.setConsumeTimeout(5L);
 		cb.setConsumerGroup(rl.getConsumerGroupID()); 
+		if(rl.isBroadcast())
+			cb.setMessageModel(MessageModel.BROADCASTING); 
 		cb.setInstanceName(C.uid());
 		
 		Set<String> topic = rl.onTopics();

@@ -146,7 +146,10 @@ public class ToEcharts {
 			String key = (String)c[0];
 			Number v = (Number)c[1];
 			JsonObject one = new JsonObject();
-			one.put(key, v);
+			if(v instanceof BigDecimal) {
+				one.put(key,BigDecimalUtil.round((BigDecimal)v, 2));
+			}else
+				one.put(key,v); 
 			jary.add(one);
 		});
 		return jary;

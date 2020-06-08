@@ -18,6 +18,10 @@ import noo.util.C;
  */
 public interface RocketConsumer {
 	
+	//唯一ID，如果消息体中有该ID，将5分钟内按照该ID去重
+	public static final String UNIQUE_ID ="uniqueID";
+	
+	
 	public static Set<String> asSet(String...topics){
 		Set<String> s = new HashSet<>();
 		for(String a: topics) {
@@ -36,6 +40,10 @@ public interface RocketConsumer {
 	
 	default public String getConsumerGroupID() {
 		return this.getClass().getName().replace(".", "_");
+	}
+	 
+	default public boolean isBroadcast() {
+		return false;
 	}
 	
 	public Set<String> onTopics(); 
