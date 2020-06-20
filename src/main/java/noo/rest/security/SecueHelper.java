@@ -97,31 +97,6 @@ public class SecueHelper {
 		redis.delete(ls);
 		 
 	}
-	
-	/**
-	 * 校验某个用户的token是否合法，通常用来做接口请求的合法性校验
-	 * @param userid
-	 * @param token
-	 * @param us
-	 * @param redis
-	 * @return
-	 */
-	public static boolean isTokenValid(String userid, String token, SecuritySetting us,StringRedisTemplate redis) {
-		if (S.isBlank(token) || S.isBlank(userid))
-			return false;
-
-		String rkey = SecueHelper.REDIS_KEY + ":" + token;
-		String s = (String) redis.opsForValue().get(rkey);
-		if (S.isBlank(s)) {
-			return false;
-		}
-
-		AbstractUser u = us.fromJsonObject(new JsonObject(s));
-		if(userid.equals(u.getId()))
-			return true;
-		return false;
-	}
-	
 
 	/**
 	 * 依据token获取用户对象
@@ -184,9 +159,17 @@ public class SecueHelper {
 	public static String getLastLoginTokenOfUser(AbstractUser uobj, StringRedisTemplate redis) {
 		String userid = uobj.getId();
 		String client_type = uobj.getClient();
+		return getLastLoginTokenOfUser(userid, client_type, redis);
+	}
+	
+	
+	/* 获取userid最后一次登录的token信息 */
+	public static String getLastLoginTokenOfUser(String userid,String client_type, StringRedisTemplate redis) { 
 		String ukey = makeRedisClientUseridKey(client_type, userid);
 		return redis.opsForValue().get(ukey);
 	}
+	
+	
 
 	public static JsonObject requestOAuthKey(String url, String code, String client_id, String secret,
 			String redirecturl) {
