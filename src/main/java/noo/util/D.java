@@ -102,7 +102,7 @@ public class D {
 	public static Date todayEnd() {
 		LocalDate today = LocalDate.now(); 
 		ZoneId zone = ZoneId.systemDefault();     
-	    return Date.from(today.atStartOfDay().atZone(zone).toInstant().minusMillis(1)); 
+	    return Date.from(today.plusDays(1).atStartOfDay().atZone(zone).toInstant().minusMillis(1)); 
 	}
 	
 	public static String now(){

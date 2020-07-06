@@ -24,9 +24,9 @@ import noo.util.S;
 public class LoginInterceptor extends RequestInterceptor {
 
 
-	private String username="username";
-	private String password="password";
-	  
+	public static final String USERNAME="username";
+	public static final String PASSWORD="password";
+	 
 	
 	@Override
 	public boolean process(String requrl, HttpServletRequest req, HttpServletResponse resp)
@@ -45,8 +45,8 @@ public class LoginInterceptor extends RequestInterceptor {
 	
 	
 	protected void doLogin(HttpServletRequest request, HttpServletResponse resp) throws IOException {
-		String u = request.getParameter(this.username);
-		String p = request.getParameter(this.password);
+		String u = request.getParameter(USERNAME);
+		String p = request.getParameter(PASSWORD); 
 		if(S.isBlank(u)) {
 			SecueHelper.writeResponse(resp, new AuthenticateException("必须有用户名！").toString());   
 			return;
@@ -64,7 +64,7 @@ public class LoginInterceptor extends RequestInterceptor {
 		if(us.checkUserPassword(uobj, p, request) && us.checkClient(u,p,client_type)) {
 			
 			uobj.setClient(client_type);
-			setupContextOnCheckSuccess(request, resp, uobj);
+			setupContextOnCheckSuccess(request, resp, uobj); 
 			
 		}else { 
 			checkFailed(resp);  
@@ -95,6 +95,7 @@ public class LoginInterceptor extends RequestInterceptor {
 		resp.getWriter().print(respJson.encode());
 	}
 	
+ 
 	 
 	
 }
