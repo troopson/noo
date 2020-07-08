@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsProcessor;
@@ -38,6 +39,7 @@ import noo.util.SpringContext;
 
 public class SecurityFilter implements Filter {
   
+	//public static final Logger log = LoggerFactory.getLogger(SecurityFilter.class);
 	 
 	protected SecuritySetting us; 
 
@@ -72,18 +74,22 @@ public class SecurityFilter implements Filter {
 		this.corsProcessor.processRequest(corsConfiguration, req, resp);
 		
 		String method = req.getMethod();
+		String requrl = req.getRequestURI();
 		
 		if(HttpMethod.OPTIONS.matches(method)) {
+			if(AuthcodeService.is_AuthcodeUrl(requrl)) { 
+				resp.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+			}
 			resp.getWriter().print(0);
 			return;
 		}
-		
-		String requrl = req.getRequestURI();
+		 
 		
 		if(us.isIgnore(requrl)) {
 			chain.doFilter(request, response);
 			return;
 	    }
+		 
 		
 		try {	
 			

@@ -8,6 +8,9 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
 import noo.exception.AuthenticateException;
@@ -19,50 +22,32 @@ import noo.util.ID;
 import noo.util.S;
 
 /**
+ * 完成的两个功能
+ * 1. 登录验证后，得到授权码， 
+ * 换取授权码的操作，由业务系统自行实现
+ *   AuthcodeService.exchangeCode(redis, authcode); 
  * @author qujianjun   troopson@163.com
  * 2018年10月16日 
  */
 public class AuthCodeLoginInterceptor extends RequestInterceptor {
  
-	  
-	public static final String AUTHCODELOGIN_URL="/acode_login";  
-	public static final String EXCHANGE_AUTHCODE_URL="/exchange_acode";  
+	public static final Logger log = LoggerFactory.getLogger(AuthCodeLoginInterceptor.class);
+	    
 	
-	public static final String AUTHCODE ="authcode";
-	
-	private boolean is_AuthcodeUrl(String requrl) {
-		if(requrl.endsWith(AUTHCODELOGIN_URL)) {
-			return true;
-		}else {
-			return false;
-		}
-	}
+	public static final String AUTHCODE ="authcode"; 
 	 
-
-	private boolean is_Exchange_AuthcodeUrl(String requrl) {
-		if(requrl.endsWith(EXCHANGE_AUTHCODE_URL)) {
-			return true;
-		}else {
-			return false;
-		}
-	}
 	
 	@Override
 	public boolean process(String requrl, HttpServletRequest req, HttpServletResponse resp)
 			throws Exception {
+		 
 		
 		String method = req.getMethod();
 		
-		if(this.is_AuthcodeUrl(requrl) && HttpMethod.POST.matches(method)) {
+		if(AuthcodeService.is_AuthcodeUrl(requrl) && HttpMethod.POST.matches(method)) {
 			//用户名密码登录，得到authcode
 			this.checkAndGenAuthcode(req, resp);
-			return true;
-			
-		}else if(this.is_Exchange_AuthcodeUrl(requrl) && HttpMethod.GET.matches(method)){
-			//使用authcode换取用户信息
-			String authcode = req.getParameter(AUTHCODE);
-			this.exchangeAuthCode(resp,authcode);
-			return true;
+			return true; 
 			
 		}else {
 			return false;
@@ -83,12 +68,13 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 			SecueHelper.writeResponse(resp, new AuthenticateException("用户不存在！").toString());  
 			return;
 		}
-		
+		 
 		
 		String client_type = SecueHelper.getClient(request); 
 		
 		if(us.checkUserPassword(uobj, p, request) && us.checkClient(u,p,client_type)) {
 			
+		 
 			uobj.setClient(client_type);
 			genAndReturnAuthcodeOnSuccess(request, resp, uobj); 
 			
@@ -110,20 +96,18 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 		uobj.setToken(authkey);  
 		
 		String code = AuthcodeService.genAuthcode(redis, uobj);
-		 
+		
+		log.info("generate auth code "+code+ "for user:"+uobj.toJsonObject());
 		resp.setCharacterEncoding("UTF-8");
 		resp.setContentType("text/html;charset=utf-8");  
+		resp.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 		 
 		JsonObject respJson = new JsonObject();
 		respJson.put(AUTHCODE, code); 
 		resp.getWriter().print(respJson.encode());
 	}
 	
-	
-	private void exchangeAuthCode(HttpServletResponse resp, String authcode) throws IOException {
-		JsonObject respJson = AuthcodeService.exchangeCode(redis, authcode); 
-		resp.getWriter().print(respJson.encode());
-	}
+ 
 	
 	
 	 

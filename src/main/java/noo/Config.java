@@ -22,6 +22,7 @@ import noo.exception.BaseExceptionHandler;
 import noo.jdbc.JdbcSvr;
 import noo.jdbc.SQLHolder;
 import noo.json.JsonObjectResolver;
+import noo.rest.security.processor.AuthCodeLoginInterceptor;
 import noo.rest.security.processor.LoginInterceptor;
 import noo.rest.security.processor.LogoutInterceptor;
 import noo.util.SpringContext;
@@ -96,6 +97,9 @@ public class Config {
 		return new LoginInterceptor();
 	}
 	
- 
+	@Bean  
+	public AuthCodeLoginInterceptor AuthCodeLoginInterceptor() {
+		return new AuthCodeLoginInterceptor();
+	}
 
 }

@@ -26,11 +26,11 @@ apply from: 'maven_push.gradle'
  
 
 jar {
-    enabled = true
+    enabled = true 
     archiveName = 'noo-1.0.56.jar'
     manifest {
         attributes 'Implementation-Title': 'noo'  
-    }
+    } 
 }
  
 
