@@ -25,8 +25,8 @@ import noo.util.S;
 public class AuthCodeLoginInterceptor extends RequestInterceptor {
  
 	  
-	public static final String AUTHCODELOGIN_URL="/Aclogin";  
-	public static final String EXCHANGE_AUTHCODE_URL="/exchangeAc";  
+	public static final String AUTHCODELOGIN_URL="/acode_login";  
+	public static final String EXCHANGE_AUTHCODE_URL="/exchange_acode";  
 	
 	public static final String AUTHCODE ="authcode";
 	
