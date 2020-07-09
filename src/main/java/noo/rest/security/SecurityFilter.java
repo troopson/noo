@@ -77,8 +77,8 @@ public class SecurityFilter implements Filter {
 		String requrl = req.getRequestURI();
 		
 		if(HttpMethod.OPTIONS.matches(method)) {
-			if(AuthcodeService.is_AuthcodeUrl(requrl)) { 
-				resp.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+			if(AuthcodeService.is_AuthcodeUrl(requrl)) {  
+				resp.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 			}
 			resp.getWriter().print(0);
 			return;
