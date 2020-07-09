@@ -14,6 +14,7 @@ import noo.exception.AuthenticateException;
 import noo.json.JsonObject;
 import noo.rest.security.AbstractUser;
 import noo.rest.security.SecueHelper;
+import noo.rest.security.delegate.DelegateHttpServletRequest;
 import noo.util.ID;
 import noo.util.S;
 
@@ -44,9 +45,11 @@ public class LoginInterceptor extends RequestInterceptor {
 	}
 	
 	
-	protected void doLogin(HttpServletRequest request, HttpServletResponse resp) throws IOException {
+	protected void doLogin(HttpServletRequest rawrequest, HttpServletResponse resp) throws IOException {
+		HttpServletRequest request = new DelegateHttpServletRequest(rawrequest);
 		String u = request.getParameter(USERNAME);
-		String p = request.getParameter(PASSWORD); 
+		String p = request.getParameter(PASSWORD);  
+		
 		if(S.isBlank(u)) {
 			SecueHelper.writeResponse(resp, new AuthenticateException("必须有用户名！").toString());   
 			return;
@@ -94,8 +97,7 @@ public class LoginInterceptor extends RequestInterceptor {
 		respJson.put(SecueHelper.HEADER_KEY, authkey); 
 		resp.getWriter().print(respJson.encode());
 	}
-	
- 
+	 
 	 
 	
 }

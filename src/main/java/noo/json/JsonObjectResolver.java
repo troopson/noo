@@ -3,6 +3,7 @@
  */
 package noo.json;
 
+import java.io.IOException;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest; 
@@ -36,12 +37,8 @@ public final class JsonObjectResolver implements HandlerMethodArgumentResolver {
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		String method = servletRequest.getMethod();
 	    if(!HttpMethod.GET.matches(method) && !HttpMethod.HEAD.matches(method)) {
-              
-             String jsonBody = S.readAndCloseInputStream(servletRequest.getInputStream(), "UTF-8"); 
-             if(S.isNotBlank(jsonBody)) {
-            	//jsonBody = jsonBody.replace("<script>", "");
-				result = new JsonObject(jsonBody);
-			}
+             
+	    	result = parseAsJson(servletRequest); 
 			 
 		 }
 		 if(result==null) {
@@ -55,6 +52,17 @@ public final class JsonObjectResolver implements HandlerMethodArgumentResolver {
 		} 
 		
 		return result;
+	}
+	
+	//content-type: application/json
+	public static JsonObject parseAsJson(HttpServletRequest servletRequest) throws IOException {
+		 String jsonBody = S.readAndCloseInputStream(servletRequest.getInputStream(), "UTF-8"); 
+         if(S.isNotBlank(jsonBody)) {
+        	 //jsonBody = jsonBody.replace("<script>", "");
+			 return new JsonObject(jsonBody);
+		 }else {
+			 return null;
+		 }
 	}
 
 }

@@ -18,6 +18,7 @@ import noo.json.JsonObject;
 import noo.rest.security.AbstractUser;
 import noo.rest.security.AuthcodeService;
 import noo.rest.security.SecueHelper;
+import noo.rest.security.delegate.DelegateHttpServletRequest;
 import noo.util.ID;
 import noo.util.S;
 
@@ -55,9 +56,11 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 	}
 	
 	
-	protected void checkAndGenAuthcode(HttpServletRequest request, HttpServletResponse resp) throws IOException {
+	protected void checkAndGenAuthcode(HttpServletRequest rawrequest, HttpServletResponse resp) throws IOException {
+		HttpServletRequest request = new DelegateHttpServletRequest(rawrequest);
 		String u = request.getParameter(LoginInterceptor.USERNAME);
-		String p = request.getParameter(LoginInterceptor.PASSWORD); 
+		String p = request.getParameter(LoginInterceptor.PASSWORD);  
+		
 		if(S.isBlank(u)) {
 			SecueHelper.writeResponse(resp, new AuthenticateException("必须有用户名！").toString());   
 			return;
@@ -68,7 +71,7 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 			SecueHelper.writeResponse(resp, new AuthenticateException("用户不存在！").toString());  
 			return;
 		}
-		 
+		
 		
 		String client_type = SecueHelper.getClient(request); 
 		
