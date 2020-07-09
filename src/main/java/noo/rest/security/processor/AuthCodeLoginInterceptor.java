@@ -37,6 +37,16 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 	
 	public static final String AUTHCODE ="authcode"; 
 	 
+
+	private static final String AUTHCODELOGIN_URL="/[a-zA-Z0-9]+/acode_login";    
+	
+	private boolean is_AuthcodeUrl(String requrl) {
+		if(requrl.matches(AUTHCODELOGIN_URL)) {
+			return true;
+		}else {
+			return false;
+		}
+	}
 	
 	@Override
 	public boolean process(String requrl, HttpServletRequest req, HttpServletResponse resp)
@@ -45,7 +55,7 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 		
 		String method = req.getMethod();
 		
-		if(AuthcodeService.is_AuthcodeUrl(requrl) && HttpMethod.POST.matches(method)) {
+		if(this.is_AuthcodeUrl(requrl) && HttpMethod.POST.matches(method)) {
 			//用户名密码登录，得到authcode
 			this.checkAndGenAuthcode(req, resp);
 			return true; 

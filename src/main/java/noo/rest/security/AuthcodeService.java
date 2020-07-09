@@ -58,14 +58,5 @@ public class AuthcodeService {
 	}
 	
 	
-	public static final String AUTHCODELOGIN_URL="/acode_login";    
-	
-	public static boolean is_AuthcodeUrl(String requrl) {
-		if(requrl.matches(AUTHCODELOGIN_URL)) {
-			return true;
-		}else {
-			return false;
-		}
-	}
 	
 }
