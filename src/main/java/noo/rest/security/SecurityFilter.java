@@ -66,6 +66,10 @@ public class SecurityFilter implements Filter {
 		this.configSource.registerCorsConfiguration(path, corsConfiguration);
 	} 
 	
+	public void setCorsConfiguration(CorsConfiguration corsConfiguration) {
+		this.registCorsConfiguration("/**", corsConfiguration);  
+	}
+	
   
 	protected boolean isPassCors(HttpServletRequest req,HttpServletResponse resp) throws IOException {
 		if (CorsUtils.isCorsRequest(req)) {
