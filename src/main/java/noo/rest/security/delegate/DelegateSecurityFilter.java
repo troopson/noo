@@ -41,9 +41,10 @@ public class DelegateSecurityFilter extends SecurityFilter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest)request;
-		HttpServletResponse resp = (HttpServletResponse)response; 
+		HttpServletResponse resp = (HttpServletResponse)response;  
 		
-		this.corsProcessor.processRequest(corsConfiguration, req, resp);
+		if (!this.isPassCors(req, resp)) 
+			return;  
 		
 		String method = req.getMethod();
 		

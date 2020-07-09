@@ -18,11 +18,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsProcessor;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.DefaultCorsProcessor;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import noo.exception.BaseException;
 import noo.exception.BusinessException;
@@ -41,49 +41,56 @@ public class SecurityFilter implements Filter {
   
 	//public static final Logger log = LoggerFactory.getLogger(SecurityFilter.class);
 	 
+	private final UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
+	
+	protected final CorsProcessor corsProcessor = new DefaultCorsProcessor();
+	
 	protected SecuritySetting us; 
 
 	private StringRedisTemplate redis;  
 	 
 	private UsualHandler usualprocess;
 	 
-	private List<RequestInterceptor> requestHandler;
-	 
-	
-	protected CorsProcessor corsProcessor = new DefaultCorsProcessor();
-	
-	protected CorsConfiguration corsConfiguration = null;
+	private List<RequestInterceptor> requestHandler; 
 
-	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		if(this.corsConfiguration==null) { 
-		    this.corsConfiguration = new CorsConfiguration();
-		    this.corsConfiguration.addAllowedOrigin("*"); // 1允许任何域名使用
-		    this.corsConfiguration.addAllowedHeader("*"); // 2允许任何头
-		    this.corsConfiguration.addAllowedMethod("*"); // 3允许任何方法（post、get等）
-		    this.corsConfiguration.setAllowCredentials(true);
-		}
+	public CorsConfiguration buildDefaultCorsConfig() {
+		CorsConfiguration ccf = new CorsConfiguration();
+		ccf.addAllowedOrigin("*"); // 1允许任何域名使用
+		ccf.addAllowedHeader("*"); // 2允许任何头
+		ccf.addAllowedMethod("*"); // 3允许任何方法（post、get等）
+		ccf.setAllowCredentials(true); 
+		return ccf;
 	}
- 
+
+	public void registCorsConfiguration(String path, CorsConfiguration corsConfiguration) {
+		this.configSource.registerCorsConfiguration(path, corsConfiguration);
+	} 
+	
+  
+	protected boolean isPassCors(HttpServletRequest req,HttpServletResponse resp) throws IOException {
+		if (CorsUtils.isCorsRequest(req)) {
+			CorsConfiguration corsConfiguration = this.configSource.getCorsConfiguration(req);
+			if (corsConfiguration != null) {
+				boolean isValid = this.corsProcessor.processRequest(corsConfiguration, req, resp);
+				if (!isValid || CorsUtils.isPreFlightRequest(req)) {
+					return false;
+				}
+			}
+		} 
+		return true;
+	}
+
+
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest)request;
-		HttpServletResponse resp = (HttpServletResponse)response; 
+		HttpServletResponse resp = (HttpServletResponse)response;   
 		
-		this.corsProcessor.processRequest(corsConfiguration, req, resp);
+		if (!this.isPassCors(req, resp)) 
+			return; 
 		
-		String method = req.getMethod();
-		String requrl = req.getRequestURI();
-		
-		if(HttpMethod.OPTIONS.matches(method)) {
-			if(AuthcodeService.is_AuthcodeUrl(requrl)) {  
-				resp.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-			}
-			resp.getWriter().print(0);
-			return;
-		}
-		 
+		String requrl = req.getRequestURI(); 
 		
 		if(us.isIgnore(requrl)) {
 			chain.doFilter(request, response);
@@ -144,15 +151,7 @@ public class SecurityFilter implements Filter {
 
 	}
  
-   
 
-	public CorsConfiguration getCorsConfiguration() {
-		return corsConfiguration;
-	}
-
-	public void setCorsConfiguration(CorsConfiguration corsConfiguration) {
-		this.corsConfiguration = corsConfiguration;
-	}
 
 	public void setSecuritySetting(SecuritySetting us) {
 		this.us = us;
@@ -163,6 +162,11 @@ public class SecurityFilter implements Filter {
 		this.redis = redis;
 	}
 
+	
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+
+	} 
 
 	@Override
 	public void destroy() {
