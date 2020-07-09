@@ -103,7 +103,7 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 		log.info("generate auth code "+code+ "for user:"+uobj.toJsonObject());
 		resp.setCharacterEncoding("UTF-8");
 		resp.setContentType("text/html;charset=utf-8");  
-		resp.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+		resp.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 		 
 		JsonObject respJson = new JsonObject();
 		respJson.put(AUTHCODE, code); 
