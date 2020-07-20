@@ -53,6 +53,12 @@ public class SecueHelper {
 		resp.setContentType("text/html;charset=utf-8");
 		resp.getWriter().print(msg);
 	}
+	
+	public static void writeJsonResponse(HttpServletResponse resp, String msg) throws IOException {
+		resp.setCharacterEncoding("UTF-8");
+		resp.setContentType("application/json;charset=utf-8");
+		resp.getWriter().print(msg);
+	}
 
 	public static void updateUser(AbstractUser u,  StringRedisTemplate redis) {
 		String ustring = u.toJsonObject().encode();

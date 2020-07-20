@@ -8,11 +8,13 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 
 import noo.exception.AuthenticateException;
 import noo.json.JsonObject;
 import noo.rest.security.AbstractUser;
+import noo.rest.security.ApiRateLimitPool;
 import noo.rest.security.SecueHelper;
 import noo.rest.security.delegate.DelegateHttpServletRequest;
 import noo.util.ID;
@@ -27,7 +29,12 @@ public class LoginInterceptor extends RequestInterceptor {
 
 	public static final String USERNAME="username";
 	public static final String PASSWORD="password";
-	 
+	
+	@Autowired
+	private ApiRateLimitPool arlp;
+	
+	
+	
 	
 	@Override
 	public boolean process(String requrl, HttpServletRequest req, HttpServletResponse resp)
@@ -44,8 +51,14 @@ public class LoginInterceptor extends RequestInterceptor {
 		}
 	}
 	
+//	public void rateLimit() {
+//		RateLimiter rl = new RateLimiter();
+//	}
 	
 	protected void doLogin(HttpServletRequest rawrequest, HttpServletResponse resp) throws IOException {
+		
+		this.arlp.checkLimit("login",rawrequest);
+		
 		HttpServletRequest request = new DelegateHttpServletRequest(rawrequest);
 		String u = request.getParameter(USERNAME);
 		String p = request.getParameter(PASSWORD);  

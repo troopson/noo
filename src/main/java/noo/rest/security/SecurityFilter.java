@@ -116,16 +116,16 @@ public class SecurityFilter implements Filter {
 			    this.doUsualHandler(requrl, req, resp, chain); 
 			}
 		}catch(Throwable e){
-			e.printStackTrace();
+			e.printStackTrace();  
 			if(e instanceof SessionTimeoutException) { 
 				resp.setStatus(401);
-				SecueHelper.writeResponse(resp, e.toString());
+				SecueHelper.writeJsonResponse(resp, e.toString());
 			}else if(e instanceof BaseException) {
 				resp.setStatus(400);
-				SecueHelper.writeResponse(resp, e.toString());  
+				SecueHelper.writeJsonResponse(resp, e.toString());  
 			}else {
 				resp.setStatus(403);
-				SecueHelper.writeResponse(resp, new BusinessException(ExpCode.AUTHORIZE,"没有权限访问！").toString());  
+				SecueHelper.writeJsonResponse(resp, new BusinessException(ExpCode.AUTHORIZE,"没有权限访问！").toString());  
 			}
 		} 
 		

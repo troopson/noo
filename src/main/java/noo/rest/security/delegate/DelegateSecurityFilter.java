@@ -95,8 +95,8 @@ public class DelegateSecurityFilter extends SecurityFilter {
 	public void process(String requrl, HttpServletRequest req, HttpServletResponse resp, FilterChain chain) throws Exception {
 		AbstractUser u = this.retrieveUser(req, resp);
 		if (u == null) {
-			resp.setStatus(401);
-			resp.getWriter().print(new SessionTimeoutException().toString());
+			resp.setStatus(401); 
+			SecueHelper.writeResponse(resp,new SessionTimeoutException().toString());
 			return;
 		}
 		
