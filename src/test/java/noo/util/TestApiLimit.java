@@ -4,7 +4,8 @@ import org.junit.Test;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import noo.rest.security.ApiRateLimitPool;
+import noo.rest.security.api.ApiRateLimit;
+import noo.rest.security.api.ApiRateLimitPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 public class TestApiLimit {

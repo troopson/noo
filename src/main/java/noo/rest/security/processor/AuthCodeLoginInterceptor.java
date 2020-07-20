@@ -18,9 +18,9 @@ import org.springframework.web.cors.CorsUtils;
 import noo.exception.AuthenticateException;
 import noo.json.JsonObject;
 import noo.rest.security.AbstractUser;
-import noo.rest.security.ApiRateLimitPool;
 import noo.rest.security.AuthcodeService;
 import noo.rest.security.SecueHelper;
+import noo.rest.security.api.ApiRateLimitPool;
 import noo.rest.security.delegate.DelegateHttpServletRequest;
 import noo.util.ID;
 import noo.util.S;
@@ -38,21 +38,12 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 	public static final Logger log = LoggerFactory.getLogger(AuthCodeLoginInterceptor.class);
 	    
 	
-	public static final String AUTHCODE ="authcode"; 
-	 
-
-	private static final String AUTHCODELOGIN_URL="/[a-zA-Z0-9]+/acode_login";    
+	public static final String AUTHCODE ="authcode";  
+ 
 	 
 	@Autowired
 	private ApiRateLimitPool arlp;
-	
-	private boolean is_AuthcodeUrl(String requrl) {
-		if(requrl.matches(AUTHCODELOGIN_URL)) {
-			return true;
-		}else {
-			return false;
-		}
-	}
+
 	
 	@Override
 	public boolean process(String requrl, HttpServletRequest req, HttpServletResponse resp)
@@ -61,7 +52,7 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 		
 		String method = req.getMethod();
 		
-		if(CorsUtils.isCorsRequest(req) && this.is_AuthcodeUrl(requrl) && HttpMethod.POST.matches(method)) {
+		if(CorsUtils.isCorsRequest(req) && this.us.is_AuthcodeUrl(requrl) && HttpMethod.POST.matches(method)) {
 			//用户名密码登录，得到authcode
 			this.checkAndGenAuthcode(req, resp);
 			return true; 

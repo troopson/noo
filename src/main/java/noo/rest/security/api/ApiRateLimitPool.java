@@ -1,7 +1,7 @@
 /**
  * 
  */
-package noo.rest.security;
+package noo.rest.security.api;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import noo.util.ApiRateLimit;
 import noo.util.Req;
 import noo.util.S;
 import noo.util.SpringContext;

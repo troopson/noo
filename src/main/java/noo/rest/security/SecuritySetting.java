@@ -22,6 +22,10 @@ public interface SecuritySetting {
 		return true;
 	}
 	
+	default public boolean is_AuthcodeUrl(String url) {
+		return false;
+	}
+	
 	public boolean isIgnore(String url);
 	
 	public boolean isLoginUrl(String url);

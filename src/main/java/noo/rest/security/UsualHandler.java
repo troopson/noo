@@ -43,6 +43,7 @@ public class UsualHandler  {
 		try {	
 			if (us.canAccess(u, requrl)) {
 				AuthContext.set(u);
+				AuthContext.setReq(req);
 				chain.doFilter(req, resp);
 			} else {
 				resp.setStatus(403);

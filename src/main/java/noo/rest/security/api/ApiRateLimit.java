@@ -1,7 +1,7 @@
 /**
  * 
  */
-package noo.util;
+package noo.rest.security.api;
 
 import java.util.concurrent.TimeUnit;
 
@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import noo.exception.BusinessException;
+import noo.util.S;
 
 /**
  * @author qujianjun   troopson@163.com
