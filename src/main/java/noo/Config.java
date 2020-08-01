@@ -23,9 +23,10 @@ import noo.jdbc.JdbcSvr;
 import noo.jdbc.SQLHolder;
 import noo.json.JsonObjectResolver;
 import noo.rest.security.api.ApiRateLimitPool;
-import noo.rest.security.processor.AuthCodeLoginInterceptor;
 import noo.rest.security.processor.LoginInterceptor;
 import noo.rest.security.processor.LogoutInterceptor;
+import noo.rest.security.processor.unify.AuthCodeLoginInterceptor;
+import noo.rest.security.processor.unify.UniLoginInterceptor;
 import noo.util.SpringContext;
 
 /**
@@ -101,6 +102,11 @@ public class Config {
 	@Bean  
 	public AuthCodeLoginInterceptor AuthCodeLoginInterceptor() {
 		return new AuthCodeLoginInterceptor();
+	}
+	
+	@Bean
+	public UniLoginInterceptor UniLoginInterceptor() {
+		return new UniLoginInterceptor();
 	}
 	
 	@Bean

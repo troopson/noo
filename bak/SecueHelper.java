@@ -16,6 +16,9 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import noo.json.JsonObject;
+import noo.rest.security.processor.OAuth2Interceptor;
+import noo.util.Http;
+import noo.util.MD5;
 import noo.util.S;
 
 /**
@@ -173,6 +176,28 @@ public class SecueHelper {
 	}
 	
 	
+
+	public static JsonObject requestOAuthKey(String url, String code, String client_id, String secret,
+			String redirecturl) {
+		String sign = MD5.encode(code + "" + client_id + "" + secret);
+		StringBuilder param = new StringBuilder(OAuth2Interceptor.PARAM_AUTHCODE).append("=").append(code).append("&")
+				.append(SecueHelper.CLIENT).append("=").append(client_id).append("&")
+				.append(OAuth2Interceptor.PARAM_REDIRECT_URL).append("=").append(redirecturl).append("&")
+				.append(OAuth2Interceptor.PARAM_SERVER_SIGN).append("=").append(sign);
+
+		String result = null;
+		if (url.toLowerCase().startsWith("https://")) {
+			result = Http.httpsPost(url, param.toString());
+		} else {
+			result = Http.sendPost(url, param.toString());
+		}
+
+		if (S.isBlank(result))
+			return null;
+		else
+			return new JsonObject(result);
+	}
+
 	public static void setEx(RedisConnection connection, String key, long minute, String val) {
 		byte[] keybyte = key.getBytes();
 		byte[] value = val.getBytes();

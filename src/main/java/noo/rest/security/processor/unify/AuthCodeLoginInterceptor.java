@@ -1,7 +1,7 @@
 /**
  * 
  */
-package noo.rest.security.processor;
+package noo.rest.security.processor.unify;
 
 import java.io.IOException;
 
@@ -15,15 +15,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsUtils;
 
-import noo.exception.AuthenticateException;
 import noo.json.JsonObject;
 import noo.rest.security.AbstractUser;
 import noo.rest.security.AuthcodeService;
-import noo.rest.security.SecueHelper;
 import noo.rest.security.api.ApiRateLimitPool;
-import noo.rest.security.delegate.DelegateHttpServletRequest;
+import noo.rest.security.processor.RequestInterceptor;
 import noo.util.ID;
-import noo.util.S;
 
 /**
  * 完成的两个功能
@@ -37,9 +34,6 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
  
 	public static final Logger log = LoggerFactory.getLogger(AuthCodeLoginInterceptor.class);
 	    
-	
-	public static final String AUTHCODE ="authcode";  
- 
 	 
 	@Autowired
 	private ApiRateLimitPool arlp;
@@ -47,63 +41,25 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 	
 	@Override
 	public boolean process(String requrl, HttpServletRequest req, HttpServletResponse resp)
-			throws Exception {
-		 
+			throws Exception { 
 		
 		String method = req.getMethod();
 		
-		if(CorsUtils.isCorsRequest(req) && this.us.is_AuthcodeUrl(requrl) && HttpMethod.POST.matches(method)) {
-			//用户名密码登录，得到authcode
-			this.checkAndGenAuthcode(req, resp);
-			return true; 
-			
-		}else {
-			return false;
-		}
-	}
-	
-	
-	protected void checkAndGenAuthcode(HttpServletRequest rawrequest, HttpServletResponse resp) throws IOException {
-		
-		this.arlp.checkLimit("authcode",rawrequest);
-		
-		
-		HttpServletRequest request = new DelegateHttpServletRequest(rawrequest);
-		String u = request.getParameter(LoginInterceptor.USERNAME);
-		String p = request.getParameter(LoginInterceptor.PASSWORD);  
-		
-		if(S.isBlank(u)) {
-			SecueHelper.writeResponse(resp, new AuthenticateException("必须有用户名！").toString());   
-			return;
-		}
-		
-		AbstractUser uobj = us.loadUserByName(u);
-		if(uobj ==null) {
-			SecueHelper.writeResponse(resp, new AuthenticateException("用户不存在！").toString());  
-			return;
-		}
-		
-		
-		String client_type = SecueHelper.getClient(request); 
-		
-		if(us.checkUserPassword(uobj, p, request) && us.checkClient(u,p,client_type)) {
-			
+		if(!CorsUtils.isCorsRequest(req) || !HttpMethod.POST.matches(method)  || !this.us.is_AuthcodeUrl(requrl) )
+			return false; 
 		 
-			uobj.setClient(client_type);
-			genAndReturnAuthcodeOnSuccess(request, resp, uobj); 
-			
-		}else { 
-			checkFailed(resp);  
-		}
+		//校验一下访问频次
+		this.arlp.checkLimit("authcode",req);
+		
+		AbstractUser uobj = AuthcodeCommon.checkAndGetUserObj(req, resp, this.us,this.redis);
+		if(uobj!=null) {
+			this.genAndReturnAuthcodeOnSuccess(req, resp, uobj); 
+		}  
+		return true;
+		 
 	}
-
-
-	protected void checkFailed(HttpServletResponse resp) throws IOException {
-		resp.setStatus(405);
-		SecueHelper.writeResponse(resp, new AuthenticateException("用户名或密码错误！").toString());
-	}
-
-
+	
+	
 	protected void genAndReturnAuthcodeOnSuccess(HttpServletRequest request, HttpServletResponse resp, AbstractUser uobj)
 			throws IOException {
 		String authkey =  ID.uuid();
@@ -117,10 +73,14 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 		resp.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 		 
 		JsonObject respJson = new JsonObject();
-		respJson.put(AUTHCODE, code); 
+		respJson.put(AuthcodeCommon.AUTHCODE, code); 
 		resp.getWriter().print(respJson.encode());
 	}
 	
+	
+	
+
+ 
  
 	
 	

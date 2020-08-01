@@ -45,6 +45,7 @@ public class ApiRateLimitPool {
 		}else { 
 			String apiLimit = SpringContext.getProperty(PROPERTY_PREX+apiName);
 			if(S.isBlank(apiLimit)) { 
+				//如果没有定义，记录一下，下次不用再调用getProperty去获取属性了
 				noLimit.add(apiName);
 				return null;  
 			}else {

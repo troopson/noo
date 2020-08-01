@@ -83,8 +83,14 @@ public class UserService implements SecuritySetting {
 
 
 	@Override
-	public boolean checkClient(String u, String p, String client_type) { 
+	public boolean checkClient(AbstractUser u, String client_type) { 
 		return true;
+	}
+
+
+	@Override
+	public AbstractUser loadUserByAuthCode(String authcode) { 
+		return null;
 	}
 
 	 

@@ -16,9 +16,11 @@ public interface SecuritySetting {
 	
 	public AbstractUser loadUserByName(String username);
 	
+	public AbstractUser loadUserByAuthCode(String authcode);
+	
 	public boolean checkUserPassword(AbstractUser u, String requestPassword, HttpServletRequest req);	
 	
-	default public boolean checkClient(String username, String requestPassword, String client_type) {
+	default public boolean checkClient(AbstractUser u, String client_type) {
 		return true;
 	}
 	
@@ -39,6 +41,8 @@ public interface SecuritySetting {
 	default public void afterLoginSuccess(AbstractUser uo, HttpServletRequest req) {
 		
 	}
+	
+	
 	
 
 	

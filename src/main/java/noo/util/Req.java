@@ -83,6 +83,9 @@ public class Req {
 			} catch (UnknownHostException e) {
 			}
 		}
+		if (ip != null && ip.indexOf(",")!=-1) {
+			ip = ip.split(",")[0];
+		}
 		return ip;
 	}
 	
