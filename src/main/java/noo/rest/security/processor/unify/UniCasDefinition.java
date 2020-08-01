@@ -12,7 +12,7 @@ public interface UniCasDefinition {
 	
 	public String getSystemRedirectUrl(String client);
 	
-	public boolean isCasUrl(String path);
+	public String casUrl();
 	 
 	
 	

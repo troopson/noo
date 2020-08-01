@@ -56,7 +56,7 @@ public class UniCasInterceptor extends RequestInterceptor {
 		if (definition == null)
 			throw new NullPointerException("Can't find UniCasDefinition Object.");
 		
-		if(!this.definition.isCasUrl(requrl))
+		if(!this.isCasUrl(requrl))
 			return false;
 		
 		String method = req.getMethod();  
@@ -183,6 +183,13 @@ public class UniCasInterceptor extends RequestInterceptor {
 			resp.getWriter().print(respJson.encode());
 		}
 	}
+	
+	//-------------------------------------------------------------------
+	
+	private boolean isCasUrl(String path) {
+		return path.equals(this.definition.casUrl());
+	}
+	
 
 	//-------------------------------------------------------------------
 
@@ -191,7 +198,7 @@ public class UniCasInterceptor extends RequestInterceptor {
 		String unify_token = ID.uuid();
 		Cookie cookie = new Cookie(COOKIENAME, unify_token);
 		cookie.setHttpOnly(true);
-		cookie.setPath("/");
+		cookie.setPath(this.definition.casUrl());
 		cookie.setVersion(1);
 		resp.addCookie(cookie);
 		return unify_token;
