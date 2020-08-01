@@ -104,10 +104,10 @@ public class Config {
 		return new AuthCodeLoginInterceptor();
 	}
 	
-	@Bean
-	public UniLoginInterceptor UniLoginInterceptor() {
-		return new UniLoginInterceptor();
-	}
+//	@Bean
+//	public UniLoginInterceptor UniLoginInterceptor() {
+//		return new UniLoginInterceptor();
+//	}
 	
 	@Bean
 	public ApiRateLimitPool ApiRateLimitPool() {
