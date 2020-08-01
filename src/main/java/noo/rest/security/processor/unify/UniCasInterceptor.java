@@ -32,7 +32,7 @@ import noo.util.S;
  * 
  * @author qujianjun troopson@163.com Jul 28, 2020
  */
-public class UniLoginInterceptor extends RequestInterceptor {
+public class UniCasInterceptor extends RequestInterceptor {
 
 	public static final Logger log = LoggerFactory.getLogger(AuthCodeLoginInterceptor.class);
 
@@ -48,45 +48,42 @@ public class UniLoginInterceptor extends RequestInterceptor {
 	private ApiRateLimitPool arlp;
 
 	@Autowired(required = false)
-	private UnifiyLoginDefinition definition;
+	private UniCasDefinition definition;
 
 	@Override
 	public boolean process(String requrl, HttpServletRequest req, HttpServletResponse resp) throws Exception {
 
 		if (definition == null)
-			throw new NullPointerException("Can't find UnifiyLoginDefinition Object.");
-
-		String method = req.getMethod();
-
-		// 如果是注销，需要第三方系统从前端发起一个jsonp的logout的请求
-		if (HttpMethod.GET.matches(method) && this.definition.isUnifyLogoutUrl(requrl)) {
-			String cookie_identify = this.findCookie(req, resp);
-			if (S.isNotBlank(cookie_identify)) {
-				this.removeCookie(resp);
-				this.removeCookieUserObj(cookie_identify);
-			}
-			SecueHelper.writeResponse(resp, "0");
-			return true;
-		}
+			throw new NullPointerException("Can't find UniCasDefinition Object.");
+		
+		if(!this.definition.isCasUrl(requrl))
+			return false;
+		
+		String method = req.getMethod();  
 
 		//如果登录的链接是一个GET请求，认为是种cookie的请求
-		if (HttpMethod.GET.matches(method) && this.definition.isUnifyLoginUrl(requrl)) {
+		if (HttpMethod.GET.matches(method)) {
 			String cookie_identify = this.findCookie(req, resp); 
+			
+			//1. 如果是注销的，执行注销流程
+			String type = req.getParameter("type");
+			if("logout".equals(type)) {
+				this.doLogout(req, resp, cookie_identify);
+				return true;
+			}  
+
+			//2. 如果是一个跳转的请求, 将cookie对应的用户信息保存下来，下次有对应的cookie，就可以直接跳转了
 			String authcode = req.getParameter(AuthcodeCommon.AUTHCODE);
 			String redirectUrl = req.getParameter(REDIRECT_URL);
-			if(S.isNotBlank(authcode) && S.isNotBlank(redirectUrl)) {
-				//如果是一个跳转的请求, 将cookie对应的用户信息保存下来，下次有对应的cookie，就可以直接跳转了
+			if(S.isNotBlank(authcode) && S.isNotBlank(redirectUrl)) { 
 				//如果已经有cookie了，这里会更新这个cookie的值
-				String uni_cookie = this.plantCookie(resp);
-				JsonObject uobj = AuthcodeService.readCode(redis, authcode);
-				this.persistCookieUserObj(uni_cookie, uobj);  
+				this.doRedirect(req, resp, cookie_identify, authcode, redirectUrl);
+				return true;
 				
-				String destUrl = URLDecoder.decode(redirectUrl, "utf-8");
-				destUrl =destUrl + (destUrl.indexOf("?")==-1?"?":"&") +"authcode="+authcode;
-				resp.sendRedirect(destUrl); 
-				
-			}else if(S.isNotBlank(cookie_identify)) {
-				//页面显示的时候，如果有cookie，直接生成一个authcode返回，这样前端不需要登录
+			} 
+			//3. 以上参数都没有，当作页面初始化脚本的请求，如果有cookie，直接生成一个authcode返回，这样前端不需要登录
+			if(S.isNotBlank(cookie_identify)) {
+				 
 				JsonObject u = this.loadUserObjByCookie(cookie_identify);
 				if (u!= null) {  
 					String client = SecueHelper.getClient(req);
@@ -97,26 +94,45 @@ public class UniLoginInterceptor extends RequestInterceptor {
 				}
 			}
 			return true;
-		}
-		
-
-		// 登录相关
-		if (!CorsUtils.isCorsRequest(req) || !HttpMethod.POST.matches(method) || !this.definition.isUnifyLoginUrl(requrl))
+			
+		}else if (CorsUtils.isCorsRequest(req) && HttpMethod.POST.matches(method)) {
+			// 登录相关 
+			// 校验一下访问频次
+			this.arlp.checkLimit("unify_login", req);
+			
+			AbstractUser uobj = AuthcodeCommon.checkAndGetUserObj(req, resp, this.us, this.redis);
+			if (uobj != null) {
+				JsonObject u = uobj.toJsonObject();
+				//this.persistCookieUserObj(cookie_identify, u);  // 保存到redis中，过期时间比较长，
+				this.genAndReturnAuthcodeOnSuccess(req, resp, uobj.getClient(), u, false); // 生成一个authcode
+				log.info("login success, return auth code ok.");
+			}
+			return true;
+		}else {
 			return false;
+		} 
 
-		// 校验一下访问频次
-		this.arlp.checkLimit("unify_login", req);
-		
-		AbstractUser uobj = AuthcodeCommon.checkAndGetUserObj(req, resp, this.us, this.redis);
-		if (uobj != null) {
-			JsonObject u = uobj.toJsonObject();
-			//this.persistCookieUserObj(cookie_identify, u);  // 保存到redis中，过期时间比较长，
-			this.genAndReturnAuthcodeOnSuccess(req, resp, uobj.getClient(), u, false); // 生成一个authcode
-			log.info("login success, return auth code ok.");
+	}
+
+	private void doLogout(HttpServletRequest req, HttpServletResponse resp, String cookie_identify) throws IOException {
+		// 如果是注销，需要第三方系统从前端发起一个jsonp的logout的请求 
+		if (S.isNotBlank(cookie_identify)) {
+			this.removeCookie(resp);
+			this.removeCookieUserObj(cookie_identify);
 		}
+		SecueHelper.writeResponse(resp, "0");
+		 
+	}
+	
+	private void doRedirect(HttpServletRequest req, HttpServletResponse resp, String cookie_identify, String authcode, String redirectUrl) throws IOException {
+		String uni_cookie = this.plantCookie(resp);
+		JsonObject uobj = AuthcodeService.readCode(redis, authcode);
+		this.persistCookieUserObj(uni_cookie, uobj);  
 		
-		return true;
-
+		String destUrl = URLDecoder.decode(redirectUrl, "utf-8");
+		destUrl =destUrl + (destUrl.indexOf("?")==-1?"?":"&") +"authcode="+authcode;
+		resp.sendRedirect(destUrl); 
+		
 	}
 
 	/**

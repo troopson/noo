@@ -26,7 +26,7 @@ import noo.rest.security.api.ApiRateLimitPool;
 import noo.rest.security.processor.LoginInterceptor;
 import noo.rest.security.processor.LogoutInterceptor;
 import noo.rest.security.processor.unify.AuthCodeLoginInterceptor;
-import noo.rest.security.processor.unify.UniLoginInterceptor;
+import noo.rest.security.processor.unify.UniCasInterceptor;
 import noo.util.SpringContext;
 
 /**
