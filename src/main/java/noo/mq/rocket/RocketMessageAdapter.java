@@ -22,11 +22,8 @@ public class RocketMessageAdapter implements MessageListenerConcurrently {
 
 
 	public static final Log log = LogFactory.getLog(RocketProducer.class);
-	
 
 	private RocketConsumer rl;
-	
-
 	 
 	
 	public RocketMessageAdapter(RocketConsumer l) {
@@ -47,9 +44,9 @@ public class RocketMessageAdapter implements MessageListenerConcurrently {
 			   if(log.isDebugEnabled()) {
 				    log.debug("Consumer MQ Msg, topic:"+m.getTopic()+"  tag:"+m.getTags()+"  content:"+s);
 			   }
-			    //如果需要对消费的消息做去重，这里验证一下，设定的时间内不允许重复消费
-			    if(mbody.containsKey(RocketConsumer.UNIQUE_ID)) {
-				     boolean b = ConsumDupCheck.is_consumed(m.getTopic(), m.getTags(), mbody.getString(RocketConsumer.UNIQUE_ID));
+			    //如果需要对消费的消息做去重，这里验证一下，30秒内不允许重复消费
+			    if(rl.IsAvoidDuplicateMessage()) {
+				     boolean b = DupCheck.is_consumed(m.getTopic()+":"+m.getTags(), s);
 				     if(b)
 					    continue;
 			    }

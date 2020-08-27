@@ -10,9 +10,7 @@ import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-
 import noo.json.JsonObject;
-import noo.util.A;
 import noo.util.S;
 
 /**
@@ -23,12 +21,12 @@ import noo.util.S;
 public class RocketSendCallback implements SendCallback { 
 	
 	public final Message msg;
-	public final boolean isAlert;
+	public final IAlert alerter;
 	public final StringRedisTemplate redis;
 
-	public RocketSendCallback(Message msg , boolean isAlert, StringRedisTemplate redis) {
+	public RocketSendCallback(Message msg , IAlert isAlert, StringRedisTemplate redis) {
 		this.msg = msg;
-		this.isAlert = isAlert;
+		this.alerter = isAlert;
 		this.redis = redis;
 	}
 
@@ -58,13 +56,13 @@ public class RocketSendCallback implements SendCallback {
 			this.redis.expire(RocketProducer.EXPCEPTION_REDIS_KEY, 24, TimeUnit.HOURS);
 			RocketProducer.log.info("Send MQ Msg failed, push MQ msg into redis. topic:" + topic + " tag:" + tags
 					+ " content:" + content);
-			if(isAlert)
-				A.dingding("Send MQ Msg failed, push MQ msg into redis. topic:" + topic + " tag:" + tags + " content:"
+			if(this.alerter!=null)
+				this.alerter.alert("Send MQ Msg failed, push MQ msg into redis. topic:" + topic + " tag:" + tags + " content:"
 					+ content);
 		} else {
 			RocketProducer.log.error("Send MQ Msg failed, topic:" + topic + " tag:" + tags + " content:" + content);
-			if(isAlert)
-				A.dingding("Send MQ Msg failed, topic:" + topic + " tag:" + tags + " content:" + content);
+			if(this.alerter!=null)
+				this.alerter.alert("Send MQ Msg failed, topic:" + topic + " tag:" + tags + " content:" + content);
 		}
 		e.printStackTrace();
 	}

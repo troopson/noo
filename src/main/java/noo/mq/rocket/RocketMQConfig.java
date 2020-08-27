@@ -55,14 +55,14 @@ public class RocketMQConfig {
 	
 	
 	@Bean
-	public RocketProducer createProducer(StringRedisTemplate redis,Environment evn) {
+	public RocketProducer createProducer(StringRedisTemplate redis,Environment evn,IAlert alerter) {
 		
 		RocketProducer rmp = new RocketProducer();
 		rmp.start(this.producerid, this.onsaddr, Integer.parseInt(this.send_timeout));
 		rmp.setRedis(redis);
 		String profile = evn.getActiveProfiles()[0];
 		if("prod".equals(profile))
-			rmp.setAlert(true);
+			rmp.setAlert(alerter);
 		return rmp;
 		
 	}
@@ -75,11 +75,6 @@ public class RocketMQConfig {
 		
 	}
 	
-	@Bean
-	public ConsumDupCheck createConsumDupCheck() {
-		ConsumDupCheck c = new ConsumDupCheck();
-		return c;
-	}
 	
 	 
 	

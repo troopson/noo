@@ -36,14 +36,14 @@ public class RocketProducer {
 	
 	private StringRedisTemplate redis;
 	 
-	private boolean isAlert = false;
+	private IAlert alerter = null;
 
 	public void setRedis(StringRedisTemplate redis) {
 		this.redis = redis;
 	}
 	
-	public void setAlert(boolean alert) {
-		this.isAlert = alert;
+	public void setAlert(IAlert alert) {
+		this.alerter = alert;
 	}
 	
 	
@@ -117,7 +117,7 @@ public class RocketProducer {
 		
 		
 		Message msg = createMessage(topic, tag, j, delayLevel); 
-		this.sendMsg(msg, new RocketSendCallback(msg,this.isAlert,this.redis));
+		this.sendMsg(msg, new RocketSendCallback(msg,this.alerter,this.redis));
 	}
 
 

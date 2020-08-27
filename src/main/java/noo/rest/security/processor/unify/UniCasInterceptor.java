@@ -65,6 +65,7 @@ public class UniCasInterceptor extends RequestInterceptor {
 		if (HttpMethod.GET.matches(method)) {
 			String cookie_identify = this.findCookie(req, resp); 
 			
+			
 			//1. 如果是注销的，执行注销流程
 			String type = req.getParameter("type");
 			if("logout".equals(type)) {
@@ -120,7 +121,10 @@ public class UniCasInterceptor extends RequestInterceptor {
 			this.removeCookie(resp);
 			this.removeCookieUserObj(cookie_identify);
 		}
-		SecueHelper.writeResponse(resp, "0");
+		String callback = req.getParameter("callback");
+		if(S.isBlank(callback))
+			callback="callback";
+		SecueHelper.writeResponse(resp, callback+"();");
 		 
 	}
 	
@@ -199,7 +203,7 @@ public class UniCasInterceptor extends RequestInterceptor {
 		Cookie cookie = new Cookie(COOKIENAME, unify_token);
 		cookie.setHttpOnly(true);
 		cookie.setPath(this.definition.casUrl());
-		cookie.setVersion(1);
+		cookie.setVersion(1); 
 		resp.addCookie(cookie);
 		return unify_token;
 	}
