@@ -26,7 +26,6 @@ import noo.rest.security.api.ApiRateLimitPool;
 import noo.rest.security.processor.LoginInterceptor;
 import noo.rest.security.processor.LogoutInterceptor;
 import noo.rest.security.processor.unify.AuthCodeLoginInterceptor;
-import noo.rest.security.processor.unify.UniCasInterceptor;
 import noo.util.SpringContext;
 
 /**
@@ -73,11 +72,13 @@ public class Config {
 //	}
 	
 	
-	@Autowired
+	@Autowired(required=false)
 	private Set<RequestMappingHandlerAdapter> adapters; 
 	 
 	@PostConstruct
     public void addArgumentResolvers() {
+		if(adapters==null)
+			return;
 		for(RequestMappingHandlerAdapter adapter: adapters) {
 			List<HandlerMethodArgumentResolver> ls = adapter.getArgumentResolvers();
 			List<HandlerMethodArgumentResolver> rslvs = new ArrayList<>();

@@ -62,6 +62,13 @@ public class UniCasInterceptor extends RequestInterceptor {
 		String method = req.getMethod();  
 
 		//如果登录的链接是一个GET请求，认为是种cookie的请求
+		/*
+		 * 依据参数，区分为如下几种：
+		 * 1. 登出的jsonp操作
+		 * 2. 带authcode和redirect_url的跳转请求，利用该请求种一个cookie
+		 * 3. 首次加载页面时候引入cas JavaScript的请求，利用该请求，判断是否有cookie，如果有，返回authocode直接登录
+		 * 4. 以上都不是，不做任何操作
+		 */
 		if (HttpMethod.GET.matches(method)) {
 			String cookie_identify = this.findCookie(req, resp); 
 			
@@ -121,11 +128,11 @@ public class UniCasInterceptor extends RequestInterceptor {
 			this.removeCookie(resp);
 			this.removeCookieUserObj(cookie_identify);
 		}
-		String callback = req.getParameter("callback");
-		if(S.isBlank(callback))
-			callback="callback";
-		SecueHelper.writeResponse(resp, callback+"();");
-		 
+		String loginpage = req.getParameter("loginpage");
+		if(S.isNotBlank(loginpage))
+			SecueHelper.writeResponse(resp,"<!DOCTYPE html><html><body onload=\"window.location.href='"+loginpage+"'\">跳转登录页中...</body></html>"); 
+		else
+			SecueHelper.writeResponse(resp,"<!DOCTYPE html><html><body>登出成功!</body></html>");
 	}
 	
 	private void doRedirect(HttpServletRequest req, HttpServletResponse resp, String cookie_identify, String authcode, String redirectUrl) throws IOException {
@@ -203,7 +210,7 @@ public class UniCasInterceptor extends RequestInterceptor {
 		Cookie cookie = new Cookie(COOKIENAME, unify_token);
 		cookie.setHttpOnly(true);
 		cookie.setPath(this.definition.casUrl());
-		cookie.setVersion(1); 
+		cookie.setVersion(1);  
 		resp.addCookie(cookie);
 		return unify_token;
 	}

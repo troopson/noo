@@ -182,6 +182,8 @@ public class JdbcSvr {
 		log.debug(sql.toString()+"   "+C.printArray(values));
 		return sql;
 	}
+	
+	//=======update delete===============================================================
 
 	public int updateRow(String table, String setFields,String conditionFields,  Object[] values) {
 		return this.updateRow(table, S.splitWithComma(setFields), conditionFields.split(","), values);
@@ -240,6 +242,13 @@ public class JdbcSvr {
 		return this.getJdbcTemplate().update(sql.toString(), params);
 
 	}
+	
+	public int execute(String sql,JsonObject param) {
+		Eso e = SqlUtil.buildESO(sql, param==null?null:param.getMap());
+		return this.getJdbcTemplate().update(e.sql(),param==null?null:param.getMap());
+	}
+	
+	//=============================================================
 
 	public JsonObject get(String table, Object uuid) {
 		return this.get(table, "uuid", uuid);

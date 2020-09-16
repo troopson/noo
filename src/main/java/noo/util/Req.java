@@ -84,7 +84,7 @@ public class Req {
 			}
 		}
 		if (ip != null && ip.indexOf(",")!=-1) {
-			ip = ip.split(",")[0];
+			ip = ip.substring(0, ip.indexOf(","));
 		}
 		return ip;
 	}
