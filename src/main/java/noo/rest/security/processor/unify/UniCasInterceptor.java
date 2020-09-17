@@ -4,7 +4,10 @@
 package noo.rest.security.processor.unify;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.Cookie;
@@ -129,10 +132,34 @@ public class UniCasInterceptor extends RequestInterceptor {
 			this.removeCookieUserObj(cookie_identify);
 		}
 		String loginpage = req.getParameter("loginpage");
-		if(S.isNotBlank(loginpage))
+	
+		if(S.isNotBlank(loginpage)) {
+			loginpage = this.addRequestParams(req, loginpage);
 			SecueHelper.writeResponse(resp,"<!DOCTYPE html><html><body onload=\"window.location.href='"+loginpage+"'\">跳转登录页中...</body></html>"); 
-		else
+		}else
 			SecueHelper.writeResponse(resp,"<!DOCTYPE html><html><body>登出成功!</body></html>");
+	}
+	
+	//将logout请求中携带的参数，都添加到loginpage的url后面
+	private String addRequestParams(HttpServletRequest req,String loginpage) throws UnsupportedEncodingException {
+		Enumeration<String> e = req.getParameterNames();
+		StringBuilder sb = null;
+		while(e.hasMoreElements()) {
+			String pn=e.nextElement();
+			if(!pn.equals("type") && !pn.equals("loginpage")) {
+				String value = req.getParameter(pn);
+				if(S.isBlank(value))
+					continue;
+				value = URLEncoder.encode(value, "UTF-8");
+				if(sb==null)
+				    sb=new StringBuilder(pn).append("=").append(value);
+				else 
+					sb.append("&").append(pn).append("=").append(value);
+			}	
+		}
+		if(sb!=null)
+			loginpage = loginpage+ (loginpage.indexOf("?")==-1?"?":"&") + sb.toString();
+		return loginpage;
 	}
 	
 	private void doRedirect(HttpServletRequest req, HttpServletResponse resp, String cookie_identify, String authcode, String redirectUrl) throws IOException {
