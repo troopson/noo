@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import noo.event.ListenerPool;
 import noo.exception.BaseExceptionHandler;
+import noo.jdbc.JdbcCacheSvr;
 import noo.jdbc.JdbcSvr;
 import noo.jdbc.SQLHolder;
 import noo.json.JsonObjectResolver;
@@ -48,6 +49,12 @@ public class Config {
 	public JdbcSvr createJdbcSvr() {
 		return new JdbcSvr(this.dataSource);
 	}
+	
+	@Bean
+	public JdbcCacheSvr createJdbcCach() {
+		return new JdbcCacheSvr();
+	}
+	
 
 	@Bean
 	public SQLHolder createSQLHolder() {

@@ -57,8 +57,10 @@ public class ApiRateLimit {
 			return 1;
 		}else {
 			long value = redis.opsForValue().increment(key, 1);
-			if(value>this.limit)
+			if(value>this.limit) {
+				log.info(ip+" visit api times big than limit.");
 				throw new BusinessException(508,"访问频率超过了系统限制！");
+			}
 			return value;
 		}
 		
