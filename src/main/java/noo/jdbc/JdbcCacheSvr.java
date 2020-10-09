@@ -24,8 +24,8 @@ public class JdbcCacheSvr {
 	
 	public static final Logger log = LoggerFactory.getLogger(JdbcCacheSvr.class);
 	
-	public static final int CACHE_TIME_THRESHOLD = 1000;  //查询时间的阈值，1秒
-	public static final int CACHE_REC_NUM_THRESHOLD = 1000;  //查询记录数的阈值
+	public static int cache_time_threshold = 1000;  //查询时间的阈值，1秒
+	public static int cache_rec_num_threshold = 1000;  //查询记录数的阈值
 	
 	@Autowired
 	private JdbcSvr svr;
@@ -57,7 +57,7 @@ public class JdbcCacheSvr {
 			long duration = System.currentTimeMillis() - start;
 			//如果查询时间超过阈值，并且查询结果集小于阈值，就缓存起来
 			//时间短不缓存
-			if(ja!=null && duration>CACHE_TIME_THRESHOLD && ja.size()<CACHE_REC_NUM_THRESHOLD) {
+			if(ja!=null && duration>cache_time_threshold && ja.size()<cache_rec_num_threshold) {
 				redis.opsForValue().set(key, ja.encode(), second, TimeUnit.SECONDS);
 			}
 			return ja;
