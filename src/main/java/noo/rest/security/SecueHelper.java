@@ -6,6 +6,7 @@ package noo.rest.security;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,6 +18,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import noo.json.JsonObject;
 import noo.util.S;
+import noo.util.SpringContext;
 
 /**
  * @author qujianjun troopson@163.com 2018年10月16日
@@ -142,6 +144,33 @@ public class SecueHelper {
 
 		return u;
 
+	}
+	
+	//将某个用户id的登录session设置为过期，可以按照client类型设置
+	public static void invalidUser(StringRedisTemplate redis,String userid,String[] client_types) {
+		if(redis==null || S.isBlank(userid))
+			return;
+		List<String> to_delete = new ArrayList<>();
+		if(client_types==null)
+			client_types = new String[] {DEFAULT_CLIENT}; 
+		for(String one : client_types) {
+			String userid_key = makeRedisClientUseridKey(one, userid);
+			String token = redis.opsForValue().get(userid_key);
+			if(S.isNotBlank(token)) {
+				String rkey = SecueHelper.REDIS_KEY + ":" + token;
+				to_delete.add(userid_key);
+				to_delete.add(rkey);
+			}
+		}
+		redis.delete(to_delete); 
+		
+		Map<String,InfInvalidUser> rh = SpringContext.getBeansOfType(InfInvalidUser.class);
+		if(rh !=null) { 
+			for(InfInvalidUser i : rh.values()) {
+				i.doInvalidUser(redis, userid);
+			}
+		}
+		
 	}
 	
 	

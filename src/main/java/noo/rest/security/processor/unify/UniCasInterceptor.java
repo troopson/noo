@@ -7,8 +7,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -17,12 +18,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsUtils;
 
 import noo.json.JsonObject;
 import noo.rest.security.AbstractUser;
 import noo.rest.security.AuthcodeService;
+import noo.rest.security.InfInvalidUser;
 import noo.rest.security.SecueHelper;
 import noo.rest.security.api.ApiRateLimitPool;
 import noo.rest.security.processor.RequestInterceptor;
@@ -35,11 +41,12 @@ import noo.util.S;
  * 
  * @author qujianjun troopson@163.com Jul 28, 2020
  */
-public class UniCasInterceptor extends RequestInterceptor {
+public class UniCasInterceptor extends RequestInterceptor implements InfInvalidUser{
 
 	public static final Logger log = LoggerFactory.getLogger(AuthCodeLoginInterceptor.class);
 
 	public static final String UNIFY_TOKEN_REDIS = "unify_token:";
+	public static final String UNIFY_TOKEN_USREID_REDIS = "unify_token_userid:";
 
 	public static final String COOKIENAME = "uni_identify";
 	
@@ -250,9 +257,24 @@ public class UniCasInterceptor extends RequestInterceptor {
 	}
 	
 	//==============================================
-
+	
 	private void persistCookieUserObj(String unify_token, JsonObject uobj) {
-		redis.opsForValue().set(UNIFY_TOKEN_REDIS + unify_token, uobj.encode(), EXPIRED_HOURS, TimeUnit.HOURS);
+		//redis.opsForValue().set(UNIFY_TOKEN_REDIS + unify_token, uobj.encode(), EXPIRED_HOURS, TimeUnit.HOURS);
+		
+		String id = uobj.getString("id");
+		if(S.isBlank(id))
+			id = uobj.getString("userid");
+		final String userid = id;
+		redis.executePipelined(new RedisCallback<Object>() { 
+			@Override
+			public Object doInRedis(RedisConnection connection) throws DataAccessException {
+				SecueHelper.setEx(connection,UNIFY_TOKEN_REDIS + unify_token, EXPIRED_HOURS*60, uobj.encode());
+				SecueHelper.setEx(connection,UNIFY_TOKEN_USREID_REDIS + userid, EXPIRED_HOURS*60, unify_token); 
+				return null;
+			}
+
+		});
+		
 	}
 
 	private JsonObject loadUserObjByCookie(String unify_token) {
@@ -267,5 +289,18 @@ public class UniCasInterceptor extends RequestInterceptor {
 	private void removeCookieUserObj(String unify_token) {
 		redis.delete(UNIFY_TOKEN_REDIS +unify_token);
 	}
+	
+	 
+
+	public void doInvalidUser(StringRedisTemplate redis, String userid) {
+		String unify_token = redis.opsForValue().get(UNIFY_TOKEN_USREID_REDIS + userid);
+		if(S.isNotBlank(unify_token)) {
+			List<String> a =new ArrayList<>();
+			a.add(UNIFY_TOKEN_USREID_REDIS + userid);
+			a.add(UNIFY_TOKEN_REDIS + unify_token);
+			redis.delete(a);
+		}
+	}
+	
 
 }
