@@ -25,7 +25,7 @@ public class JdbcCacheSvr {
 	public static final Logger log = LoggerFactory.getLogger(JdbcCacheSvr.class);
 	
 	public static int cache_time_threshold = 1000;  //查询时间的阈值，1秒
-	public static int cache_rec_num_threshold = 1000;  //查询记录数的阈值
+	public static int cache_rec_num_threshold = 500;  //查询记录数的阈值
 	
 	@Autowired
 	private JdbcSvr svr;
