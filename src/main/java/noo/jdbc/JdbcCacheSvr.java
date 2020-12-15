@@ -48,13 +48,13 @@ public class JdbcCacheSvr {
 		String key = "jdbc.result."+MD5.encode(sql+" param:"+param.encode());
 		
 		if(redis.hasKey(key)) {
-			log.info("find in cache, return result from cache for sql:"+sql);
+			log.info("find in cache, return result from cache key "+key+" +for sql:"+sql);
 			String value = redis.opsForValue().get(key);
 			return new JsonArray(value);
 		}else {
 			long start = System.currentTimeMillis();
 			JsonArray ja = svr.qry(sql, param);
-			long duration = System.currentTimeMillis() - start;
+			long duration = System.currentTimeMillis() - start; 
 			//如果查询时间超过阈值，并且查询结果集小于阈值，就缓存起来
 			//时间短不缓存
 			if(ja!=null && duration>cache_time_threshold && ja.size()<cache_rec_num_threshold) {

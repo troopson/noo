@@ -116,7 +116,6 @@ public class SecurityFilter implements Filter {
 			    this.doUsualHandler(requrl, req, resp, chain); 
 			}
 		}catch(Throwable e){
-			e.printStackTrace();  
 			if(e instanceof SessionTimeoutException) { 
 				resp.setStatus(401);
 				SecueHelper.writeJsonResponse(resp, e.toString());
@@ -124,6 +123,7 @@ public class SecurityFilter implements Filter {
 				resp.setStatus(400);
 				SecueHelper.writeJsonResponse(resp, e.toString());  
 			}else {
+				e.printStackTrace();  
 				resp.setStatus(403);
 				SecueHelper.writeJsonResponse(resp, new BusinessException(ExpCode.AUTHORIZE,"没有权限访问！").toString());  
 			}

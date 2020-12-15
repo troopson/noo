@@ -2,10 +2,8 @@
  * 
  */
 package noo.rest.security.api;
-
-import java.util.HashSet;
+ 
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,13 +17,31 @@ import noo.util.SpringContext;
 
 /**
  * @author qujianjun   troopson@163.com
- * 
  * Jul 20, 2020 
+ 读取spring配置文件中的配置项，实现对接口访问次数的控制
+ 
+ 使用方式
+ 
+ 在需要控制的类中，配置属性
+	@Autowired
+	private ApiRateLimitPool arlp; 
+ 
+	@GetMapping(value = "/refreshToken")
+	public JsonObject refreshAccessToken(JsonObject params,HttpServletRequest request) { 
+		arlp.checkLimit("refreshToken", request);
+		
+ 配置方式： 
+ 一分钟5次调用
+ limit.api.refreshToken: 5
+ 
+ 30分钟内5次调用
+ limit.api.refreshToken: 30,5
+  
+ * 
  */
 public class ApiRateLimitPool {
  
-	private static final Map<String, ApiRateLimit> pools = new ConcurrentHashMap<>();
-	private static final Set<String> noLimit = new HashSet<>();
+	private static final Map<String, ApiRateLimit> pools = new ConcurrentHashMap<>(); 
 	
 	private static final String PROPERTY_PREX="limit.api.";
 	
@@ -38,18 +54,24 @@ public class ApiRateLimitPool {
 
 
 	private ApiRateLimit getApiRateLimit(String apiName) {  
-		if(noLimit.contains(apiName))
-			return null;
+		//if(noLimit.contains(apiName))
+		//	return null;
 		if(pools.containsKey(apiName)) {
 			return pools.get(apiName); 
 		}else { 
 			String apiLimit = SpringContext.getProperty(PROPERTY_PREX+apiName);
-			if(S.isBlank(apiLimit)) { 
-				//如果没有定义，记录一下，下次不用再调用getProperty去获取属性了
-				noLimit.add(apiName);
+			if(S.isBlank(apiLimit)) {  
 				return null;  
 			}else {
-				ApiRateLimit ar = new ApiRateLimit(this.redis,apiName,Long.parseLong(apiLimit));
+				ApiRateLimit ar;
+				if(apiLimit.indexOf(",")!=-1) {
+					String[] minute_rate = apiLimit.split(",");
+					int minute = Integer.parseInt(minute_rate[0]);
+					long rate = Long.parseLong(minute_rate[1]);
+					ar = new ApiRateLimit(this.redis,apiName,minute,rate);
+				}else {
+					ar = new ApiRateLimit(this.redis,apiName,Long.parseLong(apiLimit));
+				}
 				pools.put(apiName, ar);
 				return ar;
 			}

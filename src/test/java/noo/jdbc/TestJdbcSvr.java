@@ -44,6 +44,15 @@ public class TestJdbcSvr {
 		if(ds!=null)
 			ds.close();  
 	}
+	
+	@Test
+	public void testIniType() { 
+		  
+		
+		
+	}
+ 
+	
 
 	@Test
 	public void testQueryPageById() { 

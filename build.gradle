@@ -10,7 +10,7 @@ configurations.all {
 
 buildscript {
     repositories {                
-	   maven {   url 'https://repo.spring.io/libs-milestone'  }
+	   maven {   url 'https://repo.spring.io/milestone'  }
        jcenter() 
     }
     dependencies {
@@ -59,7 +59,7 @@ task copyJars(type:Copy) {
  
 repositories {
 
-	     maven {   url 'https://repo.spring.io/libs-milestone'  }
+	     maven {   url 'https://repo.spring.io/milestone'  }
          jcenter() 
 
 } 
@@ -92,6 +92,7 @@ dependencies {
 	compile group: 'commons-codec', name: 'commons-codec', version: '1.14'
 	
     testCompile 'junit:junit:4.12'
+    testCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.8' 
      
 }
 

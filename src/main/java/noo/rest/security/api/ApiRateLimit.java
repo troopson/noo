@@ -31,6 +31,7 @@ public class ApiRateLimit {
 	
 	
 	public ApiRateLimit(StringRedisTemplate redis,String apiname,  long limit) {
+		//默认一分钟内，限制访问的次数
 		this(redis,apiname,1,limit);
 	}
 	
@@ -61,7 +62,7 @@ public class ApiRateLimit {
 				log.info(ip+" visit api times big than limit.");
 				throw new BusinessException(508,"访问频率超过了系统限制！");
 			}
-			return value;
+			return value; 
 		}
 		
 	}

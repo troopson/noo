@@ -49,6 +49,8 @@ import noo.util.S;
 //@ConditionalOnProperty(name = "spring.datasource.url")
 @SuppressWarnings("rawtypes")
 public class JdbcSvr {
+	
+	public static enum DBType { MYSQL, POSTGRES, ORACLE, UNKNOWN}
 
 	public static final Logger log = LoggerFactory.getLogger(JdbcSvr.class);
 
@@ -56,16 +58,36 @@ public class JdbcSvr {
 
 	// ====================================================
 	// SPRING JDBC模板接口
-	protected JdbcTemplate jdbcTemplate;
-	protected NamedParameterJdbcTemplate named;
+	public final JdbcTemplate jdbcTemplate;
+	public final NamedParameterJdbcTemplate named;
 	
-	
+	private DBType dbtype;
 
 	@Autowired
 	public JdbcSvr(DataSource dataSource) {
 		log.info("Create JdbcSvr, Inject dataSource "+dataSource.hashCode());
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.named = new NamedParameterJdbcTemplate(this.jdbcTemplate);
+		
+		try { 
+			String driverName = dataSource.getConnection().getMetaData().getDriverName();
+			log.debug("driverName: "+driverName);
+			String lower = driverName.toLowerCase();
+			if(lower.indexOf("mysql")>0)
+				this.dbtype = DBType.MYSQL;
+			else if(lower.indexOf("postgresql")>0)
+				this.dbtype = DBType.POSTGRES;
+			else if(lower.indexOf("oracle")>0)
+				this.dbtype = DBType.ORACLE;
+			else
+				this.dbtype = DBType.UNKNOWN;
+		} catch (SQLException e) { 
+			this.dbtype = DBType.UNKNOWN;
+		} 
+	}
+	
+	public DBType dbtype() {
+		return this.dbtype;
 	}
 
 	public JdbcTemplate getJdbcTemplate() {
@@ -75,6 +97,8 @@ public class JdbcSvr {
 	public NamedParameterJdbcTemplate getNamedTemplate() {
 		return this.named;
 	}
+	
+ 
 
 	// =========================insert, update, delete==========================
 
@@ -476,13 +500,13 @@ public class JdbcSvr {
 
 		String newsql = SqlUtil.processParam(sql, param.getMap());
 		JdbcSvr.log.debug(newsql+"   "+param.encode());
-		PageQuery page = new PageQuery(newsql.toString(), param.getMap(), pageNo, pageSize, this.getNamedTemplate(),isQueryTotal);
+		PageQuery page = new PageQuery(newsql.toString(), param.getMap(), pageNo, pageSize,this,isQueryTotal);
 		page.getResultList();
 		return new PageJsonArray(page);
 	}
 
 	public PageJsonArray qryByPage(String sql, Object[] params, int pageNo, int pageSize) {
-		PageQuery page = new PageQuery(sql, params, pageNo, pageSize, this.getJdbcTemplate(),true);
+		PageQuery page = new PageQuery(sql, params, pageNo, pageSize,this,true);
 		page.getResultList();
 		return new PageJsonArray(page);
 	}

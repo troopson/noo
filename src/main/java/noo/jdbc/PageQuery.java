@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import noo.jdbc.JdbcSvr.DBType;
 
 /**
  * @author 瞿建军
@@ -35,8 +34,7 @@ public class PageQuery implements Serializable {
 	
 	private transient boolean isQueryTotalCount = true;
 
-	public PageQuery(String sql) {
-	}
+
 
 	/**
 	 * 分页构造函数
@@ -52,8 +50,8 @@ public class PageQuery implements Serializable {
 	 * @param jTemplate
 	 *            JdbcTemplate实例
 	 */
-	public PageQuery(String sql, Object[] args, int currentPage, int numPerPage, JdbcTemplate jTemplate, boolean query_total) {
-		if (jTemplate == null) {
+	public PageQuery(String sql, Object[] args, int currentPage, int numPerPage, JdbcSvr svr, boolean query_total) {
+		if (svr == null) {
 			throw new IllegalArgumentException("PageInation.jTemplate is null,please initial it first. ");
 		} else if (sql == null || sql.equals("")) {
 			throw new IllegalArgumentException("PageInation.sql is null,please initial it first. ");
@@ -70,7 +68,8 @@ public class PageQuery implements Serializable {
 			totalSQL.append(" ) totalTable ");
 	
 			// 总记录数
-			setTotalRows(jTemplate.queryForObject(totalSQL.toString(), args, Integer.class));
+			setTotalRows(svr.qryInt(totalSQL.toString(), args));
+			//setTotalRows(svr.getJdbcTemplate().queryForObject(totalSQL.toString(), args, Integer.class));
 		}else {
 			this.setTotalRows(0);
 		}
@@ -87,26 +86,16 @@ public class PageQuery implements Serializable {
 		// 计算起始行数
 		setStartIndex();
 		// 计算结束行数
-		setLastIndex();
-
-		// System.out.println("lastIndex="+lastIndex);
-
-		// 构造oracle数据库的分页语句
-		/**
-		 * StringBuffer paginationSQL = new StringBuffer(" SELECT * FROM ( ");
-		 * paginationSQL.append(" SELECT temp.* ,ROWNUM num FROM ( ");
-		 * paginationSQL.append(sql); paginationSQL.append(" ) temp where ROWNUM <= " +
-		 * lastIndex); paginationSQL.append(" ) WHERE num > " + startIndex);
-		 */
+		setLastIndex(); 
 
 		// 装入结果集
-		setResultList(jTemplate.queryForList(getMySQLPageSQL(sql, startIndex, numPerPage), args));
+	
+		setResultList(svr.jdbcTemplate.queryForList(getPageSQL(svr.dbtype(),sql, startIndex, numPerPage), args));
 	}
 
 	// 提供一个可以执行命名参数的方法
-	public PageQuery(String sql, Map<String, ?> args, int currentPage, int numPerPage,
-			NamedParameterJdbcTemplate jTemplate, boolean query_total) {
-		if (jTemplate == null) {
+	public PageQuery(String sql, Map<String, ?> args, int currentPage, int numPerPage, JdbcSvr svr, boolean query_total) {
+		if (svr == null) {
 			throw new IllegalArgumentException("PageInation.jTemplate is null,please initial it first. ");
 		} else if (sql == null || sql.equals("")) {
 			throw new IllegalArgumentException("PageInation.sql is null,please initial it first. ");
@@ -122,7 +111,7 @@ public class PageQuery implements Serializable {
 			totalSQL.append(" ) totalTable ");
 	
 			// 总记录数
-			setTotalRows(jTemplate.queryForObject(totalSQL.toString(), args, Integer.class));
+			setTotalRows(svr.named.queryForObject(totalSQL.toString(), args, Integer.class));
 		}else {
 			setTotalRows(0);
 		}
@@ -139,22 +128,23 @@ public class PageQuery implements Serializable {
 		// 计算起始行数
 		setStartIndex();
 		// 计算结束行数
-		setLastIndex();
-
-		// System.out.println("lastIndex="+lastIndex);
-
-		// 构造oracle数据库的分页语句
-		/**
-		 * StringBuffer paginationSQL = new StringBuffer(" SELECT * FROM ( ");
-		 * paginationSQL.append(" SELECT temp.* ,ROWNUM num FROM ( ");
-		 * paginationSQL.append(sql); paginationSQL.append(" ) temp where ROWNUM <= " +
-		 * lastIndex); paginationSQL.append(" ) WHERE num > " + startIndex);
-		 */
+		setLastIndex(); 
 
 		// 装入结果集
-		setResultList(jTemplate.queryForList(getMySQLPageSQL(sql, startIndex, numPerPage), args));
+		setResultList(svr.named.queryForList(getPageSQL(svr.dbtype(),sql, startIndex, numPerPage), args));
 	}
 
+	
+	public String getPageSQL(DBType dbtype,String queryString, Integer startIndex, Integer pageSize) {
+		if(dbtype==DBType.MYSQL)
+			return this.getMySQLPageSQL(queryString, startIndex, pageSize);
+		else if(dbtype==DBType.POSTGRES)
+			return this.getPostgresPageSQL(queryString, startIndex, pageSize);
+		else if(dbtype==DBType.ORACLE)
+			return this.getOraclePageSQL(queryString, startIndex, pageSize);
+		else
+			return this.getMySQLPageSQL(queryString, startIndex, pageSize);
+	}
 	/**
 	 * 构造MySQL数据分页SQL
 	 * 
@@ -164,15 +154,42 @@ public class PageQuery implements Serializable {
 	 * @return
 	 */
 	public String getMySQLPageSQL(String queryString, Integer startIndex, Integer pageSize) {
-		String result = "";
-		if (null != startIndex && null != pageSize) {
-			result = queryString + " limit " + startIndex + "," + pageSize;
-		} else if (null != startIndex && null == pageSize) {
-			result = queryString + " limit " + startIndex;
-		} else {
-			result = queryString;
-		}
-		return result;
+		return queryString + " limit " + startIndex + "," + pageSize; 
+	}
+	
+	/**
+	 * 构造PostgreSQL数据分页SQL
+	 * 
+	 * @param queryString
+	 * @param startIndex
+	 * @param pageSize
+	 * @return
+	 */
+	public String getPostgresPageSQL(String queryString, Integer startIndex, Integer pageSize) {
+		return queryString + " limit " + pageSize + " offset " + startIndex; 
+	}
+	
+	/**
+	 * 构造Oracle数据分页SQL
+	 * 
+	 * @param queryString
+	 * @param startIndex
+	 * @param pageSize
+	 * @return
+	 * 
+		// 构造oracle数据库的分页语句
+		/* System.out.println("lastIndex="+lastIndex);
+		 * 
+		 *
+		 * StringBuffer paginationSQL = new StringBuffer(" SELECT * FROM ( ");
+		 * paginationSQL.append(" SELECT temp.* ,ROWNUM num FROM ( ");
+		 * paginationSQL.append(sql); paginationSQL.append(" ) temp where ROWNUM <= " +
+		 * lastIndex); paginationSQL.append(" ) WHERE num > " + startIndex);
+		 * 
+	
+	 */
+	public String getOraclePageSQL(String queryString, Integer startIndex, Integer pageSize) { 
+		return "SELECT * FROM ( SELECT t.* ,ROWNUM num FROM ( "+queryString+" ) t where ROWNUM <= "+(startIndex + pageSize)+" ) WHERE num > "+startIndex; 
 	}
 
 	public int getCurrentPage() {
