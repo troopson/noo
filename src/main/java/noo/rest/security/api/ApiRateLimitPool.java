@@ -23,10 +23,10 @@ import noo.util.SpringContext;
  使用方式
  
  在需要控制的类中，配置属性
-	@Autowired
+	 
 	private ApiRateLimitPool arlp; 
  
-	@GetMapping(value = "/refreshToken")
+	
 	public JsonObject refreshAccessToken(JsonObject params,HttpServletRequest request) { 
 		arlp.checkLimit("refreshToken", request);
 		

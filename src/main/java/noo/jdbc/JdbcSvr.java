@@ -73,11 +73,11 @@ public class JdbcSvr {
 			String driverName = dataSource.getConnection().getMetaData().getDriverName();
 			log.debug("driverName: "+driverName);
 			String lower = driverName.toLowerCase();
-			if(lower.indexOf("mysql")>0)
+			if(lower.indexOf("mysql")!=-1)
 				this.dbtype = DBType.MYSQL;
-			else if(lower.indexOf("postgresql")>0)
+			else if(lower.indexOf("postgresql")!=-1)
 				this.dbtype = DBType.POSTGRES;
-			else if(lower.indexOf("oracle")>0)
+			else if(lower.indexOf("oracle")!=-1)
 				this.dbtype = DBType.ORACLE;
 			else
 				this.dbtype = DBType.UNKNOWN;

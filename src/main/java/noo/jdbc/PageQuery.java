@@ -38,17 +38,7 @@ public class PageQuery implements Serializable {
 
 	/**
 	 * 分页构造函数
-	 * 
-	 * @param sql
-	 *            根据传入的sql语句得到一些基本分页信息
-	 * @param args
-	 *            参数
-	 * @param currentPage
-	 *            当前页
-	 * @param numPerPage
-	 *            每页记录数
-	 * @param jTemplate
-	 *            JdbcTemplate实例
+	 *   
 	 */
 	public PageQuery(String sql, Object[] args, int currentPage, int numPerPage, JdbcSvr svr, boolean query_total) {
 		if (svr == null) {
@@ -176,17 +166,7 @@ public class PageQuery implements Serializable {
 	 * @param startIndex
 	 * @param pageSize
 	 * @return
-	 * 
-		// 构造oracle数据库的分页语句
-		/* System.out.println("lastIndex="+lastIndex);
-		 * 
-		 *
-		 * StringBuffer paginationSQL = new StringBuffer(" SELECT * FROM ( ");
-		 * paginationSQL.append(" SELECT temp.* ,ROWNUM num FROM ( ");
-		 * paginationSQL.append(sql); paginationSQL.append(" ) temp where ROWNUM <= " +
-		 * lastIndex); paginationSQL.append(" ) WHERE num > " + startIndex);
-		 * 
-	
+	 *  
 	 */
 	public String getOraclePageSQL(String queryString, Integer startIndex, Integer pageSize) { 
 		return "SELECT * FROM ( SELECT t.* ,ROWNUM num FROM ( "+queryString+" ) t where ROWNUM <= "+(startIndex + pageSize)+" ) WHERE num > "+startIndex; 
