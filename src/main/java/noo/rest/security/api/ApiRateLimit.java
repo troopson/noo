@@ -38,6 +38,8 @@ public class ApiRateLimit {
 	public ApiRateLimit(StringRedisTemplate redis,String apiname, int minutes, long limit) {
 		if(S.isBlank(apiname))
 			throw new IllegalArgumentException("api name can't be null.");
+		if(limit<2)
+			throw new IllegalArgumentException("limit must bigger than 1.");
 		this.redis = redis;
 		this.period = minutes;
 		this.limit = limit;
@@ -58,6 +60,10 @@ public class ApiRateLimit {
 			return 1;
 		}else {
 			long value = redis.opsForValue().increment(key, 1);
+			//防止 setIfAbsent时不过期，increment的时候过期，避免设置出一个没有过期时间的key
+			if(value==1)
+				redis.expire(key, this.period, TimeUnit.MINUTES); 
+			
 			if(value>this.limit) {
 				log.info(ip+" visit api times big than limit.");
 				throw new BusinessException(508,"访问频率超过了系统限制！");
