@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -36,7 +37,7 @@ import noo.util.SpringContext;
 @Configuration 
 public class Config {
 
-	@Autowired
+	@Autowired(required = false) 
 	private DataSource dataSource;
 
 	@Bean
@@ -46,11 +47,13 @@ public class Config {
 
 	@Bean
 	@Primary
+	@ConditionalOnProperty(name="spring.datasource.url")
 	public JdbcSvr createJdbcSvr() {
 		return new JdbcSvr(this.dataSource);
 	}
 	
-	@Bean
+	@Bean 
+	@ConditionalOnProperty(name="spring.datasource.url")
 	public JdbcCacheSvr createJdbcCach() {
 		return new JdbcCacheSvr();
 	}

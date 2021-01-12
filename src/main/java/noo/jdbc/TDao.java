@@ -48,6 +48,15 @@ public abstract class TDao {
 		return jdbc.get(this.tableName(), pk, id);		
 	}
 	
+	
+	public JsonObject getById(Object id,String...fields){
+		if(fields==null || fields.length==0)
+			return this.getById(id);
+		String pk = this.jdbc.getSinglePK(this.tableName());
+		return jdbc.get(this.tableName(), pk, id,String.join(",", fields));		
+	}
+	
+	
 	public JsonObject getByField(String field, String value){		
 		return jdbc.get(this.tableName(), field, value);
 	}

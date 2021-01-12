@@ -8,7 +8,6 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -75,7 +74,12 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 *            the map to create the instance from.
 	 */
 	public JsonObject(Map<String, Object> map) {
-		this.map = map;
+		if(map instanceof LinkedCaseInsensitiveMap)
+			this.map = map;
+		else { 
+			this.map = new LinkedCaseInsensitiveMap<Object>(); 
+			this.map.putAll(map); 
+		}
 	}
 
 	/**
@@ -1026,12 +1030,8 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	 
 	public JsonObject copy() {
-		Map<String, Object> copiedMap;
-		if (map instanceof LinkedHashMap) {
-			copiedMap = new LinkedHashMap<>(map.size());
-		} else {
-			copiedMap = new HashMap<>(map.size());
-		}
+		Map<String, Object> copiedMap = new LinkedCaseInsensitiveMap<>(map.size());
+		
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
 			Object val = entry.getValue();
 			val = Json.checkAndCopy(val, true);
@@ -1042,12 +1042,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 
 	
 	public JsonObject copy(String...keys) {
-		Map<String, Object> copiedMap;
-		if (map instanceof LinkedHashMap) {
-			copiedMap = new LinkedHashMap<>(map.size());
-		} else {
-			copiedMap = new HashMap<>(map.size());
-		}
+		Map<String, Object> copiedMap = new LinkedCaseInsensitiveMap<>(map.size());
 		for(String s: keys) {
 			Object val = map.get(s);
 			val = Json.checkAndCopy(val, true); 
@@ -1057,12 +1052,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	}
 	
 	public JsonObject copyNotNull(String...keys) {
-		Map<String, Object> copiedMap;
-		if (map instanceof LinkedHashMap) {
-			copiedMap = new LinkedHashMap<>(map.size());
-		} else {
-			copiedMap = new HashMap<>(map.size());
-		}
+		Map<String, Object> copiedMap = new LinkedCaseInsensitiveMap<>(map.size());
 		for(String s: keys) {
 			Object val = map.get(s);
 			if(val==null || "".equals(val))
@@ -1277,11 +1267,12 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 
 
 	private void fromJson(String json) {
-		map = Json.decodeValue(json, Map.class);
+		this.map = Json.decodeValue(json, LinkedCaseInsensitiveMap.class);  
 	}
 
-	private void fromBuffer(byte[] buf) {
-		map = Json.decodeValue(buf, Map.class);
+	private void fromBuffer(byte[] buf) {  
+		this.map = Json.decodeValue(buf, LinkedCaseInsensitiveMap.class); 
+		
 	}
 
 	private class Iter implements Iterator<Map.Entry<String, Object>> {

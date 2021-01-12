@@ -278,15 +278,20 @@ public class JdbcSvr {
 		return this.get(table, "uuid", uuid);
 	}
 
-	@SuppressWarnings("unchecked")
 	public JsonObject get(String table, String pkfield, Object uuid) {
-		List l = this.getJdbcTemplate().queryForList("select * from " + table + " where " + pkfield + "=?",
+		return this.get(table, pkfield,uuid,"*");
+	}
+	
+	@SuppressWarnings("unchecked")
+	public JsonObject get(String table, String pkfield, Object uuid, String fields) {
+		List l = this.getJdbcTemplate().queryForList("select "+fields+" from " + table + " where " + pkfield + "=?",
 				new Object[] { uuid });
 		if (l == null || l.isEmpty()) {
 			return null;
 		}
 		return new JsonObject((Map<String, Object>) l.get(0));
 	}
+	
 
 	public int execute(String sql, Object... obj) {
 		return this.getJdbcTemplate().update(sql, obj);

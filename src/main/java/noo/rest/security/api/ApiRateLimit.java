@@ -55,6 +55,7 @@ public class ApiRateLimit {
 		
 		String key = API_CALL_REDIS_KEY+apiname+":"+ip;
 		boolean setted = redis.opsForValue().setIfAbsent(key, "1"); 
+	
 		if(setted) {
 			redis.expire(key, this.period, TimeUnit.MINUTES); 
 			return 1;
@@ -63,8 +64,7 @@ public class ApiRateLimit {
 			//防止 setIfAbsent时不过期，increment的时候过期，避免设置出一个没有过期时间的key
 			if(value==1)
 				redis.expire(key, this.period, TimeUnit.MINUTES); 
-			
-			if(value>this.limit) {
+			else if(value>this.limit) {
 				log.info(ip+" visit api times big than limit.");
 				throw new BusinessException(508,"访问频率超过了系统限制！");
 			}
