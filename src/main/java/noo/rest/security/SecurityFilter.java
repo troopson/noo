@@ -93,10 +93,10 @@ public class SecurityFilter implements Filter {
 		
 		if (!this.isPassCors(req, resp)) 
 			return; 
-		
+		 
 		String requrl = req.getRequestURI(); 
 		
-		if(us.isIgnore(requrl)) {
+		if(us==null || us.isIgnore(requrl)) {
 			chain.doFilter(request, response);
 			return;
 	    }
