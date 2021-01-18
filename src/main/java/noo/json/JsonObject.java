@@ -74,12 +74,13 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 *            the map to create the instance from.
 	 */
 	public JsonObject(Map<String, Object> map) {
-		if(map instanceof LinkedCaseInsensitiveMap)
-			this.map = map;
-		else { 
-			this.map = new LinkedCaseInsensitiveMap<Object>(); 
-			this.map.putAll(map); 
-		}
+		this.map = map;
+//		if(map instanceof LinkedCaseInsensitiveMap)
+//			this.map = map;
+//		else { 
+//			this.map = new LinkedCaseInsensitiveMap<Object>(); 
+//			this.map.putAll(map); 
+//		}
 	}
 
 	/**
@@ -103,7 +104,7 @@ public class JsonObject implements Iterable<Map.Entry<String, Object>>, Serializ
 	 */
 	 
 	public static JsonObject mapFrom(Object obj) {
-		return new JsonObject((Map<String, Object>) Json.mapper.convertValue(obj, Map.class));
+		return new JsonObject((Map<String, Object>) Json.mapper.convertValue(obj, LinkedCaseInsensitiveMap.class));
 	}
 
 	/**
