@@ -53,12 +53,25 @@ public class ApiRateLimitPool {
 	}
 
 
-	private ApiRateLimit getApiRateLimit(String apiName) {  
+	private ApiRateLimit getApiRateLimitFromPool(String apiName,Integer def_minutes, Long def_limit) {  
 		//if(noLimit.contains(apiName))
 		//	return null;
 		if(pools.containsKey(apiName)) {
 			return pools.get(apiName); 
 		}else { 
+			
+			ApiRateLimit ar = this.buildApiRateLimit(apiName, def_minutes, def_limit);
+			if(ar==null)
+				return null;
+			pools.put(apiName, ar);
+			return ar; 
+		} 
+	}
+	
+	private ApiRateLimit buildApiRateLimit(String apiName,Integer def_minutes, Long def_limit) {
+		if(def_minutes!=null && def_limit!=null && def_limit>0 && def_minutes>0) {
+			return new ApiRateLimit(this.redis,apiName,def_minutes,def_limit);
+		}else {
 			String apiLimit = SpringContext.getProperty(PROPERTY_PREX+apiName);
 			if(S.isBlank(apiLimit)) {  
 				return null;  
@@ -75,23 +88,26 @@ public class ApiRateLimitPool {
 				pools.put(apiName, ar);
 				return ar;
 			}
-		} 
+		}
 	}
 	
-	
-	public void checkLimit(String apiName,HttpServletRequest rawrequest) {
-		ApiRateLimit ar = this.getApiRateLimit(apiName);
-		if(ar==null)
-			return;
-		String ip = Req.getClientIP(rawrequest);
-		ar.checkLimit(ip);
-	}
-	
-	public void checkLimit(String apiName,String ip) {
-		ApiRateLimit ar = this.getApiRateLimit(apiName);
+	public void checkLimit(String apiName,String ip,Integer def_minutes, Long def_limit) {
+		ApiRateLimit ar = this.getApiRateLimitFromPool(apiName,def_minutes,def_limit);
 		if(ar==null)
 			return; 
 		ar.checkLimit(ip);
+	}
+	
+	public void checkLimit(String apiName,HttpServletRequest rawrequest,Integer def_minutes, Long def_limit) {
+		this.checkLimit(apiName, Req.getClientIP(rawrequest), def_minutes, def_limit);
+	}
+	
+	public void checkLimit(String apiName,HttpServletRequest rawrequest) {
+		this.checkLimit(apiName, Req.getClientIP(rawrequest), null, null);
+	}
+	
+	public void checkLimit(String apiName,String ip) {
+		this.checkLimit(apiName, ip, null, null);
 	}
 	
 
