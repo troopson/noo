@@ -11,12 +11,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 /**
  * @author qujianjun troopson@163.com 2018年8月31日
  */
 @Configuration
+@EnableScheduling
 @ConditionalOnClass(org.apache.rocketmq.client.producer.DefaultMQProducer.class)
 @ConditionalOnProperty("rocketmq.address")
 public class RocketMQConfig {
@@ -64,6 +66,13 @@ public class RocketMQConfig {
 		if("prod".equals(profile))
 			rmp.setAlert(alerter);
 		return rmp;
+		
+	}
+	
+	@Bean
+	public RocketSendCompensation createProducerCompensation(RocketProducer producer) {
+		
+		return new RocketSendCompensation(producer);
 		
 	}
 	

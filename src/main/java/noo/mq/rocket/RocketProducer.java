@@ -42,6 +42,10 @@ public class RocketProducer {
 		this.redis = redis;
 	}
 	
+	StringRedisTemplate getRedis() {
+		return this.redis;
+	}
+	
 	public void setAlert(IAlert alert) {
 		this.alerter = alert;
 	}
