@@ -17,6 +17,7 @@ public abstract class AbstractUser {
 	
 	private String id;
 	
+	
 	public void setId(String id) {
 		this.id = id;
 	}
