@@ -23,5 +23,16 @@ public class JsonArrayTest {
 		System.out.println(j.encode());
 		
 	}
+	
+	
+	@Test
+	public void testJsonObject() {
+		JsonObject j = new JsonObject();
+		j.put("abc", 123);
+		
+		System.out.println(j.getInteger("Abc"));
+		
+		
+	}
 
 }

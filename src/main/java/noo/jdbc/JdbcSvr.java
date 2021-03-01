@@ -389,7 +389,7 @@ public class JdbcSvr {
 
 	public JsonArray qry(String sql, JsonObject param) {		
 		String newsql = SqlUtil.processParam(sql, param==null?null:param.getMap());
-		log.debug(newsql+"  "+param.encode());
+		log.debug(newsql+(param==null?"  ":param.encode()) );
 		return new JsonArray(this.getNamedTemplate().query(newsql, param==null?null:param.getMap(), new MyColumnMapRowMapper()));
 	}
 

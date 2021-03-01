@@ -26,13 +26,13 @@ public class TestJdbcSvr {
 	@BeforeClass
 	public static void setUp() {
 		ds = new HikariDataSource();
-		ds.setJdbcUrl("jdbc:mysql://192.168.1.251:3306/crmdev?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&serverTimezone=Asia/Shanghai");
+		ds.setJdbcUrl("jdbc:mysql://localhost:3306/dev?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&serverTimezone=Asia/Shanghai");
 		ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
-		ds.setUsername("crm");
-		ds.setPassword("0123456789"); 
+		ds.setUsername("root");
+		ds.setPassword("12345678"); 
 		
 		RedisStandaloneConfiguration jcc = new RedisStandaloneConfiguration();
-		jcc.setHostName("192.168.1.251");  
+		jcc.setHostName("localhost");  
 		RedisConnectionFactory rcf = new JedisConnectionFactory(jcc);
 		redis = new StringRedisTemplate(rcf);  
 		

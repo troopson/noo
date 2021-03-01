@@ -3,27 +3,20 @@ spring:
     application: 
         name: noo
     redis:
-        host: 192.168.64.251
+        host: localhost
         password: # Login password of the redis server.
         port: 6379 # Redis server port.
         database: 0
     datasource: 
-        url: jdbc:mysql://192.168.64.251:3306/crmdev?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+        url: jdbc:mysql://localhost:3306/dev?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&serverTimezone=Asia/Shanghai
         username: root
-        password: "0123456789"
+        password: 12345678
         driver-class-name: com.mysql.cj.jdbc.Driver
         hikari:  
             idle-timeout: 30000
             maximum-pool-size: 15
             connection-test-query: SELECT 1
             
- 
-eureka: 
-     client:
-          serviceUrl:
-                defaultZone: http://192.168.65.250:9001/eureka/
-     instance: 
-          prefer-ip-address: true
     
 server:
      port: 8000 
@@ -33,6 +26,6 @@ rocketmq:
      consumerid: DEMO_CID
      send_timeout: 30000
      consumer_thread: 3
-     address: 192.168.64.251:9876
+     address: localhost:9876
      
     
