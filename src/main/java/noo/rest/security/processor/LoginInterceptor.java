@@ -17,11 +17,15 @@ import noo.rest.security.AbstractUser;
 import noo.rest.security.SecueHelper;
 import noo.rest.security.api.ApiRateLimitPool;
 import noo.rest.security.delegate.DelegateHttpServletRequest;
-import noo.rest.security.processor.unify.AuthcodeCommon;
+import noo.rest.security.processor.unify.AuthCommon;
 import noo.util.ID;
 import noo.util.S;
 
 /**
+ * 支持两种模式
+ * 1. 通过用户名密码登录，验证通过后得到用户信息和token
+ * 2. 发送的是授权码，通过授权码换取用户信息和token
+ * 
  * @author qujianjun   troopson@163.com
  * 2018年10月16日 
  */
@@ -63,7 +67,7 @@ public class LoginInterceptor extends RequestInterceptor {
 		HttpServletRequest request = new DelegateHttpServletRequest(rawrequest);
 		String u = request.getParameter(USERNAME);
 		String p = request.getParameter(PASSWORD);  
-		String ac = request.getParameter(AuthcodeCommon.AUTHCODE);  
+		String ac = request.getParameter(AuthCommon.AUTHCODE);  
 		 
 		
 		if(S.isNotBlank(u)) {

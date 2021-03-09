@@ -13,6 +13,8 @@ public interface UniCasDefinition {
 	public String getSystemRedirectUrl(String client);
 	
 	public String casUrl();
+	
+	public String getSystemLogoutUrl(String client);
 	 
 	
 	

@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -18,9 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsUtils;
@@ -32,12 +27,19 @@ import noo.rest.security.InfInvalidUser;
 import noo.rest.security.SecueHelper;
 import noo.rest.security.api.ApiRateLimitPool;
 import noo.rest.security.processor.RequestInterceptor;
-import noo.util.ID;
+import noo.util.Req;
 import noo.util.S;
 
 /**
  * 
  * 登录获取一个authcode，并且返回对应系统的redirectUrl
+ * 
+ * 一、正常的流程是：
+ * 1. 用户在cas系统登录页面输入用户名密码，前端发送到cas系统的登录地址，cas后端校验成功后，获得一个用户对象，用户对象保存到redis中，并返回一个authcode，以及目标系统的跳转地址tourl
+ * 2. 前端收到返回的authcode和tourl以后，发送到登录地址，并带上authcode和tourl参数，服务器端将authcode作为参数拼接到tourl地址后，进行转发，转发的同时种下一个大Token cookie
+ * 3. tourl对应的第三方服务器通过调用cas系统的接口，交换authcode，cas服务器将用户信息返回给第三方，返回的时候，已经生成了Authorization 小Token
+ * 
+ * 二、 其他系统，进入cas的登录界面时，如果带有大Token cookie，加载/cas地址时，会当做一个脚本加载，在脚本中返回authcode，这样第三方系统可以直接使用authcode交换 小Token
  * 
  * @author qujianjun troopson@163.com Jul 28, 2020
  */
@@ -45,14 +47,10 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 
 	public static final Logger log = LoggerFactory.getLogger(AuthCodeLoginInterceptor.class);
 
-	public static final String UNIFY_TOKEN_REDIS = "unify_token:";
-	public static final String UNIFY_TOKEN_USREID_REDIS = "unify_token_userid:";
-
-	public static final String COOKIENAME = "uni_identify";
+	public static final String BIG_TOKEN_COOKIE_NAME = "uni_identify";
 	
 	public static final String REDIRECT_URL ="tourl";
 
-	public static final int EXPIRED_HOURS = 24;
 
 	@Autowired
 	private ApiRateLimitPool arlp;
@@ -60,6 +58,21 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 	@Autowired(required = false)
 	private UniCasDefinition definition;
 
+	
+	//-------------------------------------------------------------------
+	
+	private boolean isCasUrl(String path) {
+		return path.equals(this.definition.casUrl());
+	}
+	
+	
+	@Override
+	public void doInvalidUser(StringRedisTemplate redis, String userid) {
+		UniCasTokenUtil.doInvalidUser(redis, userid); 
+	}
+	
+	//-------------------------------------------------------------------
+	
 	@Override
 	public boolean process(String requrl, HttpServletRequest req, HttpServletResponse resp) throws Exception {
 
@@ -75,68 +88,75 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 		/*
 		 * 依据参数，区分为如下几种：
 		 * 1. 登出的jsonp操作
-		 * 2. 带authcode和redirect_url的跳转请求，利用该请求种一个cookie
-		 * 3. 首次加载页面时候引入cas JavaScript的请求，利用该请求，判断是否有cookie，如果有，返回authocode直接登录
+		 * 2. 带authcode和redirect_url的跳转请求，利用该请求生成并设置bigtoken，由于跨域，必须利用转发来种cookie
+		 * 3. 首次加载页面时候引入cas JavaScript的请求，利用该请求，判断是否有bigToken，如果有，返回authocode直接登录
 		 * 4. 以上都不是，不做任何操作
 		 */
+		// 如果是POST请求，认为是使用 用户名密码登录 的请求
+		
 		if (HttpMethod.GET.matches(method)) {
-			String cookie_identify = this.findCookie(req, resp); 
+			String bigToken_cookie = this.findBigTokenInCookie(req, resp); 
 			
 			
-			//1. 如果是注销的，执行注销流程
+			//1. 如果是注销请求，执行注销流程
 			String type = req.getParameter("type");
 			if("logout".equals(type)) {
-				this.doLogout(req, resp, cookie_identify);
+				this.doLogout(req, resp, bigToken_cookie);
 				return true;
 			}  
 
 			//2. 如果是一个跳转的请求, 将cookie对应的用户信息保存下来，下次有对应的cookie，就可以直接跳转了
-			String authcode = req.getParameter(AuthcodeCommon.AUTHCODE);
+			String authcode = req.getParameter(AuthCommon.AUTHCODE);
 			String redirectUrl = req.getParameter(REDIRECT_URL);
 			if(S.isNotBlank(authcode) && S.isNotBlank(redirectUrl)) { 
-				//如果已经有cookie了，这里会更新这个cookie的值
-				this.doRedirect(req, resp, cookie_identify, authcode, redirectUrl);
+				//authcode存在，并且指定了转发地址，转发到第三方系统的tourl主界面
+				this.createBigTokenAndRedirect(req, resp, authcode, redirectUrl);
 				return true;
 				
 			} 
-			//3. 以上参数都没有，当作页面初始化脚本的请求，如果有cookie，直接生成一个authcode返回，这样前端不需要登录
-			if(S.isNotBlank(cookie_identify)) {
+			//3. 如果是一个页面初始化的脚本请求，有bigToken直接生成一个authcode返回，这样前端进入登录页面以后，不需要登录，直接跳转到目标tourl页面
+			if(S.isNotBlank(bigToken_cookie)) {
 				 
-				JsonObject u = this.loadUserObjByCookie(cookie_identify);
+				JsonObject u = UniCasTokenUtil.getUserObjByBigToken(redis,bigToken_cookie);
 				if (u!= null) {  
+					//该cookie存在，直接返回一个authcode给前端，前端拿到后直接走后面的处理
 					String client = SecueHelper.getClient(req);
 					this.genAndReturnAuthcodeOnSuccess(req, resp, client, u, true);
 					log.info("find cookie, auto login ");
 				}else{
-					this.removeCookie(resp);
+					this.removeBigTokenCookie(resp);
 				}
+				return true;
 			}
+			//4. 以上都不是，直接返回
 			return true;
-			
-		}else if (CorsUtils.isCorsRequest(req) && HttpMethod.POST.matches(method)) {
-			// 登录相关 
+		
+	    //5. 如果是用户名 密码登录的请求，校验成功后，生成一个authcode，并且查一下client对应的设置，看看有没有tourl，然后将authcode和tourl返回给前端
+		}else if (CorsUtils.isCorsRequest(req) && HttpMethod.POST.matches(method)) { 
 			// 校验一下访问频次
 			this.arlp.checkLimit("unify_login", req);
 			
-			AbstractUser uobj = AuthcodeCommon.checkAndGetUserObj(req, resp, this.us, this.redis);
+			AbstractUser uobj = AuthCommon.verifyNamePasswordToGetUserObj(req, resp, this.us, this.redis);
 			if (uobj != null) {
 				JsonObject u = uobj.toJsonObject();
-				//this.persistCookieUserObj(cookie_identify, u);  // 保存到redis中，过期时间比较长，
+				if(!u.containsKey("userid"))  //生成authcode前，放置一个userid属性，后面方便获取
+					u.put("userid", uobj.getId());
 				this.genAndReturnAuthcodeOnSuccess(req, resp, uobj.getClient(), u, false); // 生成一个authcode
 				log.info("login success, return auth code ok.");
 			}
 			return true;
 		}else {
 			return false;
-		} 
+		}
 
 	}
 
-	private void doLogout(HttpServletRequest req, HttpServletResponse resp, String cookie_identify) throws IOException {
+	private void doLogout(HttpServletRequest req, HttpServletResponse resp, String bigToken_cookie) throws IOException {
 		// 如果是注销，需要第三方系统从前端发起一个jsonp的logout的请求 
-		if (S.isNotBlank(cookie_identify)) {
-			this.removeCookie(resp);
-			this.removeCookieUserObj(cookie_identify);
+		if (S.isNotBlank(bigToken_cookie)) {
+			log.info("logout bigToken:"+bigToken_cookie);
+			this.removeBigTokenCookie(resp);
+			UniCasTokenUtil.removeStoredBigTokenUserObj(redis,this.definition,bigToken_cookie);
 		}
 		String loginpage = req.getParameter("loginpage");
 	
@@ -169,10 +189,17 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 		return loginpage;
 	}
 	
-	private void doRedirect(HttpServletRequest req, HttpServletResponse resp, String cookie_identify, String authcode, String redirectUrl) throws IOException {
-		String uni_cookie = this.plantCookie(resp);
+	
+	
+	private void createBigTokenAndRedirect(HttpServletRequest req, HttpServletResponse resp, String authcode, String redirectUrl) throws IOException {
 		JsonObject uobj = AuthcodeService.readCode(redis, authcode);
-		this.persistCookieUserObj(uni_cookie, uobj);  
+		String userid = uobj.getString("userid");
+		String ip = Req.getClientIP(req);
+		String bigToken = UniCasTokenUtil.createBigToken(userid,ip);
+		this.plantBigTokenCookie(resp, bigToken);
+		UniCasTokenUtil.storeBigTokenInfoInRedis(redis,bigToken, uobj);  
+		//给authcode中保存的用户对象，加上bigToken值
+		AuthcodeService.addAttrToAuthCodeUserObj(redis, authcode, UniCasTokenUtil.BIGTOKEN_IN_AUTHCODE_USEROBJ, bigToken);
 		
 		String destUrl = URLDecoder.decode(redirectUrl, "utf-8");
 		destUrl =destUrl + (destUrl.indexOf("?")==-1?"?":"&") +"authcode="+authcode;
@@ -188,12 +215,12 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 	 * @return
 	 * @throws IOException
 	 */
-	protected String findCookie(HttpServletRequest request, HttpServletResponse resp) throws IOException {
+	protected String findBigTokenInCookie(HttpServletRequest request, HttpServletResponse resp) throws IOException {
 		Cookie[] cookies = request.getCookies();
 		if (cookies == null)
 			return null;
 		for (Cookie c : cookies) {
-			if (COOKIENAME.equals(c.getName())) {
+			if (BIG_TOKEN_COOKIE_NAME.equals(c.getName())) {
 				String cookie_token = c.getValue();
 				if (S.isNotBlank(cookie_token))
 					return cookie_token;
@@ -203,22 +230,23 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 		}
 		return null;
 	}
+	
+	
 
 	protected void genAndReturnAuthcodeOnSuccess(HttpServletRequest request, HttpServletResponse resp, String client, JsonObject uobj, boolean isOnload) throws IOException {
 
-		String url = client == null ? null : this.definition.getSystemRedirectUrl(client);
-
+		String url = client == null ? null : this.definition.getSystemRedirectUrl(client); 
+	 
 		String code = AuthcodeService.genAuthcode(redis, uobj);
 
 		log.info("generate auth code " + code + "for user:" + uobj);
 		resp.setCharacterEncoding("UTF-8");
 		resp.setContentType("text/html;charset=utf-8");
 
-		// String authkey = ID.uuid();
-		// uobj.put(SecueHelper.HEADER_KEY, authkey);
+		
 
 		JsonObject respJson = new JsonObject();
-		respJson.put(AuthcodeCommon.AUTHCODE, code);
+		respJson.put(AuthCommon.AUTHCODE, code);
 		if (S.isNotBlank(url))
 			respJson.put(REDIRECT_URL, url); 
 		 
@@ -228,79 +256,26 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 			resp.getWriter().print(respJson.encode());
 		}
 	}
-	
-	//-------------------------------------------------------------------
-	
-	private boolean isCasUrl(String path) {
-		return path.equals(this.definition.casUrl());
-	}
+
 	
 
 	//-------------------------------------------------------------------
 
-	private String plantCookie(HttpServletResponse resp) {
-		// 设置一个cookie
-		String unify_token = ID.uuid();
-		Cookie cookie = new Cookie(COOKIENAME, unify_token);
+	private void plantBigTokenCookie(HttpServletResponse resp, String bigToken) {
+		// 设置一个cookie，生成大Token 
+		Cookie cookie = new Cookie(BIG_TOKEN_COOKIE_NAME, bigToken);
 		cookie.setHttpOnly(true);
 		cookie.setPath(this.definition.casUrl());
 		cookie.setVersion(1);  
-		resp.addCookie(cookie);
-		return unify_token;
+		resp.addCookie(cookie); 
 	}
 
-	private void removeCookie(HttpServletResponse resp) {
-		Cookie c = new Cookie(COOKIENAME, null);
+	private void removeBigTokenCookie(HttpServletResponse resp) {
+		Cookie c = new Cookie(BIG_TOKEN_COOKIE_NAME, null);
 		c.setPath("/");
 		c.setMaxAge(0);
 		resp.addCookie(c);
 	}
-	
-	//==============================================
-	
-	private void persistCookieUserObj(String unify_token, JsonObject uobj) {
-		//redis.opsForValue().set(UNIFY_TOKEN_REDIS + unify_token, uobj.encode(), EXPIRED_HOURS, TimeUnit.HOURS);
-		
-		String id = uobj.getString("id");
-		if(S.isBlank(id))
-			id = uobj.getString("userid");
-		final String userid = id;
-		redis.executePipelined(new RedisCallback<Object>() { 
-			@Override
-			public Object doInRedis(RedisConnection connection) throws DataAccessException {
-				SecueHelper.setEx(connection,UNIFY_TOKEN_REDIS + unify_token, EXPIRED_HOURS*60, uobj.encode());
-				SecueHelper.setEx(connection,UNIFY_TOKEN_USREID_REDIS + userid, EXPIRED_HOURS*60, unify_token); 
-				return null;
-			}
-
-		});
-		
-	}
-
-	private JsonObject loadUserObjByCookie(String unify_token) {
-		if(unify_token==null)
-			return null;
-		String value = redis.opsForValue().get(UNIFY_TOKEN_REDIS + unify_token);
-		if(S.isBlank(value))
-			return null;
-		return new JsonObject(value);
-	}
-
-	private void removeCookieUserObj(String unify_token) {
-		redis.delete(UNIFY_TOKEN_REDIS +unify_token);
-	}
-	
-	 
-
-	public void doInvalidUser(StringRedisTemplate redis, String userid) {
-		String unify_token = redis.opsForValue().get(UNIFY_TOKEN_USREID_REDIS + userid);
-		if(S.isNotBlank(unify_token)) {
-			List<String> a =new ArrayList<>();
-			a.add(UNIFY_TOKEN_USREID_REDIS + userid);
-			a.add(UNIFY_TOKEN_REDIS + unify_token);
-			redis.delete(a);
-		}
-	}
-	
+ 
 
 }

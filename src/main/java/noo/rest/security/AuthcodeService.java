@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import noo.exception.BusinessException;
 import noo.json.JsonObject;
+import noo.rest.security.processor.unify.UniCasTokenUtil;
 import noo.util.MD5;
 import noo.util.S;
 
@@ -54,9 +55,26 @@ public class AuthcodeService {
 		JsonObject j = new JsonObject(userinfo);
 		return j;
 	}
+	
+	/*
+	 * 更新authcode中保存的用户对象，给用户对象加上一个属性
+	 */
+	public static void addAttrToAuthCodeUserObj(StringRedisTemplate redis, String authcode, String key, String value) {
+		if (S.isBlank(authcode))
+			return;
+		
+		String userinfo = redis.opsForValue().get(REDIS_AUTHCODE_PREFIX + authcode);
+		if (S.isBlank(userinfo))
+			return;
+ 
+		JsonObject j = new JsonObject(userinfo);
+		j.put(key, value);
+		redis.opsForValue().set(REDIS_AUTHCODE_PREFIX + authcode, j.encode(), EXPIRED_MINUTES, TimeUnit.MINUTES);
+		
+	}
 
 	// 用授权码换取用户信息，只能换取一次
-	public static JsonObject exchangeCode(StringRedisTemplate redis, String authcode) {
+	public static JsonObject exchangeCode(StringRedisTemplate redis, String authcode, String client) {
 		if (S.isBlank(authcode))
 			throw new BusinessException(AUTHCODE_EXPIRED, "无效的授权码!");
 
@@ -66,7 +84,19 @@ public class AuthcodeService {
 
 		redis.delete(REDIS_AUTHCODE_PREFIX + authcode);
 		JsonObject j = new JsonObject(userinfo);
-		return j;
+		
+		String bigToken =(String) j.remove(UniCasTokenUtil.BIGTOKEN_IN_AUTHCODE_USEROBJ);
+		//如果用户存在bigToken，给bigToken关联上对应的smallToken
+		if(S.isNotBlank(bigToken)) {
+			String small_token = UniCasTokenUtil.createSmallToken(redis,client,bigToken);
+			j.put(SecueHelper.HEADER_KEY, small_token);  
+			return j;
+		}else {
+			String userid = j.getString("userid");
+			String small_token = UniCasTokenUtil.createSmallToken(userid);
+			j.put(SecueHelper.HEADER_KEY, small_token);  
+			return j;
+		} 
 
 	}
 

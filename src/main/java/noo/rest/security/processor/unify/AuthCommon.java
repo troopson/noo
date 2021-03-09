@@ -24,9 +24,9 @@ import noo.util.S;
 /**
  * @author qujianjun troopson@163.com Jul 28, 2020
  */
-public class AuthcodeCommon {
+public class AuthCommon {
 	
-	public static final Logger log = LoggerFactory.getLogger(AuthcodeCommon.class);
+	public static final Logger log = LoggerFactory.getLogger(AuthCommon.class);
 
 	public static final String AUTHCODE = "authcode";
 
@@ -36,7 +36,7 @@ public class AuthcodeCommon {
 	 * @param resp
 	 * @throws IOException
 	 */
-	public static AbstractUser checkAndGetUserObj(HttpServletRequest rawrequest, HttpServletResponse resp, SecuritySetting us, StringRedisTemplate redis) throws IOException {
+	public static AbstractUser verifyNamePasswordToGetUserObj(HttpServletRequest rawrequest, HttpServletResponse resp, SecuritySetting us, StringRedisTemplate redis) throws IOException {
 
 		HttpServletRequest request = new DelegateHttpServletRequest(rawrequest);
 		String u = request.getParameter(LoginInterceptor.USERNAME);

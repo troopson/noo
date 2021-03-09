@@ -23,8 +23,8 @@ import noo.rest.security.processor.RequestInterceptor;
 import noo.util.ID;
 
 /**
- * 完成的两个功能
- * 1. 登录验证后，得到授权码， 
+ * 给APP端提供的登录接口，通过用户名密码，验证成功后，得到授权码，
+ * 
  * 换取授权码的操作，由业务系统自行实现
  *   AuthcodeService.exchangeCode(redis, authcode); 
  * @author qujianjun   troopson@163.com
@@ -51,7 +51,7 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 		//校验一下访问频次
 		this.arlp.checkLimit("authcode",req);
 		
-		AbstractUser uobj = AuthcodeCommon.checkAndGetUserObj(req, resp, this.us,this.redis);
+		AbstractUser uobj = AuthCommon.verifyNamePasswordToGetUserObj(req, resp, this.us,this.redis);
 		if(uobj!=null) {
 			this.genAndReturnAuthcodeOnSuccess(req, resp, uobj); 
 		}  
@@ -73,7 +73,7 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 		resp.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 		 
 		JsonObject respJson = new JsonObject();
-		respJson.put(AuthcodeCommon.AUTHCODE, code); 
+		respJson.put(AuthCommon.AUTHCODE, code); 
 		resp.getWriter().print(respJson.encode());
 	}
 	
