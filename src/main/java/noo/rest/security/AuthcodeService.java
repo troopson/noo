@@ -10,7 +10,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import noo.exception.BusinessException;
 import noo.json.JsonObject;
-import noo.rest.security.processor.unify.UniCasTokenUtil;
+import noo.rest.security.processor.unify.TokenUtil;
 import noo.util.MD5;
 import noo.util.S;
 
@@ -28,15 +28,32 @@ public class AuthcodeService {
 
 	public static final int AUTHCODE_EXPIRED = 40011;
 
+	
 	// 给某个用户产生一个授权码，3分钟内有效
-	public static String genAuthcode(StringRedisTemplate redis, AbstractUser ui) {
-		return genAuthcode(redis, ui.toJsonObject()); 
+//	@Deprecated
+//	public static String genAuthcode(StringRedisTemplate redis,  AbstractUser ui) {
+//		return genAuthcode(redis,SecueHelper.DEFAULT_CLIENT, ui.toJsonObject()); 
+//	}
+	
+	// 给某个用户产生一个授权码，3分钟内有效
+	public static String genAuthcode(StringRedisTemplate redis, String client, AbstractUser ui) {
+		return genAuthcode(redis,client, ui.toJsonObject()); 
 	}
 
 	// 给某个用户产生一个授权码，3分钟内有效
-	public static String genAuthcode(StringRedisTemplate redis, JsonObject ui) {
+	public static String genAuthcode(StringRedisTemplate redis, String client, JsonObject ui) {	
+		return genAuthcode(redis, client, ui, null);
+	}
+	
+	// 给某个用户产生一个授权码，3分钟内有效
+	public static String genAuthcode(StringRedisTemplate redis, String client, JsonObject ui, String bigToken) {
 		if (ui == null)
 			return null;
+		//产生authcode的时候，暂存一下client，exchange的时候从userinfo中移除
+		ui.put(SecueHelper.CLIENT, client);
+		if(S.isNotBlank(bigToken))
+			ui.put(TokenUtil.BIGTOKEN_IN_AUTHCODE_USEROBJ, bigToken);
+		
 		String userinfo = ui.encode();
 		String authcode = MD5.encode(UUID.randomUUID().toString());
 		redis.opsForValue().set(REDIS_AUTHCODE_PREFIX + authcode, userinfo, EXPIRED_MINUTES, TimeUnit.MINUTES);
@@ -72,9 +89,10 @@ public class AuthcodeService {
 		redis.opsForValue().set(REDIS_AUTHCODE_PREFIX + authcode, j.encode(), EXPIRED_MINUTES, TimeUnit.MINUTES);
 		
 	}
+	 
 
 	// 用授权码换取用户信息，只能换取一次
-	public static JsonObject exchangeCode(StringRedisTemplate redis, String authcode, String client) {
+	public static JsonObject exchangeCode(StringRedisTemplate redis, String authcode) {
 		if (S.isBlank(authcode))
 			throw new BusinessException(AUTHCODE_EXPIRED, "无效的授权码!");
 
@@ -85,15 +103,16 @@ public class AuthcodeService {
 		redis.delete(REDIS_AUTHCODE_PREFIX + authcode);
 		JsonObject j = new JsonObject(userinfo);
 		
-		String bigToken =(String) j.remove(UniCasTokenUtil.BIGTOKEN_IN_AUTHCODE_USEROBJ);
+		String bigToken =(String) j.remove(TokenUtil.BIGTOKEN_IN_AUTHCODE_USEROBJ);
+		String uclient = (String) j.remove(SecueHelper.CLIENT);
 		//如果用户存在bigToken，给bigToken关联上对应的smallToken
-		if(S.isNotBlank(bigToken)) {
-			String small_token = UniCasTokenUtil.createSmallToken(redis,client,bigToken);
+		if(S.isNotBlank(bigToken)) { 
+			String small_token = TokenUtil.createSmallToken(redis,uclient,bigToken);
 			j.put(SecueHelper.HEADER_KEY, small_token);  
 			return j;
 		}else {
 			String userid = j.getString("userid");
-			String small_token = UniCasTokenUtil.createSmallToken(userid);
+			String small_token = TokenUtil.createSmallToken(uclient,userid);
 			j.put(SecueHelper.HEADER_KEY, small_token);  
 			return j;
 		} 

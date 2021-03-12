@@ -76,7 +76,6 @@ public class DelegateSecurityFilter extends SecurityFilter {
 			    this.process(requrl, req, resp, chain); 
 			}
 		}catch(Throwable e){
-			e.printStackTrace();
 			if(e instanceof SessionTimeoutException) { 
 				resp.setStatus(401);
 				SecueHelper.writeResponse(resp, e.toString());
@@ -84,6 +83,7 @@ public class DelegateSecurityFilter extends SecurityFilter {
 				resp.setStatus(400);
 				SecueHelper.writeResponse(resp, e.toString());  
 			}else {
+				e.printStackTrace();
 				resp.setStatus(403);
 				SecueHelper.writeResponse(resp, new BusinessException(ExpCode.AUTHORIZE,"没有权限访问！").toString());  
 			}

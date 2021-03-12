@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import noo.json.JsonObject;
+import noo.rest.security.processor.unify.TokenUtil;
 import noo.util.S;
 import noo.util.SpringContext;
 
@@ -25,9 +26,9 @@ import noo.util.SpringContext;
  */
 public class SecueHelper {
 
-	public static final String REDIS_KEY = "noo:session";
+	public static final String REDIS_KEY = "tk:";
 
-	public static final String REDIS_USER_KEY = "noo:user:session";
+	public static final String REDIS_USER_KEY = "tk:uid:";
 
 	public static final String HEADER_KEY = "Authorization";
 	
@@ -37,7 +38,7 @@ public class SecueHelper {
 	//前端传递过来的，表明是什么端的变量名称
 	public static final String CLIENT = "request-client";
 	//默认的client值，如果前端没有传递这个值，就是默认值
-	public static final String DEFAULT_CLIENT = "web";
+	public static final String DEFAULT_CLIENT = "none";
 	
 	
 	public static boolean isWebSocket(HttpServletRequest req) {
@@ -86,7 +87,7 @@ public class SecueHelper {
 		if(S.isBlank(auth))
 			return;
 		
-		String client = getClient(req);
+		String client = TokenUtil.parseClientFromSmallToken(auth);
 		String sessionkey = SecueHelper.REDIS_KEY + ":" + auth;
 		String sessionval = redis.opsForValue().get(sessionkey);
 		//System.out.println(sessionval);
@@ -179,6 +180,8 @@ public class SecueHelper {
 		String client_system = req.getParameter(CLIENT);
 		if(S.isBlank(client_system))
 			client_system = req.getHeader(CLIENT);
+		if(S.isBlank(client_system))
+			return DEFAULT_CLIENT;
 		return client_system;
 	}
 	

@@ -17,6 +17,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsProcessor;
@@ -38,8 +40,9 @@ import noo.util.SpringContext;
 
 
 public class SecurityFilter implements Filter {
-  
-	//public static final Logger log = LoggerFactory.getLogger(SecurityFilter.class);
+	
+	public static final Logger log = LoggerFactory.getLogger(SecurityFilter.class);
+   
 	 
 	private final UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
 	
@@ -91,8 +94,11 @@ public class SecurityFilter implements Filter {
 		HttpServletRequest req = (HttpServletRequest)request;
 		HttpServletResponse resp = (HttpServletResponse)response;   
 		
-		if (!this.isPassCors(req, resp)) 
+		if (!this.isPassCors(req, resp)) {
+			//UrlPathHelper urlPathHelper = new UrlPathHelper();
+			//log.info("cors failed:"+urlPathHelper.getLookupPathForRequest(req));
 			return; 
+		}
 		 
 		String requrl = req.getRequestURI(); 
 		

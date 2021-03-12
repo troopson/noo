@@ -20,12 +20,13 @@ import noo.rest.security.AbstractUser;
 import noo.rest.security.AuthcodeService;
 import noo.rest.security.api.ApiRateLimitPool;
 import noo.rest.security.processor.RequestInterceptor;
-import noo.util.ID;
 
 /**
  * 给APP端提供的登录接口，通过用户名密码，验证成功后，得到授权码，
  * 
  * 换取授权码的操作，由业务系统自行实现
+ * 
+ * 后面需要统一到web端的接口，目前暂时保留
  *   AuthcodeService.exchangeCode(redis, authcode); 
  * @author qujianjun   troopson@163.com
  * 2018年10月16日 
@@ -62,10 +63,8 @@ public class AuthCodeLoginInterceptor extends RequestInterceptor {
 	
 	protected void genAndReturnAuthcodeOnSuccess(HttpServletRequest request, HttpServletResponse resp, AbstractUser uobj)
 			throws IOException {
-		String authkey =  ID.uuid();
-		uobj.setToken(authkey);  
 		
-		String code = AuthcodeService.genAuthcode(redis, uobj);
+		String code = AuthcodeService.genAuthcode(redis,uobj.getClient(),uobj);
 		
 		log.info("generate auth code "+code+ "for user:"+uobj.toJsonObject());
 		resp.setCharacterEncoding("UTF-8");

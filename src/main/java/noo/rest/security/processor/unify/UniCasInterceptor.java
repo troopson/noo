@@ -68,7 +68,7 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 	
 	@Override
 	public void doInvalidUser(StringRedisTemplate redis, String userid) {
-		UniCasTokenUtil.doInvalidUser(redis, userid); 
+		TokenUtil.doInvalidUser(redis, userid); 
 	}
 	
 	//-------------------------------------------------------------------
@@ -101,7 +101,11 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 			//1. 如果是注销请求，执行注销流程
 			String type = req.getParameter("type");
 			if("logout".equals(type)) {
-				this.doLogout(req, resp, bigToken_cookie);
+				//如果有bigToken的cookie，认为是从前端来的登出请求,如果没有，认为是通过后端发送的登出请求
+				if(S.isNotBlank(bigToken_cookie))
+					this.doLogoutFromFront(req, resp, bigToken_cookie);
+				else
+					this.doLogoutFromServer(req, resp); 
 				return true;
 			}  
 
@@ -117,17 +121,19 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 			//3. 如果是一个页面初始化的脚本请求，有bigToken直接生成一个authcode返回，这样前端进入登录页面以后，不需要登录，直接跳转到目标tourl页面
 			if(S.isNotBlank(bigToken_cookie)) {
 				 
-				JsonObject u = UniCasTokenUtil.getUserObjByBigToken(redis,bigToken_cookie);
+				JsonObject u = TokenUtil.getUserObjByBigToken(redis,bigToken_cookie);
 				if (u!= null) {  
 					//该cookie存在，直接返回一个authcode给前端，前端拿到后直接走后面的处理
 					String client = SecueHelper.getClient(req);
-					this.genAndReturnAuthcodeOnSuccess(req, resp, client, u, true);
-					log.info("find cookie, auto login ");
+					this.genAndReturnAuthcodeOnSuccess(req, resp, client, u, true,bigToken_cookie);
+					log.info("find bigToken:"+bigToken_cookie+", auto login");
 				}else{
+					log.info("can not find bigtoken and client, must be init at start, remove cookie.");
 					this.removeBigTokenCookie(resp);
 				}
 				return true;
 			}
+			log.info("not any");
 			//4. 以上都不是，直接返回
 			return true;
 		
@@ -140,8 +146,8 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 			if (uobj != null) {
 				JsonObject u = uobj.toJsonObject();
 				if(!u.containsKey("userid"))  //生成authcode前，放置一个userid属性，后面方便获取
-					u.put("userid", uobj.getId());
-				this.genAndReturnAuthcodeOnSuccess(req, resp, uobj.getClient(), u, false); // 生成一个authcode
+					u.put("userid", uobj.getId()); 
+				this.genAndReturnAuthcodeOnSuccess(req, resp, uobj.getClient(), u, false,null); // 生成一个authcode
 				log.info("login success, return auth code ok.");
 			}
 			return true;
@@ -150,13 +156,28 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 		}
 
 	}
+	
+	private void doLogoutFromServer(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		String aClient_smalltoken = req.getHeader(SecueHelper.HEADER_KEY);
+		log.info("logout by client smallToken:"+aClient_smalltoken);
+		if(S.isBlank(aClient_smalltoken)) { 
+			SecueHelper.writeResponse(resp,"{\"code\":-1,\"msg\":\"Authorization is null, logout failed！\"}");
+			return;
+		} 
+		String bigToken = TokenUtil.parseBigTokenFromSmallToken(aClient_smalltoken);
+		
+		if (S.isNotBlank(bigToken)) 
+			TokenUtil.removeStoredBigTokenUserObj(redis,this.definition,bigToken);
+		
+		SecueHelper.writeResponse(resp,"{\"code\":0,\"msg\":\"logout ok！\"}");
+	}
 
-	private void doLogout(HttpServletRequest req, HttpServletResponse resp, String bigToken_cookie) throws IOException {
+	private void doLogoutFromFront(HttpServletRequest req, HttpServletResponse resp, String bigToken_cookie) throws IOException {
 		// 如果是注销，需要第三方系统从前端发起一个jsonp的logout的请求 
+		log.info("logout bigToken:"+bigToken_cookie);
 		if (S.isNotBlank(bigToken_cookie)) {
-			log.info("logout bigToken:"+bigToken_cookie);
 			this.removeBigTokenCookie(resp);
-			UniCasTokenUtil.removeStoredBigTokenUserObj(redis,this.definition,bigToken_cookie);
+			TokenUtil.removeStoredBigTokenUserObj(redis,this.definition,bigToken_cookie);
 		}
 		String loginpage = req.getParameter("loginpage");
 	
@@ -165,7 +186,7 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 			SecueHelper.writeResponse(resp,"<!DOCTYPE html><html><body onload=\"window.location.href='"+loginpage+"'\">跳转登录页中...</body></html>"); 
 		}else
 			SecueHelper.writeResponse(resp,"<!DOCTYPE html><html><body>登出成功!</body></html>");
-	}
+	} 
 	
 	//将logout请求中携带的参数，都添加到loginpage的url后面
 	private String addRequestParams(HttpServletRequest req,String loginpage) throws UnsupportedEncodingException {
@@ -193,13 +214,19 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 	
 	private void createBigTokenAndRedirect(HttpServletRequest req, HttpServletResponse resp, String authcode, String redirectUrl) throws IOException {
 		JsonObject uobj = AuthcodeService.readCode(redis, authcode);
+		if(uobj==null) {
+			log.info("authcode: "+authcode+" 已经失效。");
+		}
+			
 		String userid = uobj.getString("userid");
 		String ip = Req.getClientIP(req);
-		String bigToken = UniCasTokenUtil.createBigToken(userid,ip);
+		String bigToken = TokenUtil.createBigToken(userid,ip);
+		log.info("create bigToken:"+bigToken);
+		
 		this.plantBigTokenCookie(resp, bigToken);
-		UniCasTokenUtil.storeBigTokenInfoInRedis(redis,bigToken, uobj);  
+		TokenUtil.storeBigTokenInfoInRedis(redis,bigToken, uobj);  
 		//给authcode中保存的用户对象，加上bigToken值
-		AuthcodeService.addAttrToAuthCodeUserObj(redis, authcode, UniCasTokenUtil.BIGTOKEN_IN_AUTHCODE_USEROBJ, bigToken);
+		AuthcodeService.addAttrToAuthCodeUserObj(redis, authcode, TokenUtil.BIGTOKEN_IN_AUTHCODE_USEROBJ, bigToken);
 		
 		String destUrl = URLDecoder.decode(redirectUrl, "utf-8");
 		destUrl =destUrl + (destUrl.indexOf("?")==-1?"?":"&") +"authcode="+authcode;
@@ -233,16 +260,15 @@ public class UniCasInterceptor extends RequestInterceptor implements InfInvalidU
 	
 	
 
-	protected void genAndReturnAuthcodeOnSuccess(HttpServletRequest request, HttpServletResponse resp, String client, JsonObject uobj, boolean isOnload) throws IOException {
+	protected void genAndReturnAuthcodeOnSuccess(HttpServletRequest request, HttpServletResponse resp, String client, JsonObject uobj, boolean isOnload, String bigtoken) throws IOException {
 
 		String url = client == null ? null : this.definition.getSystemRedirectUrl(client); 
-	 
-		String code = AuthcodeService.genAuthcode(redis, uobj);
+	  
+		String code = AuthcodeService.genAuthcode(redis,client, uobj,bigtoken);
 
-		log.info("generate auth code " + code + "for user:" + uobj);
+		log.info("generate auth code " + code + " for user:" + uobj.encode());
 		resp.setCharacterEncoding("UTF-8");
-		resp.setContentType("text/html;charset=utf-8");
-
+		resp.setContentType("text/html;charset=utf-8"); 
 		
 
 		JsonObject respJson = new JsonObject();

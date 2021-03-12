@@ -14,6 +14,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import noo.exception.BusinessException;
 import noo.exception.ExpCode;
 import noo.exception.SessionTimeoutException;
+import noo.rest.security.processor.unify.TokenUtil;
 import noo.util.S;
 
 /**
@@ -66,7 +67,9 @@ public class UsualHandler  {
 			return null;
 		} 
 		
-		String client_type = SecueHelper.getClient(req);
+		String client_type = TokenUtil.parseClientFromSmallToken(token);
+		
+		//String client_type = SecueHelper.getClient(req);
 		AbstractUser ab =  SecueHelper.retrieveUser(token, us, client_type,redis);  
 		return ab;
 	}

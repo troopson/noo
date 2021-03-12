@@ -10,9 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import net.dongliu.requests.Requests;
@@ -26,37 +24,36 @@ import noo.util.S;
  * @author qujianjun   troopson@163.com
  * 2021年3月2日 
  */
-public class UniCasTokenUtil {
+public class TokenUtil {
 
-	public static final Logger log = LoggerFactory.getLogger(UniCasTokenUtil.class);
+	public static final Logger log = LoggerFactory.getLogger(TokenUtil.class);
 
-	private static final String UNICAS_BIGTOKEN = "unicas:";
+	private static final String UNICAS_BIGTOKEN = "cas:";
 	//某个用户在24小时内的所有bigtoken值，用户可能会从多个电脑登录，这样存在多个bigToken的可能性
-	private static final String UNICAS_USRE_24H_TOKENS = "unicas_user24tokens:";
+	private static final String UNICAS_USRE_24H_TOKENS = "cas_u24stk:";
 	
 	public static final String BIGTOKEN_IN_AUTHCODE_USEROBJ ="_bigtoke";
 	
 
 	public static int EXPIRED_HOURS = 18;
 	
-	//===========================================================
-	//以C开头，这种是独立的smalltoken，和bigtoken没有关系，非统一登录生成的
-	public static String createSmallToken(String userid) {
-		String token = ID.uuid();
-		return "C"+System.currentTimeMillis()+"-"+userid+"-"+token;
-	}
-	
+	//===========================================================  
 	//以G开头，这种是bigtoken
 	public static String createBigToken(String userid,String ip) {
 		String uuid = ID.uuid();  
 		return "G"+System.currentTimeMillis()+"-"+userid+"-"+uuid;
 	}
 	
+	//以C开头，这种是独立的smalltoken，和bigtoken没有关系，非统一登录生成的
+	public static String createSmallToken(String client,String userid) {
+		String uuid = ID.uuid();
+		return "C"+System.currentTimeMillis()+"-"+client+"-"+userid+"-"+uuid;
+	}
+	
 	//以S开头，这种是统一登录产生的smalltoken，和bigtoken有关系
 	public static String createSmallToken(StringRedisTemplate redis,String client,String bigToken) { 
-		String uuid = ID.uuid();
-		String userid = parseUseridFromBigToken(bigToken);
-		String smalltoken = "S"+System.currentTimeMillis()+"-"+client+"-"+userid+"-"+uuid;
+		String uuid = ID.uuid(); 
+		String smalltoken = "S"+System.currentTimeMillis()+"-"+client+"-"+uuid+"-"+bigToken;
 		appendSmallTokenToBigToken(redis, smalltoken,bigToken);
 		return smalltoken;
 	}
@@ -69,9 +66,21 @@ public class UniCasTokenUtil {
 	}
 	
 	public static String parseClientFromSmallToken(String small) {
-		if(small==null || !small.startsWith("S"))
+		if(small==null)
 			return null;
-		return small.substring(small.indexOf("-")+1,small.indexOf("-", small.indexOf("-")+1));
+		if(small.startsWith("S") || small.startsWith("C"))
+			return small.substring(small.indexOf("-")+1,small.indexOf("-", small.indexOf("-")+1));
+		else
+			return null;
+	}
+	
+	public static String parseBigTokenFromSmallToken(String small) {
+		if(small==null)
+			return null;
+		if(small.startsWith("S") || small.startsWith("C"))
+			return small.substring(small.lastIndexOf("-")+1);
+		else
+			return null;
 	}
 	
 	//===========================================================
@@ -82,23 +91,18 @@ public class UniCasTokenUtil {
 		 
 		final String userid = parseUseridFromBigToken(big_token);
 		BigToken bk = new BigToken(uobj);   
-		redis.executePipelined(new RedisCallback<Object>() { 
-			@Override
-			public Object doInRedis(RedisConnection connection) throws DataAccessException {
-				SecueHelper.setEx(connection,UNICAS_BIGTOKEN + big_token, EXPIRED_HOURS*60, bk.toJson());
-				byte[] usertokenkey =(UNICAS_USRE_24H_TOKENS + userid).getBytes();
-				if(!connection.exists(usertokenkey)) {
-					connection.sAdd(usertokenkey, big_token.getBytes());
-					connection.expire(usertokenkey, 24*60*60);  //缓存24小时，记录下某个用户24小时内所有的bigToken
-				}else {
-					connection.sAdd(usertokenkey, big_token.getBytes());
-				} 
-				 
-				return null;
-			}
-
-		});
 		
+		redis.opsForValue().set(UNICAS_BIGTOKEN + big_token, bk.toJson(),  EXPIRED_HOURS*60, TimeUnit.MINUTES);
+		String usertokenkey = UNICAS_USRE_24H_TOKENS + userid;
+		SetOperations<String, String> setops = redis.opsForSet();  
+		if(redis.hasKey(usertokenkey)) { 
+			setops.add(usertokenkey, big_token);
+			if(redis.getExpire(usertokenkey)==-1)
+				redis.expire(usertokenkey,  EXPIRED_HOURS*60, TimeUnit.MINUTES);
+		}else {
+			setops.add(usertokenkey, big_token);
+			redis.expire(usertokenkey,  EXPIRED_HOURS*60, TimeUnit.MINUTES);
+		}
 	} 
 	
 	
@@ -116,7 +120,10 @@ public class UniCasTokenUtil {
 	
 	//给bigToken追加一个smallToken
 	public static void appendSmallTokenToBigToken(StringRedisTemplate redis,String small_token,String bigToken) { 
-		BigToken bk = new BigToken(bigToken);  
+		String value = redis.opsForValue().get(UNICAS_BIGTOKEN + bigToken);
+		if(S.isBlank(value))
+			return; 
+		BigToken bk = new BigToken(value);  
 		bk.addSmallToken(small_token);
 		redis.opsForValue().set(UNICAS_BIGTOKEN + bigToken, bk.toJson(), EXPIRED_HOURS*60, TimeUnit.MINUTES); 
 	}
@@ -124,6 +131,7 @@ public class UniCasTokenUtil {
 
 	//移除bigToken信息,并且放回对应smalltokens
 	public static void removeStoredBigTokenUserObj(StringRedisTemplate redis,UniCasDefinition ucdf, String big_token) {  
+		log.info("--------remove bigToken from redis:"+big_token);
 		String userid = parseUseridFromBigToken(big_token);   
 		
 		String value = redis.opsForValue().get(UNICAS_BIGTOKEN + big_token);
@@ -138,8 +146,11 @@ public class UniCasTokenUtil {
 		redis.opsForSet().remove(UNICAS_USRE_24H_TOKENS + userid, big_token);
 		if(redis.opsForSet().size(UNICAS_USRE_24H_TOKENS + userid)==0)
 			redis.delete(UNICAS_USRE_24H_TOKENS + userid);
-		 
-		logoutSmallTokens(ucdf, smalltokens);
+		
+		if(smalltokens!=null) {
+			log.info("--------remove smallToken from redis: "+smalltokens.encode());
+			logoutSmallTokens(ucdf, smalltokens);
+		}
 		
 	}
 
@@ -162,11 +173,18 @@ public class UniCasTokenUtil {
 			
 			String logout_url = ucdf.getSystemLogoutUrl(client);
 			if(S.isNotBlank(logout_url)) {
-				Map<String,String> header = new HashMap<>();
-				header.put(SecueHelper.HEADER_KEY, stoken);
-				//token同时放在header和params中
-				Requests.get(logout_url).headers(header).params(header);
-				log.info("logout smalltoken: "+stoken);
+				//如果logout的url以=结尾，直接将stoken拼接到后面，发送get请求
+				if(logout_url.endsWith("=")) {
+					logout_url = logout_url+stoken;
+					Requests.get(logout_url).send();
+					log.info("logout smalltoken: "+stoken);
+				}else { 
+					//token同时放在header和params中 
+					Map<String,String> header = new HashMap<>();
+					header.put(SecueHelper.HEADER_KEY, stoken);
+					Requests.get(logout_url).headers(header).params(header).send();
+					log.info("logout "+logout_url+" smalltoken: "+stoken);
+				}
 			}
 		}
 		

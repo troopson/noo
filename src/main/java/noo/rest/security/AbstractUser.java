@@ -11,9 +11,9 @@ import noo.json.JsonObject;
  */
 public abstract class AbstractUser {
 	
-	private String client; 
+	private transient String client; 
 	
-	private String token;
+	private transient String token;
 	
 	private String id;
 	
@@ -32,7 +32,7 @@ public abstract class AbstractUser {
 	
 	public String getToken() {
 		return this.token;
-	}
+	} 
 	
 	public String getClient() {
 		return client;
@@ -51,7 +51,7 @@ public abstract class AbstractUser {
 	
     //User对象保存为JsonObject的结构
 	public JsonObject toJsonObject() {
-		return this.toResponseJsonObject();
+		return this.toResponseJsonObject(); 
 	}
 	
 	

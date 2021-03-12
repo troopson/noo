@@ -12,3 +12,4 @@ gradle.properties
 maven_push.gradle
 .DS_Store
 src/.DS_Store
+test.txt

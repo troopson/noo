@@ -25,6 +25,10 @@ public class TestStringParse {
 		String big_token = ID.uuid();
 		System.out.println(big_token);
 		System.out.println(MD5.encode("132.12.12.11"));
+		
+		
+		String url ="crmbackend.offcn.com:6443";
+		System.out.println(url.substring(0,url.indexOf(":")));
 
 	}
 

@@ -9,6 +9,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import noo.rest.security.SecueHelper;
 import noo.util.S;
 
@@ -19,6 +22,8 @@ import noo.util.S;
 public class LogoutInterceptor extends RequestInterceptor {
  
  
+	public static final Logger log = LoggerFactory.getLogger(LogoutInterceptor.class);
+	
 	
 	@Override
 	public boolean process(String requrl, HttpServletRequest req, HttpServletResponse resp)
@@ -32,10 +37,11 @@ public class LogoutInterceptor extends RequestInterceptor {
 	}
 	
 	private void doLogout(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		log.info("====recieve logout request");
 		String authkey = req.getHeader(SecueHelper.HEADER_KEY); 
 		if(S.isNotBlank(authkey)) {
 			SecueHelper.deleteUserLoginInfo(req, redis, us, authkey);
-			//this.redis.delete(authkey); 
+			log.info("注销Token:"+authkey);
 		}
 		resp.addHeader(SecueHelper.HEADER_KEY, "");
 		
