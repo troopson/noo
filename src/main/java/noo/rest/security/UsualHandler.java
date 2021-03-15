@@ -9,6 +9,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import noo.exception.BusinessException;
@@ -23,6 +25,8 @@ import noo.util.S;
 
 public class UsualHandler  {
  
+	public static final Logger log = LoggerFactory.getLogger(UsualHandler.class);
+	
 	private SecuritySetting us;
 	 
 	private StringRedisTemplate redis;
@@ -64,6 +68,7 @@ public class UsualHandler  {
 			resp.setHeader("Sec-WebSocket-Protocol", token);
 		}
 		if (S.isBlank(token)) { 
+			log.info("donot find token in request.");
 			return null;
 		} 
 		

@@ -11,6 +11,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
@@ -25,10 +27,12 @@ import noo.util.SpringContext;
  * @author qujianjun troopson@163.com 2018年10月16日
  */
 public class SecueHelper {
+	
+	public static final Logger log = LoggerFactory.getLogger(SecueHelper.class);
 
-	public static final String REDIS_KEY = "tk:";
+	public static final String REDIS_KEY = "tk";
 
-	public static final String REDIS_USER_KEY = "tk:uid:";
+	public static final String REDIS_USER_KEY = "tk:uid";
 
 	public static final String HEADER_KEY = "Authorization";
 	
@@ -119,6 +123,7 @@ public class SecueHelper {
 		String rkey = SecueHelper.REDIS_KEY + ":" + token;
 		String s = (String) redis.opsForValue().get(rkey);
 		if (S.isBlank(s)) {
+			log.info("token key "+rkey +" is not found in redis");
 			return null;
 		}
 
